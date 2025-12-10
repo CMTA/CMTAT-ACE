@@ -1,8 +1,8 @@
-[submodule "CMTAT"]
-	path = CMTAT
-	url = https://github.com/CMTA/CMTAT
-	branch = dev
-[submodule "chainlink-ace"]
-	path = chainlink-ace
+[submodule "submodules/chainlink-ace"]
+	path = submodules/chainlink-ace
 	url = https://github.com/smartcontractkit/chainlink-ace
 	branch = main
+[submodule "submodules/CMTAT"]
+	path = submodules/CMTAT
+	url = https://github.com/CMTA/CMTAT
+	branch = dev
