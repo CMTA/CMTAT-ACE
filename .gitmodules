@@ -5,4 +5,4 @@
 [submodule "submodules/CMTAT"]
 	path = submodules/CMTAT
 	url = https://github.com/CMTA/CMTAT
-	branch = dev
+	branch = master
