@@ -26,7 +26,7 @@ async function etherAddresses () {
 }
 
 
-async function deployComplianceTokenCMTAT (forwarderAddress, adminAddress, deployerAddress) {
+async function deployComplianceTokenCMTATStandalone (forwarderAddress, adminAddress, deployerAddress) {
   const erc20Attributes = [
     "Security Token",  // name
     "ST",             // symbol
@@ -40,10 +40,10 @@ async function deployComplianceTokenCMTAT (forwarderAddress, adminAddress, deplo
   const extraInformationAttributes = [
     "1234567890", // ISIN or identifier as tokenId
     terms,
-    "ComplianceTokenCMTAT smart contract" // information string
+    "ComplianceTokenCMTATStandalone smart contract" // information string
   ]
-  const ComplianceTokenCMTAT = await ethers.deployContract(
-    "ComplianceTokenCMTAT", 
+  const ComplianceTokenCMTATStandalone = await ethers.deployContract(
+    "ComplianceTokenCMTATStandalone", 
     [
       forwarderAddress,
       adminAddress,
@@ -56,11 +56,11 @@ async function deployComplianceTokenCMTAT (forwarderAddress, adminAddress, deplo
     deployerAddress
   )
   
-  return ComplianceTokenCMTAT;
+  return ComplianceTokenCMTATStandalone;
 } 
 
 
 module.exports = {
   etherAddresses,
-  deployComplianceTokenCMTAT
+  deployComplianceTokenCMTATStandalone
 };

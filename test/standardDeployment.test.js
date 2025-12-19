@@ -1,6 +1,6 @@
 const {ethers} =  require("hardhat");
 const { expect } = require('chai')
-const { etherAddresses, deployComplianceTokenCMTAT } = require("./testUtils.js");
+const { etherAddresses, deployComplianceTokenCMTATStandalone } = require("./testUtils.js");
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 
 
@@ -8,7 +8,7 @@ describe("ComplianceTokenCMTAT Standalone Deployment", () => {
 
   it("should deploy the ComplianceTokenCMTAT standalone contract", async () => {
     Object.assign(this, await loadFixture(etherAddresses))
-    const cmtat = await deployComplianceTokenCMTAT(
+    const cmtat = await deployComplianceTokenCMTATStandalone(
       this.forwarder.address,
       this.admin.address,
       this.deployerAddress

@@ -11,11 +11,11 @@ import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/op
 
 
 /**
- * @title ComplianceTokenCMTAT
+ * @title ComplianceTokenCMTATStandalone
  * @author Chainlink
- * @notice Compliance Token contract with Chainlink ACE policy validation on all public function (instead of RBAC)
+ * @notice Standalone ComplianceToken contract with Chainlink ACE policy validation on all public functions
  */
-contract ComplianceTokenCMTAT is CCTBaseERC2771 {
+contract ComplianceTokenCMTATStandalone is CCTBaseERC2771 {
     /**
      * @notice Contract version for standalone deployment
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
