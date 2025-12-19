@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MPL-2.0
 
-pragma solidity 0.8.26;
+pragma solidity ^0.8.20;
 
 import {CCTBaseERC2771} from "../modules/standard/CCTBaseERC2771.sol";
 import {ICMTATConstructor} from "../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
