@@ -2,14 +2,14 @@ require('@openzeppelin/hardhat-upgrades')
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: {
-    version: "0.8.26",
+    solidity: {
+    version: '0.8.30',
     settings: {
-      viaIR: true,
       optimizer: {
         enabled: true,
-        runs: 1
-      }
+        runs: 200
+      },
+      evmVersion: 'prague'
     }
   },
   paths: {
