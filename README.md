@@ -1,14 +1,38 @@
-# CMTAT-ACE
+# CMTAT ACE integration project
 
-## Library
+## Deployment versions*
+Two versions are available; *lite* version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and *standard* version, which uses PolicyEngine to protect all external functions instead of OpenZepplin role-based AccessControl.
 
-- CMTAT [v.3.1.0](https://github.com/CMTA/CMTAT/releases/tag/v3.1.0)
-
-## Installation
-
-Clone the git repository, with the option `--recurse-submodules` to fetch the submodules:
-
-```bash
-git clone git@github.com:CMTA/CMTAT-ACE.git  --recurse-submodules
+## Initialize submodules
+```shell
+git submodule update
 ```
 
+## Install dependencies
+You can use any package manager either npm, yarn or pnpm. For example you can type:
+
+```shell
+npm install
+```
+
+## Compile contracts
+To compile
+
+```shell
+npx hardhat compile
+```
+
+# Testing
+
+To run tests:
+
+```shell
+npx hardhat test
+```
+
+# Scripts
+You can use example scripts to deploy, e.g. for local Hardhat Network deployment:
+
+```shell
+npx hardhat run scripts/{script_name}
+```
