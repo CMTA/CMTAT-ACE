@@ -100,7 +100,8 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_, snapshotEngine_, documentEngine_);
 
          /* Chainlink-ACE policy module */
-       __PolicyProtected_init(admin, policyEngine_);
+        //__PolicyProtected_init_unchained(policyEngine_);
+       //__PolicyProtected_init(admin, policyEngine_);
     }
 
     /*

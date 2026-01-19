@@ -59,7 +59,7 @@ abstract contract CCTCommon is
     function __CCT_commonModules_init_unchained(address admin, ICMTATConstructor.ERC20Attributes memory ERC20Attributes_, ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationModuleAttributes_,
         ISnapshotEngine snapshotEngine_, IERC1643 documentEngine_, address policyEngine
     ) internal virtual onlyInitializing {        
-        __PolicyProtected_init(admin, policyEngine);
+        __PolicyProtected_init_unchained(policyEngine);
 
         __CCTERC20Module_init_unchained(ERC20Attributes_.name, ERC20Attributes_.symbol);
         
