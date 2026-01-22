@@ -2,8 +2,8 @@ const {ethers, upgrades } = require("hardhat");
 
 async function etherAddresses () {
   const [
-    forwarder,
     admin,
+    forwarder,
     address1,
     address2,
     address3,
@@ -13,8 +13,8 @@ async function etherAddresses () {
     attacker
   ] = await ethers.getSigners()
   return {
-    forwarder,
     admin,
+    forwarder,
     address1,
     address2,
     address3,
@@ -26,7 +26,7 @@ async function etherAddresses () {
 }
 
 
-async function deployComplianceTokenCMTATStandalone (forwarderAddress, adminAddress, deployerAddress) {
+async function deployComplianceTokenCMTATStandalone (forwarderAddress, deployerAddress, policyEngine) {
   const erc20Attributes = [
     "Security Token",  // name
     "ST",             // symbol
@@ -46,12 +46,9 @@ async function deployComplianceTokenCMTATStandalone (forwarderAddress, adminAddr
     "ComplianceTokenCMTATStandalone", 
     [
       forwarderAddress,
-      adminAddress,
       erc20Attributes,
       extraInformationAttributes,
-      ethers.ZeroAddress, // snapshotEngine
-      ethers.ZeroAddress, // documentEngine
-      ethers.ZeroAddress  // policyEngine
+      policyEngine
     ],
     deployerAddress
   )
@@ -59,7 +56,7 @@ async function deployComplianceTokenCMTATStandalone (forwarderAddress, adminAddr
   return ComplianceTokenCMTATStandalone;
 } 
 
-async function deployComplianceTokenCMTATUpgradeable (forwarderAddress, adminAddress, deployerAddress, policyEngine) {
+async function deployComplianceTokenCMTATUpgradeable (forwarderAddress, deployerAddress, policyEngine) {
   const ETHERS_CMTAT_PROXY_FACTORY = await ethers.getContractFactory(
     'ComplianceTokenCMTATUpgradeable'
   )
@@ -81,11 +78,8 @@ async function deployComplianceTokenCMTATUpgradeable (forwarderAddress, adminAdd
   const ComplianceTokenCMTATUpgradeable = await upgrades.deployProxy(
     ETHERS_CMTAT_PROXY_FACTORY, 
     [
-      adminAddress,
       erc20Attributes,
       extraInformationAttributes,
-      ethers.ZeroAddress, // snapshotEngine
-      ethers.ZeroAddress, // documentEngine
       policyEngine  // policyEngine
     ],
     {

@@ -3,6 +3,10 @@
 ## Deployment versions*
 Two versions are available; *lite* version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and *standard* version, which uses PolicyEngine to protect all external functions instead of OpenZepplin role-based AccessControl.
 
+## Library
+
+- CMTAT [v3.2.0-rc0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0-rc0)
+
 ## Initialize submodules
 ```shell
 git submodule update

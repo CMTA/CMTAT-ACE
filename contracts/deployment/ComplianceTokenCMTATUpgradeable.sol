@@ -3,10 +3,6 @@
 pragma solidity ^0.8.20;
 
 import {CCTBaseERC2771} from "../modules/standard/CCTBaseERC2771.sol";
-import {ICMTATConstructor} from "../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import {ISnapshotEngine} from "../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol";
 import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
 
 

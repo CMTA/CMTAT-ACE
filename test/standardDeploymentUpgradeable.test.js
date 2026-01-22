@@ -7,7 +7,6 @@ describe("ComplianceTokenCMTAT Upgradeable Deployment", () => {
 
   it("should deploy the ComplianceTokenCMTAT standalone contract", async () => {
     Object.assign(this, await loadFixture(etherAddresses))
-
     /*const cmtat = await deployComplianceTokenCMTATUpgradeable(
       this.forwarder.address,
       this.admin.address,
@@ -24,7 +23,7 @@ describe("ComplianceTokenCMTAT Upgradeable Deployment", () => {
    // expect(await policyEngine.getAddress()).to.be.properAddress;
 
     // Deploy ComplianceTokenCMTAT with the PolicyEngine
-    const cmtat =  await deployComplianceTokenCMTATUpgradeable(this.forwarder.address, this.admin.address, this.admin.address, await policyEngine.getAddress())
+    const cmtat =  await deployComplianceTokenCMTATUpgradeable(this.forwarder.address, this.admin.address, await policyEngine.getAddress())
     
     await cmtat.connect(this.admin).attach(policyEngine)
     expect(await cmtat.name()).to.equal("Security Token");
