@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import {CMTATBaseCommon} from "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol";
+import {CMTATBaseCommon, CMTATBaseAccessControl} from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
 import {PolicyProtected} from "../../../submodules/chainlink-ace/packages/policy-management/src/core/PolicyProtected.sol";
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
@@ -12,12 +12,13 @@ import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/tokenizat
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
 import {PauseModule}  from "../../../submodules/CMTAT/contracts/modules/wrapper/core/PauseModule.sol";
 import {EnforcementModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/EnforcementModule.sol";
+import {IERC7943FungibleTransferError}  from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7943.sol";
 // Extensions
 import {ERC20EnforcementModule, ERC20EnforcementModuleInternal} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
-import {Errors} from "../../../submodules/CMTAT/contracts/libraries/Errors.sol";
 
 
-abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModulePolicyEngine {
+
+abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, ValidationModulePolicyEngine, IERC7943FungibleTransferError {
 
        /*//////////////////////////////////////////////////////////////
                          INITIALIZER FUNCTION
@@ -30,8 +31,6 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
      * @param ERC20Attributes_ ERC20 name, symbol and decimals
      * @param extraInformationAttributes_ tokenId, terms, information
      * @param policyEngine_ address of the policy engine
-     * @param snapshotEngine_ address of the snapshot engine
-     * @param documentEngine_ address of the document engine
      * @dev
      * If you override the public function initialize,
      * call inside directly the internal function, not the public one which is protected by the initializer modifier
@@ -40,16 +39,12 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_,
         address policyEngine_
     ) public virtual initializer {
         _initialize(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            snapshotEngine_,
-            documentEngine_,
             policyEngine_
         );
     }
@@ -61,16 +56,12 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_,
         address policyEngine_
     ) internal virtual onlyInitializing{
         __CMTAT_init(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            snapshotEngine_,
-            documentEngine_,
             policyEngine_
         );
     }
@@ -82,8 +73,6 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_,
         address policyEngine_
     ) internal virtual onlyInitializing {
         /* OpenZeppelin library */
@@ -97,10 +86,10 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         __CMTAT_openzeppelin_init_unchained(ERC20Attributes_);
        
         /* Wrapper modules */
-        __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_, snapshotEngine_, documentEngine_);
+        __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
 
          /* Chainlink-ACE policy module */
-       __PolicyProtected_init(admin, policyEngine_);
+        __PolicyProtected_init_unchained(policyEngine_);
     }
 
     /*
@@ -114,8 +103,8 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
     /*
     * @dev CMTAT wrapper modules
     */
-    function __CMTAT_modules_init_unchained(address admin, ICMTATConstructor.ERC20Attributes memory ERC20Attributes_, ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_, ICMTATConstructor.Engine memory engines_) internal virtual onlyInitializing {
-        __CMTAT_commonModules_init_unchained(admin,ERC20Attributes_, extraInformationAttributes_, engines_.snapshotEngine, engines_.documentEngine);
+    function __CMTAT_modules_init_unchained(address admin, ICMTATConstructor.ERC20Attributes memory ERC20Attributes_, ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_) internal virtual onlyInitializing {
+        __CMTAT_commonModules_init_unchained(admin,ERC20Attributes_, extraInformationAttributes_);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -129,9 +118,10 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         address to,
         uint256 value
     ) public virtual override (ValidationModulePolicyEngine) view returns (bool) {
-        if(!ERC20EnforcementModuleInternal._checkActiveBalance(from, value)){
+        (bool isValid, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if(!isValid){
             return false;
-        } else {
+        }  else {
             return ValidationModulePolicyEngine.canTransfer(from, to, value);
         }
     }
@@ -145,7 +135,8 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
         address to,
         uint256 value
     ) public virtual override (ValidationModulePolicyEngine) view returns (bool) {
-        if(!ERC20EnforcementModuleInternal._checkActiveBalance(from, value)){
+        (bool isValid, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if(!isValid){
             return false;
         } else {
             return ValidationModulePolicyEngine.canTransferFrom(spender, from, to, value);
@@ -164,11 +155,11 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseCommon, ValidationModuleP
     /* ==== Transfer/mint/burn restriction ==== */
     function _checkTransferred(address spender, address from, address to, uint256 value) internal virtual override(CMTATBaseCommon) {
         CMTATBaseCommon._checkTransferred(spender, from, to, value);
-        require(ValidationModulePolicyEngine._transferred(spender, from, to, value), Errors.CMTAT_InvalidTransfer(from, to, value));
+        require(ValidationModulePolicyEngine._transferred(spender, from, to, value), ERC7943CannotTransfer(from, to, value));
     }
 
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(CMTATBaseCommon, PolicyProtected) returns (bool) {
-        return CMTATBaseCommon.supportsInterface(interfaceId) || PolicyProtected.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(CMTATBaseAccessControl, PolicyProtected) returns (bool) {
+        return CMTATBaseAccessControl.supportsInterface(interfaceId) || PolicyProtected.supportsInterface(interfaceId);
     }
 }

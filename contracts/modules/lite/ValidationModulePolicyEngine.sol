@@ -71,19 +71,19 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
 
     // Note: parameters are kept to retain the interface, even if not used
     function _canTransferFromWithPolicyEngine(
-        address spender,
-        address from,
-        address to,
-        uint256 value
+        address /* spender */,
+        address /* from */,
+        address /* to */,
+        uint256 /* value*/
     ) internal view virtual returns (bool) {
         return _tryRunPolicies();
     }
 
     // Note: parameters are kept to retain the interface, even if not used
     function _canTransferWithPolicyEngine(
-        address from,
-        address to,
-        uint256 value
+        address /* from */,
+        address /* to */,
+        uint256 /* value */
     ) internal view virtual returns (bool) {
         return _tryRunPolicies();
     }
@@ -108,7 +108,7 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
 
 
     /* ============ State functions ============ */
-    function _transferred(address spender, address from, address to, uint256 value) internal virtual returns (bool) {
+    function _transferred(address spender, address from, address to, uint256 /* value */) internal virtual returns (bool) {
         if(!_canTransferGenericByModule(spender, from, to)) {
             return false;
         } else {
