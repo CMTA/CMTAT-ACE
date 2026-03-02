@@ -12,6 +12,7 @@
   "author": "",
   "homepage": "https://github.com/CMTA/CMTAT-ACE#readme",
   "devDependencies": {
+    "@chainlink/ace": "^1.0.0",
     "@chainlink/contracts": "1.3.0",
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
