@@ -3,10 +3,10 @@
 pragma solidity ^0.8.20;
 
 import {CMTATBaseCommon, CMTATBaseAccessControl} from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
-import {PolicyProtected} from "../../../submodules/chainlink-ace/packages/policy-management/src/core/PolicyProtected.sol";
+import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {IPolicyEngine} from "../../../submodules/chainlink-ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
+import {IPolicyEngine} from "@chainlink/ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
@@ -159,7 +159,7 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
     }
 
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(CMTATBaseAccessControl, PolicyProtected) returns (bool) {
-        return CMTATBaseAccessControl.supportsInterface(interfaceId) || PolicyProtected.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(CMTATBaseAccessControl, PolicyProtectedUpgradeable) returns (bool) {
+        return CMTATBaseAccessControl.supportsInterface(interfaceId) || PolicyProtectedUpgradeable.supportsInterface(interfaceId);
     }
 }

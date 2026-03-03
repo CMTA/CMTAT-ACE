@@ -3,11 +3,11 @@
 pragma solidity ^0.8.20;
 
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
-import {PolicyProtected} from "../../../submodules/chainlink-ace/packages/policy-management/src/core/PolicyProtected.sol";
-import {IPolicyEngine} from "../../../submodules/chainlink-ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
+import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
 
 
-abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyProtected {
+abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyProtectedUpgradeable {
 
 
     /*//////////////////////////////////////////////////////////////

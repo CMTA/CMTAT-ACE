@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import {CCTCMTATBasePolicyEngine} from "./CCTCMTATBasePolicyEngine.sol";
 import {PolicyValidationModuleERC1404, IERC1404, IERC1404Extend} from "./PolicyValidationModuleERC1404.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
-import {PolicyProtected} from "../../../submodules/chainlink-ace/packages/policy-management/src/core/PolicyProtected.sol";
+import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20EnforcementModule, ERC20EnforcementModuleInternal} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 
@@ -78,8 +78,8 @@ abstract contract CCTCMTATBaseERC1404 is
         return PolicyValidationModuleERC1404._detectTransferRestriction(from, to, value);
     }
 
-    // Note: CCTCMTATBasePolicyEngine implements PolicyProtected
-    function supportsInterface(bytes4 interfaceId) public view virtual override(CCTCMTATBasePolicyEngine, PolicyProtected) returns (bool) {
+    // Note: CCTCMTATBasePolicyEngine implements PolicyProtectedUpgradeable
+    function supportsInterface(bytes4 interfaceId) public view virtual override(CCTCMTATBasePolicyEngine, PolicyProtectedUpgradeable) returns (bool) {
         return CCTCMTATBasePolicyEngine.supportsInterface(interfaceId);
     }
 }

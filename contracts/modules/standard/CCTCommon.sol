@@ -27,11 +27,13 @@ import {IBurnMintERC20} from "../../../submodules/CMTAT/contracts/interfaces/tec
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
-import {PolicyProtected} from "../../../submodules/chainlink-ace/packages/policy-management/src/core/PolicyProtected.sol";
+import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
+
+
 abstract contract CCTCommon is 
     ERC20CrossChainModule,
-    PolicyProtected,
-     CMTATBaseCommon,
+    PolicyProtectedUpgradeable,
+    CMTATBaseCommon,
     CCIPModule
 {
     function initialize(
@@ -164,11 +166,11 @@ abstract contract CCTCommon is
     function supportsInterface(bytes4 _interfaceId) public view virtual override(
         IERC165, 
         ERC20CrossChainModule,
-        PolicyProtected
+        PolicyProtectedUpgradeable
     ) returns (bool) {
         return
             ERC20CrossChainModule.supportsInterface(_interfaceId) ||
-            PolicyProtected.supportsInterface(_interfaceId);
+            PolicyProtectedUpgradeable.supportsInterface(_interfaceId);
     }
 
     /* ==== Mint and Burn Operations ==== */
