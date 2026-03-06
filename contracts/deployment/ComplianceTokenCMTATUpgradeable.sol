@@ -7,7 +7,7 @@ import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/op
 
 
 /**
- * @title ComplianceTokenCMTATStandalone
+ * @title ComplianceTokenCMTATUpgradeable
  * @author Chainlink
  * @notice Standalone ComplianceToken contract with Chainlink ACE policy validation on all public functions
  */

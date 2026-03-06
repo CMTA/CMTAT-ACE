@@ -5,6 +5,7 @@ pragma solidity ^0.8.20;
 /* ==== OpenZeppelin === */
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /* ==== CMTAT === */
 import {CMTATBaseCommon} from "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol";
@@ -27,21 +28,24 @@ import {IBurnMintERC20} from "../../../submodules/CMTAT/contracts/interfaces/tec
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
-import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedUpgradeable} from "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol";
 
 
 abstract contract CCTCommon is 
+    OwnableUpgradeable,
     ERC20CrossChainModule,
     PolicyProtectedUpgradeable,
     CMTATBaseCommon,
     CCIPModule
 {
     function initialize(
+        address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
         address policyEngine
     ) public virtual initializer {
         _initialize(
+            admin,
             ERC20Attributes_,
             extraInformationAttributes_,
             policyEngine
@@ -49,11 +53,13 @@ abstract contract CCTCommon is
     }
 
     function _initialize(
+        address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
         address policyEngine
     ) internal virtual onlyInitializing {
         __CMTAT_init(
+            admin,
             ERC20Attributes_,
             extraInformationAttributes_,
             policyEngine
@@ -65,10 +71,12 @@ abstract contract CCTCommon is
      * @dev calls the different initialize functions from the different modules
      */
     function __CMTAT_init(
+        address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes_,
         address policyEngine
     ) internal virtual onlyInitializing {
+        __Ownable_init_unchained(admin);
         /* OpenZeppelin library */
         // OZ init_unchained functions are called firstly due to inheritance
         __Context_init_unchained();
@@ -130,6 +138,11 @@ abstract contract CCTCommon is
         returns (bool)
     {
         return CMTATBaseCommon.transferFrom(from, to, value);
+    }
+
+    // Add onlyOwner modifier
+    function attachPolicyEngine(address policyEngine) external virtual override onlyOwner {
+        _attachPolicyEngine(policyEngine);
     }
 
     /* ============ View functions ============ */

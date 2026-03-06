@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import {CCTCMTATBasePolicyEngine} from "./CCTCMTATBasePolicyEngine.sol";
 import {PolicyValidationModuleERC1404, IERC1404, IERC1404Extend} from "./PolicyValidationModuleERC1404.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
-import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
+import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20EnforcementModule, ERC20EnforcementModuleInternal} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 
@@ -44,7 +44,7 @@ abstract contract CCTCMTATBaseERC1404 is
         address from,
         address to,
         uint256 value
-    ) public virtual override (CCTCMTATBasePolicyEngine, ValidationModulePolicyEngine) view returns (bool) {
+    ) public virtual override (CCTCMTATBasePolicyEngine, ValidationModuleCore) view returns (bool) {
         return CCTCMTATBasePolicyEngine.canTransfer(from, to, value);
     }
 
@@ -56,7 +56,7 @@ abstract contract CCTCMTATBaseERC1404 is
         address from,
         address to,
         uint256 value
-    ) public virtual override (CCTCMTATBasePolicyEngine, ValidationModulePolicyEngine) view returns (bool) {
+    ) public virtual override (CCTCMTATBasePolicyEngine, ValidationModuleCore) view returns (bool) {
         return CCTCMTATBasePolicyEngine.canTransferFrom(spender, from, to, value);
     }
 
@@ -78,8 +78,7 @@ abstract contract CCTCMTATBaseERC1404 is
         return PolicyValidationModuleERC1404._detectTransferRestriction(from, to, value);
     }
 
-    // Note: CCTCMTATBasePolicyEngine implements PolicyProtectedUpgradeable
-    function supportsInterface(bytes4 interfaceId) public view virtual override(CCTCMTATBasePolicyEngine, PolicyProtectedUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(CCTCMTATBasePolicyEngine) returns (bool) {
         return CCTCMTATBasePolicyEngine.supportsInterface(interfaceId);
     }
 }
