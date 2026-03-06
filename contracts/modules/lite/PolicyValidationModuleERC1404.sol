@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 
 /* ==== Tokenization === */
 import {IERC1404, IERC1404Extend} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol";
-import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
+import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 
 /**
  * @dev Validation module (ERC-1404)
@@ -13,7 +13,7 @@ import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
  * Useful to restrict and validate transfers
  */
 abstract contract PolicyValidationModuleERC1404 is
-   ValidationModulePolicyEngine, IERC1404Extend
+   ValidationModuleCore, IERC1404Extend
 {
     /* ============ State Variables ============ */
     string constant TEXT_TRANSFER_OK = "NoRestriction";

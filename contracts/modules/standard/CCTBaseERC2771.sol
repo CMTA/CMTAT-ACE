@@ -9,7 +9,6 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol";
-import "hardhat/console.sol";
 
 abstract contract CCTBaseERC2771 is CCTCommon, ERC2771Module {
 

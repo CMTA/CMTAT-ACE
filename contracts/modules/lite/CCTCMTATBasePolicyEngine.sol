@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import {CMTATBaseCommon, CMTATBaseAccessControl} from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
-import {PolicyProtectedUpgradeable} from "@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedUpgradeable} from "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol";
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {IPolicyEngine} from "@chainlink/ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
@@ -143,6 +143,10 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
         }
     }
 
+    function attachPolicyEngine(address policyEngine) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _attachPolicyEngine(policyEngine);
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -157,7 +161,6 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
         CMTATBaseCommon._checkTransferred(spender, from, to, value);
         require(ValidationModulePolicyEngine._transferred(spender, from, to, value), ERC7943CannotTransfer(from, to, value));
     }
-
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(CMTATBaseAccessControl, PolicyProtectedUpgradeable) returns (bool) {
         return CMTATBaseAccessControl.supportsInterface(interfaceId) || PolicyProtectedUpgradeable.supportsInterface(interfaceId);
