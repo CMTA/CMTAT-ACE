@@ -9,11 +9,11 @@ import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/op
 /**
  * @title ComplianceTokenCMTATUpgradeable
  * @author Chainlink
- * @notice Standalone ComplianceToken contract with Chainlink ACE policy validation on all public functions
+ * @notice Upgradeable ComplianceToken contract with Chainlink ACE policy validation on all public functions
  */
 contract ComplianceTokenCMTATUpgradeable is CCTBaseERC2771 {
     /**
-     * @notice Contract version for standalone deployment
+     * @notice Contract version for upgradeable deployment
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
      */
     /// @custom:oz-upgrades-unsafe-allow constructor

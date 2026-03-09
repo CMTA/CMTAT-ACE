@@ -1,5 +1,23 @@
 const {ethers, upgrades } = require("hardhat");
 
+const ZERO_ADDRESS = ethers.ZeroAddress;
+const DEPLOYMENT_DECIMAL = 0;
+const TERMS = {
+  name: "Token Terms v2",
+  uri: "https://cmta.ch/standards/cmta-token-cmtat",
+  documentHash: ethers.keccak256(ethers.toUtf8Bytes("terms-v2"))
+};
+const ERC20_ATTRIBUTES = ["Security Token", "ST", DEPLOYMENT_DECIMAL];
+const EXTRA_INFO_ATTRIBUTES_STANDALONE = ["1234567890", TERMS, "ComplianceTokenCMTATStandalone smart contract"];
+const EXTRA_INFO_ATTRIBUTES_UPGRADEABLE = ["1234567890", TERMS, "ComplianceTokenCMTATUpgradeable smart contract"];
+const EXTRA_INFO_ATTRIBUTES_LITE_STANDALONE = ["1234567890", TERMS, "ComplianceTokenCMTATLiteStandalone smart contract"];
+const EXTRA_INFO_ATTRIBUTES_LITE_UPGRADEABLE = ["1234567890", TERMS, "ComplianceTokenCMTATLiteUpgradeable smart contract"];
+
+// Role constants matching CMTAT convention
+const MINTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("MINTER_ROLE"));
+const BURNER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("BURNER_ROLE"));
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 async function etherAddresses () {
   const [
     admin,
@@ -25,83 +43,11 @@ async function etherAddresses () {
   }
 }
 
-
-async function deployComplianceTokenCMTATStandalone (forwarderAddress, deployerAddress, policyEngine) {
-  const erc20Attributes = [
-    "Security Token",  // name
-    "ST",             // symbol
-    0 // decimalsIrrevocable (legacy)
-  ]
-  const terms = {
-    name: "Token Terms v2",
-    uri: "https://cmta.ch/standards/cmta-token-cmtat",
-    documentHash: ethers.keccak256(ethers.toUtf8Bytes("terms-v2"))
-  }
-  const extraInformationAttributes = [
-    "1234567890", // ISIN or identifier as tokenId
-    terms,
-    "ComplianceTokenCMTATStandalone smart contract" // information string
-  ]
-  const ComplianceTokenCMTATStandalone = await ethers.deployContract(
-    "ComplianceTokenCMTATStandalone", 
-    [
-      forwarderAddress,
-      erc20Attributes,
-      extraInformationAttributes,
-      policyEngine
-    ],
-    deployerAddress
-  )
-  
-  return ComplianceTokenCMTATStandalone;
-} 
-
-async function deployComplianceTokenCMTATUpgradeable (forwarderAddress, deployerAddress, policyEngine) {
-  const ETHERS_CMTAT_PROXY_FACTORY = await ethers.getContractFactory(
-    'ComplianceTokenCMTATUpgradeable'
-  )
-  const erc20Attributes = [
-    "Security Token",  // name
-    "ST",             // symbol
-    0 // decimalsIrrevocable (legacy)
-  ]
-  const terms = {
-    name: "Token Terms v2",
-    uri: "https://cmta.ch/standards/cmta-token-cmtat",
-    documentHash: ethers.keccak256(ethers.toUtf8Bytes("terms-v2"))
-  }
-  const extraInformationAttributes = [
-    "1234567890", // ISIN or identifier as tokenId
-    terms,
-    "ComplianceTokenCMTATUpgradeable smart contract" // information string
-  ]
-  const ComplianceTokenCMTATUpgradeable = await upgrades.deployProxy(
-    ETHERS_CMTAT_PROXY_FACTORY, 
-    [
-      erc20Attributes,
-      extraInformationAttributes,
-      policyEngine  // policyEngine
-    ],
-    {
-      initializer: 'initialize',
-      constructorArgs: [forwarderAddress],
-      from: deployerAddress,
-      unsafeAllow: ['missing-initializer','missing-initializer', 'constructor']
-    }
-  )
-  
-  return ComplianceTokenCMTATUpgradeable;
-}
-
 /**
  * Deploy PolicyEngine through upgrades.deployProxy (ERC1967 proxy pattern)
- * @param {boolean} defaultAllow - The default policy result (true = allow, false = reject)
- * @param {string} initialOwner - The address of the initial owner
- * @returns {Promise<Contract>} The deployed PolicyEngine proxy instance
  */
 async function deployPolicyEngine(defaultAllow, initialOwner) {
   const PolicyEngineFactory = await ethers.getContractFactory("PolicyEngine");
-
   const policyEngine = await upgrades.deployProxy(
     PolicyEngineFactory,
     [defaultAllow, initialOwner],
@@ -110,13 +56,139 @@ async function deployPolicyEngine(defaultAllow, initialOwner) {
       unsafeAllow: ['constructor']
     }
   );
-
   return policyEngine;
 }
 
+/**
+ * Deploy PausePolicy through upgrades.deployProxy
+ */
+async function deployPausePolicy(policyEngineAddress, ownerAddress, initiallyPaused = false) {
+  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+  const configParams = abiCoder.encode(["bool"], [initiallyPaused]);
+  const PausePolicyFactory = await ethers.getContractFactory("PausePolicy");
+  const pausePolicy = await upgrades.deployProxy(
+    PausePolicyFactory,
+    [policyEngineAddress, ownerAddress, configParams],
+    {
+      initializer: 'initialize',
+      unsafeAllow: ['constructor', 'missing-initializer', 'missing-initializer-call']
+    }
+  );
+  return pausePolicy;
+}
+
+/**
+ * Deploy RoleBasedAccessControlPolicy through upgrades.deployProxy
+ */
+async function deployRBACPolicy(policyEngineAddress, ownerAddress) {
+  const RBACFactory = await ethers.getContractFactory("RoleBasedAccessControlPolicy");
+  const rbacPolicy = await upgrades.deployProxy(
+    RBACFactory,
+    [policyEngineAddress, ownerAddress, "0x"],
+    {
+      initializer: 'initialize',
+      unsafeAllow: ['constructor', 'missing-initializer', 'missing-initializer-call']
+    }
+  );
+  return rbacPolicy;
+}
+
+/**
+ * Deploy ComplianceTokenCMTATStandalone (non-upgradeable)
+ */
+async function deployComplianceTokenCMTATStandalone(forwarderAddress, adminAddress, policyEngineAddress) {
+  const cmtat = await ethers.deployContract(
+    "ComplianceTokenCMTATStandalone",
+    [
+      forwarderAddress,
+      adminAddress,
+      ERC20_ATTRIBUTES,
+      EXTRA_INFO_ATTRIBUTES_STANDALONE,
+      policyEngineAddress
+    ]
+  );
+  return cmtat;
+}
+
+/**
+ * Deploy ComplianceTokenCMTATUpgradeable (proxy)
+ */
+async function deployComplianceTokenCMTATUpgradeable(forwarderAddress, adminAddress, policyEngineAddress) {
+  const ETHERS_CMTAT_PROXY_FACTORY = await ethers.getContractFactory(
+    'ComplianceTokenCMTATUpgradeable'
+  );
+  const cmtat = await upgrades.deployProxy(
+    ETHERS_CMTAT_PROXY_FACTORY,
+    [
+      adminAddress,
+      ERC20_ATTRIBUTES,
+      EXTRA_INFO_ATTRIBUTES_UPGRADEABLE,
+      policyEngineAddress
+    ],
+    {
+      initializer: 'initialize',
+      constructorArgs: [forwarderAddress],
+      unsafeAllow: ['missing-initializer', 'constructor']
+    }
+  );
+  return cmtat;
+}
+
+/**
+ * Deploy ComplianceTokenCMTATLiteStandalone (non-upgradeable)
+ */
+async function deployComplianceTokenCMTATLiteStandalone(forwarderAddress, adminAddress, policyEngineAddress) {
+  const cmtat = await ethers.deployContract(
+    "ComplianceTokenCMTATLiteStandalone",
+    [
+      forwarderAddress,
+      adminAddress,
+      ERC20_ATTRIBUTES,
+      EXTRA_INFO_ATTRIBUTES_LITE_STANDALONE,
+      policyEngineAddress
+    ]
+  );
+  return cmtat;
+}
+
+/**
+ * Deploy ComplianceTokenCMTATLiteUpgradeable (proxy)
+ */
+async function deployComplianceTokenCMTATLiteUpgradeable(forwarderAddress, adminAddress, policyEngineAddress) {
+  const ETHERS_CMTAT_PROXY_FACTORY = await ethers.getContractFactory(
+    'ComplianceTokenCMTATLiteUpgradeable'
+  );
+  const cmtat = await upgrades.deployProxy(
+    ETHERS_CMTAT_PROXY_FACTORY,
+    [
+      adminAddress,
+      ERC20_ATTRIBUTES,
+      EXTRA_INFO_ATTRIBUTES_LITE_UPGRADEABLE,
+      policyEngineAddress
+    ],
+    {
+      initializer: 'initialize',
+      constructorArgs: [forwarderAddress, adminAddress, ERC20_ATTRIBUTES, EXTRA_INFO_ATTRIBUTES_LITE_UPGRADEABLE, policyEngineAddress],
+      unsafeAllow: ['missing-initializer', 'constructor']
+    }
+  );
+  return cmtat;
+}
+
 module.exports = {
+  ZERO_ADDRESS,
+  MINTER_ROLE,
+  BURNER_ROLE,
+  DEFAULT_ADMIN_ROLE,
+  DEPLOYMENT_DECIMAL,
+  TERMS,
+  ERC20_ATTRIBUTES,
   etherAddresses,
+  deployPolicyEngine,
+  deployPausePolicy,
+  deployRBACPolicy,
   deployComplianceTokenCMTATStandalone,
   deployComplianceTokenCMTATUpgradeable,
-  deployPolicyEngine
+  deployComplianceTokenCMTATLiteStandalone,
+  deployComplianceTokenCMTATLiteUpgradeable,
 };
