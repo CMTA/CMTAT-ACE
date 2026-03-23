@@ -116,7 +116,7 @@ npx hardhat test
 You can use example scripts to deploy, e.g. for local Hardhat Network deployment:
 
 ```shell
-npx hardhat run scripts/{script_name}
+npx hardhat run {path_to_script}
 ```
 
 # Static Analysis (Slither)
