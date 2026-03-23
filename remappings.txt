@@ -1,0 +1,3 @@
+@chainlink/policy-management/=node_modules/@chainlink/ace/packages/policy-management/src/
+@chainlink/cross-chain-identity/=node_modules/@chainlink/ace/packages/cross-chain-identity/src/
+@chainlink/contracts/=node_modules/@chainlink/contracts/

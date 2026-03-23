@@ -9,6 +9,10 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Slither reports (keep directory via .gitkeep)
+reports/*
+!reports/.gitkeep
+
 # Runtime data
 pids
 *.pid
@@ -40,6 +44,9 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+
+# Python virtual environment
+cct/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

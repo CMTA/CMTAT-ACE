@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.20;
 
-import {IPolicyEngine} from "@chainlink/ace/packages/policy-management/src/interfaces/IPolicyEngine.sol";
-import {IPolicyProtected} from "@chainlink/ace/packages/policy-management/src/interfaces/IPolicyProtected.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
+import {IPolicyProtected} from "@chainlink/policy-management/interfaces/IPolicyProtected.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";

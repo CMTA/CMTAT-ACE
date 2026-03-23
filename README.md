@@ -118,3 +118,50 @@ You can use example scripts to deploy, e.g. for local Hardhat Network deployment
 ```shell
 npx hardhat run scripts/{script_name}
 ```
+
+# Static Analysis (Slither)
+
+[Slither](https://github.com/crytic/slither) is a Solidity static analysis framework used to find vulnerabilities and code quality issues.
+
+## Setup
+
+Create and activate a Python virtual environment called `cct`:
+
+```shell
+python3 -m venv cct
+chmod +x cct/bin/activate
+source cct/bin/activate
+```
+
+Install Slither inside the virtual environment:
+
+```shell
+pip install slither-analyzer
+```
+
+Verify the installation:
+
+```shell
+slither --version
+```
+
+## Running
+
+Make sure the virtual environment is active and contracts compile successfully before running:
+
+```shell
+source cct/bin/activate
+npm run slither
+```
+
+This generates timestamped reports in the `reports/` directory:
+- **JSON** — `reports/slither-report-<timestamp>.json`
+- **Markdown** — `reports/slither-report-<timestamp>.md`
+
+## Deactivating the virtual environment
+
+When done, deactivate the virtual environment:
+
+```shell
+deactivate
+```

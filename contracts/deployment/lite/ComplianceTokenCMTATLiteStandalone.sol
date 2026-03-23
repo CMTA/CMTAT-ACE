@@ -2,16 +2,16 @@
 
 pragma solidity ^0.8.20;
 
-import {CCTCMTATBaseERC2771} from "../modules/lite/CCTCMTATBaseERC2771.sol";
-import {ICMTATConstructor} from "../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+import {CCTCMTATBaseERC2771} from "../../modules/lite/CCTCMTATBaseERC2771.sol";
+import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
+import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
 
 /**
  * @title ComplianceTokenCMTATLite
  * @author Chainlink
  * @notice Standalone Compliance Token contract with Chainlink ACE policy validation on CMTA transfers
  */
-contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC2771 {
+contract ComplianceTokenCMTATLiteStandalone is CCTCMTATBaseERC2771 {
     /**
      * @notice Contract version for standalone deployment
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
@@ -29,5 +29,13 @@ contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC2771 {
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
         address policyEngine_
-    ) ERC2771Module(forwarderIrrevocable) {}
+    ) ERC2771Module(forwarderIrrevocable) {
+        // Initialize the contract to avoid front-running
+        initialize(
+            admin,
+            ERC20Attributes_,
+            extraInformationAttributes_,
+            policyEngine_
+        );
+    }
 }

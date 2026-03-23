@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.20;
 
-import {CCTBaseERC2771} from "../modules/standard/CCTBaseERC2771.sol";
-import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+import {CCTBaseERC2771} from "../../modules/standard/CCTBaseERC2771.sol";
+import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
 
 
 /**

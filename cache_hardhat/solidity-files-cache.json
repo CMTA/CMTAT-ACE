@@ -1,0 +1,3988 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/lite/ComplianceTokenCMTATLiteStandalone.sol": {
+      "lastModificationDate": 1773194236388,
+      "contentHash": "399ce8a8ccd1c2a759619a106aad52bd",
+      "sourceName": "contracts/deployment/lite/ComplianceTokenCMTATLiteStandalone.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../modules/lite/CCTCMTATBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATLiteStandalone"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/CCTCMTATBaseERC2771.sol": {
+      "lastModificationDate": 1766069548241,
+      "contentHash": "c1917fd23513535cc1f18994c1b58cf4",
+      "sourceName": "contracts/modules/lite/CCTCMTATBaseERC2771.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./CCTCMTATBaseERC20CrossChain.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol",
+        "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTCMTATBaseERC2771"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol": {
+      "lastModificationDate": 1772459546422,
+      "contentHash": "d2ec11374905c456bf8e13ce09151c3b",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../engine/IRuleEngine.sol",
+        "../tokenization/draft-IERC1643CMTAT.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ICMTATConstructor"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol": {
+      "lastModificationDate": 1765380322380,
+      "contentHash": "e4625ddc00c353063c619dea9250a30d",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC2771Module"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/CCTCMTATBaseERC20CrossChain.sol": {
+      "lastModificationDate": 1766069548236,
+      "contentHash": "0b39d465054e9c0b7f2f3856437ac373",
+      "sourceName": "contracts/modules/lite/CCTCMTATBaseERC20CrossChain.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol",
+        "./CCTCMTATBaseERC1404.sol",
+        "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTCMTATBaseERC20CrossChain"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol": {
+      "lastModificationDate": 1766069901805,
+      "contentHash": "dd4ac3512e42e62e26ec342fb9f2a033",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ContextUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/CCTCMTATBaseERC1404.sol": {
+      "lastModificationDate": 1772729649635,
+      "contentHash": "b162adc208ea12301842696b5cddddc7",
+      "sourceName": "contracts/modules/lite/CCTCMTATBaseERC1404.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./CCTCMTATBasePolicyEngine.sol",
+        "./PolicyValidationModuleERC1404.sol",
+        "./ValidationModulePolicyEngine.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTCMTATBaseERC1404"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol": {
+      "lastModificationDate": 1772459546424,
+      "contentHash": "9f6fa848f28f5809023f02acff6801c1",
+      "sourceName": "submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./wrapper/core/VersionModule.sol",
+        "./wrapper/core/ERC20BurnModule.sol",
+        "./wrapper/core/ERC20MintModule.sol",
+        "./wrapper/extensions/ExtraInformationModule.sol",
+        "./wrapper/extensions/ERC20EnforcementModule.sol",
+        "./wrapper/extensions/DocumentEngineModule.sol",
+        "./wrapper/extensions/SnapshotEngineModule.sol",
+        "./wrapper/core/ERC20BaseModule.sol",
+        "../interfaces/engine/ISnapshotEngine.sol",
+        "../interfaces/technical/IMintBurnToken.sol",
+        "../interfaces/technical/IERC5679.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CMTATBaseCommon"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol": {
+      "lastModificationDate": 1765380322380,
+      "contentHash": "80d496a394b377d06f6a428173de9448",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../interfaces/technical/IGetCCIPAdmin.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCIPModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol": {
+      "lastModificationDate": 1765380322378,
+      "contentHash": "8bd2c48e980dbee546bfb63e8b5c1a3b",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../internal/ERC20BurnModuleInternal.sol",
+        "../../../interfaces/technical/IMintBurnToken.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol",
+        "../../../interfaces/tokenization/draft-IERC7551.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20BurnModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol": {
+      "lastModificationDate": 1765380322379,
+      "contentHash": "22df54c53004fdfa26c585002ef559aa",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../internal/ERC20MintModuleInternal.sol",
+        "../../../interfaces/technical/IMintBurnToken.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol",
+        "../../../interfaces/tokenization/draft-IERC7551.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20MintModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol": {
+      "lastModificationDate": 1772459546427,
+      "contentHash": "000206e07b3c933f938ab760fb0db4fa",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "../../../interfaces/technical/IERC7802.sol",
+        "../../../interfaces/technical/IMintBurnToken.sol",
+        "../../../interfaces/technical/IERC20Allowance.sol",
+        "../core/ERC20BurnModule.sol",
+        "../core/ERC20MintModule.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20CrossChainModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol": {
+      "lastModificationDate": 1766069901797,
+      "contentHash": "93b4d16d2c47c2b87ada511a3b6a33a8",
+      "sourceName": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/IAccessControl.sol",
+        "../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "../utils/introspection/ERC165Upgradeable.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AccessControlUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol": {
+      "lastModificationDate": 1766069901855,
+      "contentHash": "db681efc0ba429bde356c763f3ba09cb",
+      "sourceName": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "../../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20Upgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/CCTCMTATBasePolicyEngine.sol": {
+      "lastModificationDate": 1774274316442,
+      "contentHash": "220c76518df4b6cac1c9286cef9c1410",
+      "sourceName": "contracts/modules/lite/CCTCMTATBasePolicyEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol",
+        "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol",
+        "./ValidationModulePolicyEngine.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/PauseModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/EnforcementModule.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7943.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTCMTATBasePolicyEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/PolicyValidationModuleERC1404.sol": {
+      "lastModificationDate": 1773194914672,
+      "contentHash": "8ace5b74e893263ec6382c6b27e89fea",
+      "sourceName": "contracts/modules/lite/PolicyValidationModuleERC1404.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PolicyValidationModuleERC1404"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/lite/ValidationModulePolicyEngine.sol": {
+      "lastModificationDate": 1774274316430,
+      "contentHash": "49d1b121b4e4538ecbb7eea8f537514e",
+      "sourceName": "contracts/modules/lite/ValidationModulePolicyEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol",
+        "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol",
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ValidationModulePolicyEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "5e4dadfee8eb2cefc0481f6426d0f548",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../internal/ERC20EnforcementModuleInternal.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol",
+        "../../../interfaces/tokenization/draft-IERC7551.sol",
+        "../../../interfaces/tokenization/draft-IERC7943.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20EnforcementModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol": {
+      "lastModificationDate": 1765380322379,
+      "contentHash": "05ab0b704c2967bb40eaaaf82dd9da59",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../controllers/ValidationModule.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol",
+        "../../../interfaces/tokenization/draft-IERC7551.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ValidationModuleCore"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol": {
+      "lastModificationDate": 1773024228217,
+      "contentHash": "2196c4d3579b7c42f25cd37bee0f5cd0",
+      "sourceName": "submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/interfaces/IERC165.sol",
+        "./wrapper/security/AccessControlModule.sol",
+        "./wrapper/core/ERC20BurnModule.sol",
+        "./wrapper/core/ERC20MintModule.sol",
+        "./wrapper/extensions/ExtraInformationModule.sol",
+        "./wrapper/extensions/ERC20EnforcementModule.sol",
+        "./wrapper/extensions/DocumentEngineModule.sol",
+        "./wrapper/extensions/SnapshotEngineModule.sol",
+        "./wrapper/core/ERC20BaseModule.sol",
+        "../interfaces/technical/ICMTATConstructor.sol",
+        "./0_CMTATBaseCommon.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CMTATBaseAccessControl"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "8a9b2ff07c3633da1d3d8ec395ab99b9",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1643"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol": {
+      "lastModificationDate": 1765380322372,
+      "contentHash": "3b15f21eab6fc4057dd7feef6236fa61",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20BatchBalance",
+        "ISnapshotEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7943.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "f27d66f0e096e1d67edda9100fa22162",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7943.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC7943ERC20Enforcement",
+        "IERC7943ERC20EnforcementSpecific",
+        "IERC7943FungibleEnforcementEventAndError",
+        "IERC7943FungibleTransactCheck",
+        "IERC7943FungibleTransferError",
+        "IERC7943TransactError"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/EnforcementModule.sol": {
+      "lastModificationDate": 1765380322379,
+      "contentHash": "34c55b10afb8ae66fb33b27074e773bb",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/EnforcementModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../internal/EnforcementModuleInternal.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EnforcementModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/PauseModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "00b7d5c73268f01a685cf4604eb54c3d",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/PauseModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol",
+        "../../../interfaces/tokenization/draft-IERC7551.sol",
+        "../../../interfaces/tokenization/ICMTAT.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PauseModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/interfaces/IPolicyEngine.sol": {
+      "lastModificationDate": 1772459626777,
+      "contentHash": "5ac016edab09986d2c2f197c31220187",
+      "sourceName": "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPolicyEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/core/PolicyProtectedUpgradeable.sol": {
+      "lastModificationDate": 1772459626813,
+      "contentHash": "7fa82aea0ce468d9b82011a4a3113f66",
+      "sourceName": "@chainlink/policy-management/core/PolicyProtectedUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IPolicyEngine.sol",
+        "../interfaces/IPolicyProtected.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PolicyProtectedUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7551.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "d9ebeee4aef4dcef89dcb358026639e6",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7551.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC3643Partial.sol",
+        "../technical/IERC5679.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC7551Burn",
+        "IERC7551Compliance",
+        "IERC7551Document",
+        "IERC7551ERC20Enforcement",
+        "IERC7551ERC20EnforcementEvent",
+        "IERC7551ERC20EnforcementTokenFrozenEvent",
+        "IERC7551Mint",
+        "IERC7551Pause"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/IERC3643Partial.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "591cc96b764dc7cb67f7d80621106e47",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/IERC3643Partial.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./draft-IERC7943.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC3643BatchTransfer",
+        "IERC3643Burn",
+        "IERC3643ComplianceRead",
+        "IERC3643ERC20Base",
+        "IERC3643ERC20Enforcement",
+        "IERC3643Enforcement",
+        "IERC3643EnforcementEvent",
+        "IERC3643IComplianceContract",
+        "IERC3643Mint",
+        "IERC3643Pause",
+        "IERC3643Version"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/controllers/ValidationModule.sol": {
+      "lastModificationDate": 1772459546425,
+      "contentHash": "dd4820729f403c3a7b3d07a26d45c6fc",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/controllers/ValidationModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../core/PauseModule.sol",
+        "../core/EnforcementModule.sol",
+        "../../../interfaces/tokenization/draft-IERC7943.sol",
+        "../../../interfaces/tokenization/draft-IERC7943.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ValidationModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/IERC5679.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "66455eef398cd6e40c549c665e956f05",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/IERC5679.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/interfaces/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC5679",
+        "IERC5679Burn",
+        "IERC5679Mint"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/interfaces/IERC165.sol": {
+      "lastModificationDate": 1766069902003,
+      "contentHash": "947853028399b7de34bcc3704ee06e99",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": []
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1766069902004,
+      "contentHash": "7074c93b1ea0a122063f26ddd1db1032",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/ICMTAT.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "7c9991f8a07619f2830c14eb2e311975",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/ICMTAT.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./draft-IERC1643CMTAT.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ICMTATBase",
+        "ICMTATCreditEvents",
+        "ICMTATDeactivate",
+        "ICMTATDebt"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol": {
+      "lastModificationDate": 1766069901898,
+      "contentHash": "5740e77fdc660fbee591e2c59e977cdd",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PausableUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643CMTAT.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "fd8382e936b3290e457e50cfcd57cd61",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643CMTAT.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./draft-IERC1643.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1643CMTAT"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1766069902018,
+      "contentHash": "2acae54ad209714bca07edf4bae32f72",
+      "sourceName": "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Initializable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/internal/EnforcementModuleInternal.sol": {
+      "lastModificationDate": 1765380322378,
+      "contentHash": "6fcbb17b416e7ec79a9014053a899dda",
+      "sourceName": "submodules/CMTAT/contracts/modules/internal/EnforcementModuleInternal.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+        "./common/EnforcementModuleLibrary.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EnforcementModuleInternal"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/internal/common/EnforcementModuleLibrary.sol": {
+      "lastModificationDate": 1765380322378,
+      "contentHash": "fd0d05a59b951881dcfc6eaeebaa9d8d",
+      "sourceName": "submodules/CMTAT/contracts/modules/internal/common/EnforcementModuleLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EnforcementModuleLibrary"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol": {
+      "lastModificationDate": 1766069901897,
+      "contentHash": "bcfb6430f07521142c3725a35f1e65ef",
+      "sourceName": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "OwnableUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/interfaces/IPolicyProtected.sol": {
+      "lastModificationDate": 1772459626777,
+      "contentHash": "2e8c1af1d4604de2e53ff174618d1813",
+      "sourceName": "@chainlink/policy-management/interfaces/IPolicyProtected.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPolicyProtected"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol": {
+      "lastModificationDate": 1766069901849,
+      "contentHash": "cd93bc5bd62a1e7bea1bfab7aec3d86d",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC165Upgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1766069901893,
+      "contentHash": "7ed23477eca0250d0edbb9a34e6a95ac",
+      "sourceName": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": []
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/extensions/ExtraInformationModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "2926cea09887acbc3973dd98066fc73a",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/extensions/ExtraInformationModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+        "../../../interfaces/tokenization/draft-IERC1643CMTAT.sol",
+        "../../../interfaces/tokenization/ICMTAT.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ExtraInformationModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/extensions/DocumentEngineModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "4c8a892ac361e0f7ed9d62afd70b6d4a",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/extensions/DocumentEngineModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+        "../../../interfaces/engine/IDocumentEngine.sol",
+        "../../../interfaces/modules/IDocumentEngineModule.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "DocumentEngineModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/ERC20BaseModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "3d19cb4d8bbf13073a6e77092039b464",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/ERC20BaseModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "../../../interfaces/technical/IERC20Allowance.sol",
+        "../../../interfaces/engine/ISnapshotEngine.sol",
+        "../../../interfaces/tokenization/IERC3643Partial.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20BaseModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/extensions/SnapshotEngineModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "7b5d8c70197b3fad3db2ff60ee526362",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/extensions/SnapshotEngineModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+        "../../../interfaces/modules/ISnapshotEngineModule.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SnapshotEngineModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/security/AccessControlModule.sol": {
+      "lastModificationDate": 1765380322381,
+      "contentHash": "cdd6782c0d214435ea908d37016d32d2",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/security/AccessControlModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AccessControlModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/IMintBurnToken.sol": {
+      "lastModificationDate": 1772459546422,
+      "contentHash": "62ee053f339ce532e813b31ecb1d95c6",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/IMintBurnToken.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IBurnBatchERC20",
+        "IBurnFromERC20",
+        "IBurnMintERC20",
+        "IForcedBurnERC20",
+        "IMintBatchERC20Event"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/internal/ERC20BurnModuleInternal.sol": {
+      "lastModificationDate": 1765380322377,
+      "contentHash": "1e6d1bbd74de47c320c43bf548fb0b27",
+      "sourceName": "submodules/CMTAT/contracts/modules/internal/ERC20BurnModuleInternal.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20BurnModuleInternal"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
+      "lastModificationDate": 1766069901939,
+      "contentHash": "bcc76f4747d56c28c40ae272ef3470a6",
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.4"
+      ],
+      "artifacts": [
+        "IERC1155Errors",
+        "IERC20Errors",
+        "IERC721Errors"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1766069902006,
+      "contentHash": "9261adf6457863de3e9892f51317ec89",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "lastModificationDate": 1766069902007,
+      "contentHash": "513778b30d2750f5d2b9b19bbcf748a5",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.2"
+      ],
+      "artifacts": [
+        "IERC20Metadata"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/internal/ERC20MintModuleInternal.sol": {
+      "lastModificationDate": 1765380322378,
+      "contentHash": "90e51deacc89b1464b200c300d2fa83a",
+      "sourceName": "submodules/CMTAT/contracts/modules/internal/ERC20MintModuleInternal.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20MintModuleInternal"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol": {
+      "lastModificationDate": 1765380322372,
+      "contentHash": "c3dcebeb73713ab00788aafb5a19cf94",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../tokenization/draft-IERC1643.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IDocumentEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/modules/IDocumentEngineModule.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "14a389dd9a277083a1572d7fa69d0efe",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/modules/IDocumentEngineModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../tokenization/draft-IERC1643.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IDocumentEngineModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/IERC20Allowance.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "9b3af82e84423e081f03c761206ffb54",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/IERC20Allowance.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20Allowance"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/internal/ERC20EnforcementModuleInternal.sol": {
+      "lastModificationDate": 1772459546425,
+      "contentHash": "ebad5fd99d64dd5e0747abc6c0d1ff2c",
+      "sourceName": "submodules/CMTAT/contracts/modules/internal/ERC20EnforcementModuleInternal.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "../../interfaces/tokenization/draft-IERC7551.sol",
+        "../../interfaces/tokenization/draft-IERC7943.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20EnforcementModuleInternal"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/modules/wrapper/core/VersionModule.sol": {
+      "lastModificationDate": 1772459546426,
+      "contentHash": "4af91ba785f181981e1268c232b14b85",
+      "sourceName": "submodules/CMTAT/contracts/modules/wrapper/core/VersionModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../interfaces/tokenization/IERC3643Partial.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "VersionModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/modules/ISnapshotEngineModule.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "ec69626a48da76066d41f3f4db969cd2",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/modules/ISnapshotEngineModule.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../engine/ISnapshotEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ISnapshotEngineModule"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/engine/IRuleEngine.sol": {
+      "lastModificationDate": 1772459546422,
+      "contentHash": "bf5ef8bc7a23532d8b6e2ed7868e8e74",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/engine/IRuleEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../tokenization/draft-IERC1404.sol",
+        "../tokenization/IERC3643Partial.sol",
+        "../tokenization/draft-IERC7551.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IRuleEngine",
+        "IRuleEngineERC1404"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol": {
+      "lastModificationDate": 1772459546423,
+      "contentHash": "706d1f3f1a70df1f417ca6364644b609",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1404",
+        "IERC1404Extend"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1766069901995,
+      "contentHash": "def1e8f7b6cac577cf2600655bf3bdf8",
+      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.4"
+      ],
+      "artifacts": [
+        "IAccessControl"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/IGetCCIPAdmin.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "37c38e91ba8a34180ed695b87ae74b20",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/IGetCCIPAdmin.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IGetCCIPAdmin"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/submodules/CMTAT/contracts/interfaces/technical/IERC7802.sol": {
+      "lastModificationDate": 1765380322373,
+      "contentHash": "cb49ec9db8c7469e9ce2bb36c285a3a2",
+      "sourceName": "submodules/CMTAT/contracts/interfaces/technical/IERC7802.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC7802"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol": {
+      "lastModificationDate": 1766069901858,
+      "contentHash": "543c7d0cdce14c010ad355b8c2009843",
+      "sourceName": "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/ContextUpgradeable.sol",
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC2771ContextUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/interfaces/IPolicy.sol": {
+      "lastModificationDate": 1772459626777,
+      "contentHash": "3c9a654f0cad313a858aacf0a775e57c",
+      "sourceName": "@chainlink/policy-management/interfaces/IPolicy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IPolicyEngine.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPolicy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/policies/PausePolicy.sol": {
+      "lastModificationDate": 1772459626780,
+      "contentHash": "992ce50e5f32be205fea4a4f95cdd2d5",
+      "sourceName": "@chainlink/policy-management/policies/PausePolicy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "@chainlink/policy-management/core/Policy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PausePolicy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/core/Policy.sol": {
+      "lastModificationDate": 1772459626781,
+      "contentHash": "c66020704945f11b9f641d0f9f73d44f",
+      "sourceName": "@chainlink/policy-management/core/Policy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IPolicy.sol",
+        "../interfaces/IPolicyEngine.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Policy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/policies/RoleBasedAccessControlPolicy.sol": {
+      "lastModificationDate": 1772459626816,
+      "contentHash": "7d82a4251acf561d52a39156b31704a4",
+      "sourceName": "@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol",
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "@chainlink/policy-management/core/Policy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "RoleBasedAccessControlPolicy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/standard/CCTBaseERC2771.sol": {
+      "lastModificationDate": 1773194165430,
+      "contentHash": "fb7347980991cf1508a4ae961f2efae3",
+      "sourceName": "contracts/modules/standard/CCTBaseERC2771.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./CCTCommon.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol",
+        "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTBaseERC2771"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/standard/CCTCommon.sol": {
+      "lastModificationDate": 1774274316443,
+      "contentHash": "82a316900bcabd9b0ba789247a876cbe",
+      "sourceName": "contracts/modules/standard/CCTCommon.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/interfaces/IERC165.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/VersionModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BaseModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ExtraInformationModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/DocumentEngineModule.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/SnapshotEngineModule.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/IERC5679.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/IMintBurnToken.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol",
+        "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "CCTCommon"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/lite/ComplianceTokenCMTATLiteUpgradeable.sol": {
+      "lastModificationDate": 1773194235136,
+      "contentHash": "5bfdcc3f6f5fdf16c9dd07dcb56f6be0",
+      "sourceName": "contracts/deployment/lite/ComplianceTokenCMTATLiteUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../modules/lite/CCTCMTATBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATLiteUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/standard/ComplianceTokenCMTATStandalone.sol": {
+      "lastModificationDate": 1773194231902,
+      "contentHash": "7272750d9801ffc77a6ea8ef7a5b64ca",
+      "sourceName": "contracts/deployment/standard/ComplianceTokenCMTATStandalone.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../modules/standard/CCTBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATStandalone"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/lite/ComplianceTokenCMTATLiteUUPSUpgradeable.sol": {
+      "lastModificationDate": 1773194233701,
+      "contentHash": "bca3a4fe60dac7968dc0b1bb7158e100",
+      "sourceName": "contracts/deployment/lite/ComplianceTokenCMTATLiteUUPSUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
+        "../../modules/lite/CCTCMTATBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATLiteUUPSUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "lastModificationDate": 1766069902035,
+      "contentHash": "59a325652a58784f0c3050d8b71f8595",
+      "sourceName": "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../interfaces/draft-IERC1822.sol",
+        "../ERC1967/ERC1967Utils.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.22"
+      ],
+      "artifacts": [
+        "UUPSUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/interfaces/draft-IERC1822.sol": {
+      "lastModificationDate": 1766069901939,
+      "contentHash": "9b2cafd2153b51bcfd7f4cb4cfc975aa",
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC1822.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": [
+        "IERC1822Proxiable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+      "lastModificationDate": 1766069901956,
+      "contentHash": "2741625b983eb412cfdd8aa55a7671c1",
+      "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../beacon/IBeacon.sol",
+        "../../interfaces/IERC1967.sol",
+        "../../utils/Address.sol",
+        "../../utils/StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.21"
+      ],
+      "artifacts": [
+        "ERC1967Utils"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/utils/Address.sol": {
+      "lastModificationDate": 1766069901916,
+      "contentHash": "44f61b7a5cd41aa205efaebb4686f797",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol",
+        "./LowLevelCall.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/utils/StorageSlot.sol": {
+      "lastModificationDate": 1766069902031,
+      "contentHash": "e656d64c4ce918f3d13030b91c935134",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/proxy/beacon/IBeacon.sol": {
+      "lastModificationDate": 1766069901997,
+      "contentHash": "ee2e46607ed2be58bd554306d068acba",
+      "sourceName": "@openzeppelin/contracts/proxy/beacon/IBeacon.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.16"
+      ],
+      "artifacts": [
+        "IBeacon"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/interfaces/IERC1967.sol": {
+      "lastModificationDate": 1766069902005,
+      "contentHash": "3c9577899f440b0c66e880c96e9250bb",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC1967.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.11"
+      ],
+      "artifacts": [
+        "IERC1967"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/utils/Errors.sol": {
+      "lastModificationDate": 1766069901983,
+      "contentHash": "6b5eac2b85500c3012977849cfd633d8",
+      "sourceName": "@openzeppelin/contracts/utils/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Errors"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@openzeppelin/contracts/utils/LowLevelCall.sol": {
+      "lastModificationDate": 1766069902019,
+      "contentHash": "6ecbbd3c1163c0354a61dd03a9e2df41",
+      "sourceName": "@openzeppelin/contracts/utils/LowLevelCall.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "LowLevelCall"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/standard/ComplianceTokenCMTATUUPSUpgradeable.sol": {
+      "lastModificationDate": 1773194316869,
+      "contentHash": "3099216b7c8b3439027cd5b928aff3f8",
+      "sourceName": "contracts/deployment/standard/ComplianceTokenCMTATUUPSUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
+        "../../modules/standard/CCTBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATUUPSUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/policies/SecureMintPolicy.sol": {
+      "lastModificationDate": 1772459626818,
+      "contentHash": "91b94368f3c881c9e6f2f09e80f209db",
+      "sourceName": "@chainlink/policy-management/policies/SecureMintPolicy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol",
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "@chainlink/policy-management/core/Policy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SecureMintPolicy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+      "lastModificationDate": 1766069902084,
+      "contentHash": "64a3f906dc7696aa3c9fa8454b673be7",
+      "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AggregatorV3Interface"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol": {
+      "lastModificationDate": 1766069902084,
+      "contentHash": "a045cdf1098c0a0735bee2f727fee0aa",
+      "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./AggregatorInterface.sol",
+        "./AggregatorV3Interface.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AggregatorV2V3Interface"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorInterface.sol": {
+      "lastModificationDate": 1766069902083,
+      "contentHash": "1739f42cb7ceb036e6fd94b9d9990506",
+      "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorInterface.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AggregatorInterface"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol": {
+      "lastModificationDate": 1766069902183,
+      "contentHash": "964c2024720c0de4d9ed9fa3907afa75",
+      "sourceName": "@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../shared/interfaces/AggregatorV2V3Interface.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MockV3Aggregator"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/demo/DemoImports.sol": {
+      "lastModificationDate": 1774274086297,
+      "contentHash": "99ddca216683da05d40abeeda9bec86b",
+      "sourceName": "contracts/modules/demo/DemoImports.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "@chainlink/policy-management/core/PolicyEngine.sol",
+        "@chainlink/policy-management/policies/PausePolicy.sol",
+        "@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol",
+        "@chainlink/policy-management/policies/SecureMintPolicy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": []
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/deployment/standard/ComplianceTokenCMTATUpgradeable.sol": {
+      "lastModificationDate": 1773194356004,
+      "contentHash": "e6c4ed0f2b2c06b821bfd0cedbd72e6f",
+      "sourceName": "contracts/deployment/standard/ComplianceTokenCMTATUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../modules/standard/CCTBaseERC2771.sol",
+        "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ComplianceTokenCMTATUpgradeable"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/interfaces/IExtractor.sol": {
+      "lastModificationDate": 1772459626774,
+      "contentHash": "4d95ec851df33f26d940217cc7dd38e2",
+      "sourceName": "@chainlink/policy-management/interfaces/IExtractor.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IPolicyEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IExtractor"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/chainlink-ace-modified/MintBurnExtractor.sol": {
+      "lastModificationDate": 1773919134544,
+      "contentHash": "c114e6e6d1f5ac2bc98f3befb0dd6cf6",
+      "sourceName": "contracts/modules/chainlink-ace-modified/MintBurnExtractor.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/policy-management/interfaces/IExtractor.sol",
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "MintBurnExtractor"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/chainlink-ace-modified/TransferValidationPolicy.sol": {
+      "lastModificationDate": 1774273499551,
+      "contentHash": "90a7af87beb542de12133ada98285baa",
+      "sourceName": "contracts/modules/chainlink-ace-modified/TransferValidationPolicy.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "@chainlink/policy-management/core/Policy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "TransferValidationPolicy"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/interfaces/IMapper.sol": {
+      "lastModificationDate": 1772459626775,
+      "contentHash": "98e8d930c6842010115b094d00992270",
+      "sourceName": "@chainlink/policy-management/interfaces/IMapper.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IPolicyEngine.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IMapper"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/node_modules/@chainlink/ace/packages/policy-management/src/core/PolicyEngine.sol": {
+      "lastModificationDate": 1772459626781,
+      "contentHash": "d715c518edd01695a4ab46df576c7ab8",
+      "sourceName": "@chainlink/policy-management/core/PolicyEngine.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IExtractor.sol",
+        "../interfaces/IMapper.sol",
+        "../interfaces/IPolicy.sol",
+        "./Policy.sol",
+        "../interfaces/IPolicyEngine.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PolicyEngine"
+      ]
+    },
+    "/Users/mark/dev/projects/cmta/CMTAT-ACE/contracts/modules/chainlink-ace-modified/PolicyProtectedUpgradeable.sol": {
+      "lastModificationDate": 1774274299113,
+      "contentHash": "80fd81dcbb18e58dc5c40a346d169def",
+      "sourceName": "contracts/modules/chainlink-ace-modified/PolicyProtectedUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 50
+          },
+          "evmVersion": "prague",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/policy-management/interfaces/IPolicyEngine.sol",
+        "@chainlink/policy-management/interfaces/IPolicyProtected.sol",
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PolicyProtectedUpgradeable"
+      ]
+    }
+  }
+}

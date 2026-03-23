@@ -2,20 +2,20 @@
 
 pragma solidity ^0.8.20;
 
-import {CCTCMTATBaseERC2771} from "../modules/lite/CCTCMTATBaseERC2771.sol";
-import {ICMTATConstructor} from "../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ERC2771Module} from "../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+import {CCTBaseERC2771} from "../../modules/standard/CCTBaseERC2771.sol";
+import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
+import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+
 
 /**
- * @title ComplianceTokenCMTATLite
+ * @title ComplianceTokenCMTATStandalone
  * @author Chainlink
- * @notice Standalone Compliance Token contract with Chainlink ACE policy validation on CMTA transfers
+ * @notice Standalone ComplianceToken contract with Chainlink ACE policy validation on all public functions
  */
-contract ComplianceTokenCMTATLiteStandalone is CCTCMTATBaseERC2771 {
+contract ComplianceTokenCMTATStandalone is CCTBaseERC2771 {
     /**
      * @notice Contract version for standalone deployment
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
-     * @param admin address of the admin of contract (Access Control)
      * @param ERC20Attributes_ ERC20 name, symbol and decimals
      * @param extraInformationAttributes_ tokenId, terms, information
      * @param snapshotEngine_ address of the snapshot engine
@@ -24,15 +24,15 @@ contract ComplianceTokenCMTATLiteStandalone is CCTCMTATBaseERC2771 {
      */
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
-        address forwarderIrrevocable,
-        address admin,
+        address forwarderIrrevocable_,
+        address admin_,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
         address policyEngine_
-    ) ERC2771Module(forwarderIrrevocable) {
+    ) ERC2771Module(forwarderIrrevocable_) {
         // Initialize the contract to avoid front-running
         initialize(
-            admin,
+            admin_,
             ERC20Attributes_,
             extraInformationAttributes_,
             policyEngine_
