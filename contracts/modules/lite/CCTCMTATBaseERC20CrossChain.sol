@@ -14,6 +14,12 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModule, CCTCMTATBaseERC1404  {
 
     /* ============  State Functions ============ */
+    /**
+    * @dev revert if the contract is in pause state
+    */
+    function approve(address spender, uint256 value) public virtual override(ERC20Upgradeable) whenNotPaused returns (bool) {
+        return ERC20Upgradeable.approve(spender, value);
+    }
     function transfer(address to, uint256 value) public virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (bool) {
          return CMTATBaseCommon.transfer(to, value);
     }

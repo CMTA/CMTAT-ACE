@@ -109,15 +109,12 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
 
     /* ============ State functions ============ */
     function _transferred(address spender, address from, address to, uint256 /* value */) internal virtual returns (bool) {
-        if(!_canTransferGenericByModuleAndRevert(spender, from, to)) {
-            return false;
-        } else {
-             IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
-             if (address(policyEngine_) != address(0)){
-                bytes memory context = getContext();
-                policyEngine_.run(
-                    IPolicyEngine.Payload({selector: msg.sig, sender: msg.sender, data: msg.data[4:], context: context}));
-            }
+        _canTransferGenericByModuleAndRevert(spender, from, to);
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        if (address(policyEngine_) != address(0)){
+            bytes memory context = getContext();
+            policyEngine_.run(
+                IPolicyEngine.Payload({selector: msg.sig, sender: msg.sender, data: msg.data[4:], context: context}));
         }
         return true;
     }
