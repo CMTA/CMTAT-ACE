@@ -93,7 +93,7 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
         if (address(policyEngine_) != address(0)) {
             bytes memory context = getContext();
             try policyEngine_.check(
-                IPolicyEngine.Payload({selector: msg.sig, sender: msg.sender, data: msg.data[4:], context: context})
+                IPolicyEngine.Payload({selector: msg.sig, sender: _msgSender(), data: msg.data[4:], context: context})
             ) 
             {
                 return true;
@@ -114,7 +114,7 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
         if (address(policyEngine_) != address(0)){
             bytes memory context = getContext();
             policyEngine_.run(
-                IPolicyEngine.Payload({selector: msg.sig, sender: msg.sender, data: msg.data[4:], context: context}));
+                IPolicyEngine.Payload({selector: msg.sig, sender: _msgSender(), data: msg.data[4:], context: context}));
         }
         return true;
     }
