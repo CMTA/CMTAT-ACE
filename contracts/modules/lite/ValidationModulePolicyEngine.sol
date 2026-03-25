@@ -115,6 +115,9 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
             bytes memory context = getContext();
             policyEngine_.run(
                 IPolicyEngine.Payload({selector: msg.sig, sender: _msgSender(), data: msg.data[4:], context: context}));
+            if (context.length > 0) {
+                clearContext();
+            }
         }
         return true;
     }
