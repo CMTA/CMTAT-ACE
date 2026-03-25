@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { MINTER_ROLE, BURNER_ROLE } = require('../../deploymentUtils')
+const { MINTER_ROLE } = require('../../deploymentUtils')
 
 /**
  * Tests RoleBasedAccessControlPolicy behavior on standard (PolicyEngine-based) contracts.

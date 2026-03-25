@@ -4,8 +4,7 @@ const {
   fixture,
   loadFixture,
   deployPolicyEngine,
-  deployCCTLiteUUPSUpgradeable,
-  DEFAULT_ADMIN_ROLE
+  deployCCTLiteUUPSUpgradeable
 } = require('../deploymentUtils')
 
 // Reuse CMTAT common modules
