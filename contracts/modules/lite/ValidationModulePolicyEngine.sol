@@ -3,8 +3,9 @@
 pragma solidity ^0.8.20;
 
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
-import {PolicyProtectedUpgradeable} from "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
 abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyProtectedUpgradeable {
@@ -69,32 +70,42 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
         }
     }
 
-    // Note: parameters are kept to retain the interface, even if not used
     function _canTransferFromWithPolicyEngine(
-        address /* spender */,
-        address /* from */,
-        address /* to */,
-        uint256 /* value*/
+        address spender,
+        address from,
+        address to,
+        uint256 value
     ) internal view virtual returns (bool) {
-        return _tryRunPolicies();
+        return _tryCheckPolicies(
+            IERC20.transferFrom.selector,
+            spender,
+            abi.encode(from, to, value)
+        );
     }
 
-    // Note: parameters are kept to retain the interface, even if not used
     function _canTransferWithPolicyEngine(
-        address /* from */,
-        address /* to */,
-        uint256 /* value */
+        address from,
+        address to,
+        uint256 value
     ) internal view virtual returns (bool) {
-        return _tryRunPolicies();
+        return _tryCheckPolicies(
+            IERC20.transfer.selector,
+            from,
+            abi.encode(to, value)
+        );
     }
 
-    function _tryRunPolicies() internal view returns(bool) {
+    function _tryCheckPolicies(
+        bytes4 selector,
+        address sender,
+        bytes memory data
+    ) internal view returns (bool) {
         IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
         if (address(policyEngine_) != address(0)) {
             bytes memory context = getContext();
             try policyEngine_.check(
-                IPolicyEngine.Payload({selector: msg.sig, sender: _msgSender(), data: msg.data[4:], context: context})
-            ) 
+                IPolicyEngine.Payload({selector: selector, sender: sender, data: data, context: context})
+            )
             {
                 return true;
             }

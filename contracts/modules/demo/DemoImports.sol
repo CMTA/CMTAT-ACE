@@ -10,4 +10,5 @@ import {PolicyEngine} from "@chainlink/policy-management/core/PolicyEngine.sol";
 import {PausePolicy} from "@chainlink/policy-management/policies/PausePolicy.sol";
 import {RoleBasedAccessControlPolicy} from "@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol";
 import {SecureMintPolicy} from "@chainlink/policy-management/policies/SecureMintPolicy.sol";
+import {ERC20TransferExtractor} from "@chainlink/policy-management/extractors/ERC20TransferExtractor.sol";
     

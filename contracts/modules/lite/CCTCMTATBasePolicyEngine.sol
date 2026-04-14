@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import {CMTATBaseCommon, CMTATBaseAccessControl} from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
-import {PolicyProtectedUpgradeable} from "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";

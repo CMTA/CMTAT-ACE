@@ -10,7 +10,7 @@ import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper
 /**
  * @title ComplianceTokenCMTATLiteUUPSUpgradeable
  * @author Chainlink
- * @notice UUPS upgradeable Lite ComplianceToken contract with Chainlink ACE policy validation on CMTA transfers
+ * @notice UUPS upgradeable lite ComplianceToken contract with Chainlink ACE policy validation on CMTA transfers
  */
 contract ComplianceTokenCMTATLiteUUPSUpgradeable is CCTCMTATBaseERC2771, UUPSUpgradeable {
     bytes32 public constant PROXY_UPGRADE_ROLE = keccak256("PROXY_UPGRADE_ROLE");

@@ -9,7 +9,7 @@ import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper
 /**
  * @title ComplianceTokenCMTATLite
  * @author Chainlink
- * @notice Standalone Compliance Token contract with Chainlink ACE policy validation on CMTA transfers
+ * @notice Standalone upgradeable lite Compliance Token contract with Chainlink ACE policy validation on CMTA transfers
  */
 contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC2771 {
     /**
@@ -29,5 +29,8 @@ contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC2771 {
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
         address policyEngine_
-    ) ERC2771Module(forwarderIrrevocable) {}
+    ) ERC2771Module(forwarderIrrevocable) {
+        // Disable the possibility to initialize the implementation
+        _disableInitializers();
+    }
 }

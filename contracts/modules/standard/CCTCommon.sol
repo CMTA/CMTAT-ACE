@@ -28,7 +28,7 @@ import {IBurnMintERC20} from "../../../submodules/CMTAT/contracts/interfaces/tec
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
-import {PolicyProtectedUpgradeable} from "../chainlink-ace-modified/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
 
 
 abstract contract CCTCommon is 

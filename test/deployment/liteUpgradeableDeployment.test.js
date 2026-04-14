@@ -14,6 +14,9 @@ const ERC20BurnModuleCommon = require('../../submodules/CMTAT/test/common/ERC20B
 const ERC20BaseModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BaseModuleCommon')
 const EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/EnforcementModuleCommon')
 const ERC20EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/ERC20EnforcementModuleCommon')
+const VersionModuleCommon = require('../../submodules/CMTAT/test/common/VersionModuleCommon')
+const ERC20CrossChainModuleCommon = require('../../submodules/CMTAT/test/common/ERC20CrossChainModuleCommon')
+const CCIPModuleCommon = require('../../submodules/CMTAT/test/common/CCIPModuleCommon')
 
 describe('ComplianceTokenCMTATLiteUpgradeable', function () {
   beforeEach(async function () {
@@ -44,6 +47,7 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
   })
 
   // Core CMTAT commons
+  VersionModuleCommon()
   PauseModuleCommon()
   ERC20MintModuleCommon()
   ERC20BurnModuleCommon()
@@ -52,4 +56,8 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
 
   // Extensions
   ERC20EnforcementModuleCommon()
+
+  // options
+  ERC20CrossChainModuleCommon()
+  CCIPModuleCommon()
 })

@@ -17,6 +17,9 @@ const BURNER_SELF_ROLE = ethers.keccak256(ethers.toUtf8Bytes('BURNER_SELF_ROLE')
 const PAUSER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('PAUSER_ROLE'))
 const ENFORCER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ENFORCER_ROLE'))
 const ERC20ENFORCER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ERC20ENFORCER_ROLE'))
+const DOCUMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes('DOCUMENT_ROLE'))
+const SNAPSHOOTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('SNAPSHOOTER_ROLE'))
+const CROSS_CHAIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes('CROSS_CHAIN_ROLE'))
 const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 /**
@@ -208,6 +211,9 @@ module.exports = {
   PAUSER_ROLE,
   ENFORCER_ROLE,
   ERC20ENFORCER_ROLE,
+  DOCUMENT_ROLE,
+  SNAPSHOOTER_ROLE,
+  CROSS_CHAIN_ROLE,
   DEFAULT_ADMIN_ROLE,
   fixture,
   loadFixture,

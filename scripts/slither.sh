@@ -10,7 +10,7 @@ mkdir -p "$REPORTS_DIR"
 
 # Compile first so Slither can skip its own compile step
 echo "Compiling contracts..."
-npx hardhat compile
+forge build
 
 echo "Running Slither analysis..."
 

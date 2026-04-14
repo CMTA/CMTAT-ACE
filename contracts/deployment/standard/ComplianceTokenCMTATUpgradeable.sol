@@ -19,5 +19,8 @@ contract ComplianceTokenCMTATUpgradeable is CCTBaseERC2771 {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(
         address forwarderIrrevocable
-    ) ERC2771Module(forwarderIrrevocable) {}
+    ) ERC2771Module(forwarderIrrevocable) {
+        // Disable the possibility to initialize the implementation
+        _disableInitializers();
+    }
 }

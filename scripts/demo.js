@@ -9,6 +9,10 @@
  *   5. MintBurnExtractor
  *   6. SecureMintPolicy (proxy) – added to mint function
  *   7. MockV3Aggregator (Hardhat-only reserve price feed for SecureMint)
+ *   8. ERC20TransferExtractor – set for transfer()
+ *   9. ERC20TransferFromExtractor – set for transferFrom()
+ *  10. MaxAmountRule + RestrictedAddressRule (mock IRule contracts)
+ *  11. TransferValidationPolicy (proxy) – added to transfer() and transferFrom()
  *
  * Script example - do not use it for production
  */
@@ -259,6 +263,95 @@ async function main() {
   console.log("SecureMint policy added for mint selector");
 
   /* ============================================================
+   * 11b. Deploy ERC20TransferExtractor + ERC20TransferFromExtractor
+   * ============================================================ */
+  console.log("\n--- Step 11b: Deploy Transfer Extractors ---");
+
+  const ERC20ExtractorFactory = await ethers.getContractFactory("ERC20TransferExtractor");
+  const erc20TransferExtractor = await ERC20ExtractorFactory.deploy();
+  await erc20TransferExtractor.waitForDeployment();
+  const erc20TransferExtractorAddress = await erc20TransferExtractor.getAddress();
+  console.log("ERC20TransferExtractor deployed to:", erc20TransferExtractorAddress);
+
+  const ERC20FromExtractorFactory = await ethers.getContractFactory("ERC20TransferFromExtractor");
+  const erc20TransferFromExtractor = await ERC20FromExtractorFactory.deploy();
+  await erc20TransferFromExtractor.waitForDeployment();
+  const erc20TransferFromExtractorAddress = await erc20TransferFromExtractor.getAddress();
+  console.log("ERC20TransferFromExtractor deployed to:", erc20TransferFromExtractorAddress);
+
+  /* ============================================================
+   * 11c. Deploy mock rules + TransferValidationPolicy
+   * ============================================================ */
+  console.log("\n--- Step 11c: Deploy TransferValidationPolicy with mock rules ---");
+
+  // Deploy MaxAmountRule (max 1000 tokens)
+  const MaxAmountRuleFactory = await ethers.getContractFactory("MaxAmountRule");
+  const maxTransferAmount = 1000n * 10n ** BigInt(tokenDecimals);
+  const maxAmountRule = await MaxAmountRuleFactory.deploy(maxTransferAmount);
+  await maxAmountRule.waitForDeployment();
+  const maxAmountRuleAddress = await maxAmountRule.getAddress();
+  console.log("MaxAmountRule deployed to:", maxAmountRuleAddress, `(max: ${maxTransferAmount})`);
+
+  // Deploy RestrictedAddressRule (no initially restricted addresses)
+  const RestrictedAddressRuleFactory = await ethers.getContractFactory("RestrictedAddressRule");
+  const restrictedAddressRule = await RestrictedAddressRuleFactory.deploy([]);
+  await restrictedAddressRule.waitForDeployment();
+  const restrictedAddressRuleAddress = await restrictedAddressRule.getAddress();
+  console.log("RestrictedAddressRule deployed to:", restrictedAddressRuleAddress);
+
+  // Deploy TransferValidationPolicy with both rules
+  const transferPolicyConfigParams = abiCoder.encode(
+    ["address[]"],
+    [[maxAmountRuleAddress, restrictedAddressRuleAddress]]
+  );
+  const TransferPolicyFactory = await ethers.getContractFactory("TransferValidationPolicy");
+  const transferPolicy = await upgrades.deployProxy(
+    TransferPolicyFactory,
+    [policyEngineAddress, admin, transferPolicyConfigParams],
+    { initializer: "initialize", unsafeAllow: ["constructor", "missing-initializer", "missing-initializer-call"], silenceWarnings: true }
+  );
+  await transferPolicy.waitForDeployment();
+  const transferPolicyAddress = await transferPolicy.getAddress();
+  console.log("TransferValidationPolicy deployed to:", transferPolicyAddress);
+
+  /* ============================================================
+   * 11d. Set extractors and add TransferValidationPolicy
+   * ============================================================ */
+  console.log("\n--- Step 11d: Register extractors & TransferValidationPolicy ---");
+
+  // Set ERC20TransferExtractor for transfer()
+  await policyEngine.connect(deployer).setExtractor(selectors.transfer, erc20TransferExtractorAddress);
+  console.log("ERC20TransferExtractor set for transfer selector");
+
+  // Set ERC20TransferFromExtractor for transferFrom()
+  await policyEngine.connect(deployer).setExtractor(selectors.transferFrom, erc20TransferFromExtractorAddress);
+  console.log("ERC20TransferFromExtractor set for transferFrom selector");
+
+  // Parameter name constants
+  const PARAM_SPENDER = keccak256(toUtf8Bytes("spender"));
+  const PARAM_FROM = keccak256(toUtf8Bytes("from"));
+  const PARAM_TO = keccak256(toUtf8Bytes("to"));
+  const PARAM_AMOUNT_TRANSFER = keccak256(toUtf8Bytes("amount"));
+
+  // Add TransferValidationPolicy to transfer() — expects [from, to, amount]
+  await policyEngine.connect(deployer).addPolicy(
+    cmtatAddress,
+    selectors.transfer,
+    transferPolicyAddress,
+    [PARAM_FROM, PARAM_TO, PARAM_AMOUNT_TRANSFER]
+  );
+  console.log("TransferValidationPolicy added for transfer (3 params: from, to, amount)");
+
+  // Add TransferValidationPolicy to transferFrom() — expects [spender, from, to, amount]
+  await policyEngine.connect(deployer).addPolicy(
+    cmtatAddress,
+    selectors.transferFrom,
+    transferPolicyAddress,
+    [PARAM_SPENDER, PARAM_FROM, PARAM_TO, PARAM_AMOUNT_TRANSFER]
+  );
+  console.log("TransferValidationPolicy added for transferFrom (4 params: spender, from, to, amount)");
+
+  /* ============================================================
    * 12. Grant operation allowances on RBAC policy
    * ============================================================ */
   console.log("\n--- Step 12: Grant RBAC operation allowances ---");
@@ -308,6 +401,7 @@ async function main() {
   const pausePolicyImpl = await upgrades.erc1967.getImplementationAddress(pausePolicyAddress);
   const rbacPolicyImpl = await upgrades.erc1967.getImplementationAddress(rbacPolicyAddress);
   const secureMintPolicyImpl = await upgrades.erc1967.getImplementationAddress(secureMintPolicyAddress);
+  const transferPolicyImpl = await upgrades.erc1967.getImplementationAddress(transferPolicyAddress);
 
   // PolicyEngine uses Transparent Proxy, so it also has a ProxyAdmin
   const policyEngineAdmin = await upgrades.erc1967.getAdminAddress(policyEngineAddress);
@@ -321,12 +415,14 @@ async function main() {
   console.log("PausePolicy (proxy):        ", pausePolicyAddress);
   console.log("RBAC Policy (proxy):        ", rbacPolicyAddress);
   console.log("SecureMint Policy (proxy):  ", secureMintPolicyAddress);
+  console.log("Transfer Policy (proxy):    ", transferPolicyAddress);
 
   console.log("\n--- Implementation Contracts ---");
   console.log("PolicyEngine (impl):        ", policyEngineImpl);
   console.log("PausePolicy (impl):         ", pausePolicyImpl);
   console.log("RBAC Policy (impl):         ", rbacPolicyImpl);
   console.log("SecureMint Policy (impl):   ", secureMintPolicyImpl);
+  console.log("Transfer Policy (impl):     ", transferPolicyImpl);
 
   console.log("\n--- Proxy Admin ---");
   console.log("PolicyEngine ProxyAdmin:    ", policyEngineAdmin);
@@ -334,6 +430,10 @@ async function main() {
   console.log("\n--- Non-Proxy Contracts ---");
   console.log("Token (Standalone):         ", cmtatAddress);
   console.log("MintBurn Extractor:         ", extractorAddress);
+  console.log("ERC20Transfer Extractor:    ", erc20TransferExtractorAddress);
+  console.log("ERC20TransferFrom Extractor:", erc20TransferFromExtractorAddress);
+  console.log("MaxAmountRule:              ", maxAmountRuleAddress);
+  console.log("RestrictedAddressRule:      ", restrictedAddressRuleAddress);
   console.log("Mock Reserve Feed:          ", mockFeedAddress);
 
   console.log("\n--- Configuration ---");
@@ -344,7 +444,10 @@ async function main() {
   console.log("  - PausePolicy protects ALL listed external functions (initially unpaused)");
   console.log("  - RBAC policy protects ALL listed external functions");
   console.log("  - SecureMint policy protects mint() (reserve-backed minting)");
-  console.log("  - Policy execution order per function: PausePolicy → RBAC → (SecureMint on mint)");
+  console.log("  - TransferValidationPolicy protects transfer() and transferFrom()");
+  console.log("    → MaxAmountRule: max", maxTransferAmount.toString(), "raw units per transfer");
+  console.log("    → RestrictedAddressRule: no addresses initially restricted");
+  console.log("  - Policy execution order per function: PausePolicy → RBAC → (SecureMint on mint) → (TransferValidation on transfer/transferFrom)");
   console.log("  - Admin has MINTER, BURNER, BURNER_FROM, ENFORCER, ERC20ENFORCER roles");
   console.log("========================================");
 }
