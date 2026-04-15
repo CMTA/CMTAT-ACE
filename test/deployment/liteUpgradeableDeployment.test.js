@@ -1,85 +1,87 @@
-const { ethers } = require('hardhat')
-const { expect } = require('chai')
-const {
-  loadFixture,
-  deployCCTLiteUpgradeable,
-  createLiteFixture
-} = require('../deploymentUtils')
+const { ethers } = require('hardhat');
+const { expect } = require('chai');
+const { loadFixture, deployCCTLiteUpgradeable, createLiteFixture } = require('../deploymentUtils');
 
 // Reuse CMTAT common modules
-const PauseModuleCommon = require('../../submodules/CMTAT/test/common/PauseModuleCommon')
-const ERC20MintModuleCommon = require('../../submodules/CMTAT/test/common/ERC20MintModuleCommon')
-const ERC20BurnModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BurnModuleCommon')
-const ERC20BaseModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BaseModuleCommon')
-const EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/EnforcementModuleCommon')
-const ERC20EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/ERC20EnforcementModuleCommon')
-const VersionModuleCommon = require('../../submodules/CMTAT/test/common/VersionModuleCommon')
-const ERC20CrossChainModuleCommon = require('../../submodules/CMTAT/test/common/ERC20CrossChainModuleCommon')
-const CCIPModuleCommon = require('../../submodules/CMTAT/test/common/CCIPModuleCommon')
-const ExtraInfoModuleCommon = require('../../submodules/CMTAT/test/common/ExtraInfoModuleCommon')
-const DocumentModuleCommon = require('../../submodules/CMTAT/test/common/DocumentModule/DocumentModuleCommon')
-const SnapshotModuleCommon = require('../common/cmtat/SnapshotModuleCommon')
+const PauseModuleCommon = require('../../submodules/CMTAT/test/common/PauseModuleCommon');
+const ERC20MintModuleCommon = require('../../submodules/CMTAT/test/common/ERC20MintModuleCommon');
+const ERC20BurnModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BurnModuleCommon');
+const ERC20BaseModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BaseModuleCommon');
+const EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/EnforcementModuleCommon');
+const ERC20EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/ERC20EnforcementModuleCommon');
+const VersionModuleCommon = require('../../submodules/CMTAT/test/common/VersionModuleCommon');
+const ERC20CrossChainModuleCommon = require('../../submodules/CMTAT/test/common/ERC20CrossChainModuleCommon');
+const CCIPModuleCommon = require('../../submodules/CMTAT/test/common/CCIPModuleCommon');
+const ExtraInfoModuleCommon = require('../../submodules/CMTAT/test/common/ExtraInfoModuleCommon');
+const DocumentModuleCommon = require('../../submodules/CMTAT/test/common/DocumentModule/DocumentModuleCommon');
+const SnapshotModuleCommon = require('../common/cmtat/SnapshotModuleCommon');
 // Snapshot scheduling & global modules from CMTAT
-const SnapshotModuleCommonScheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonScheduling')
-const SnapshotModuleCommonRescheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonRescheduling')
-const SnapshotModuleCommonUnschedule = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonUnschedule')
-const SnapshotModuleCommonGetNextSnapshot = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonGetNextSnapshot')
-const SnapshotModuleMultiplePlannedTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleMultiplePlannedTest')
-const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleOnePlannedSnapshotTest')
-const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot')
+const SnapshotModuleCommonScheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonScheduling');
+const SnapshotModuleCommonRescheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonRescheduling');
+const SnapshotModuleCommonUnschedule = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonUnschedule');
+const SnapshotModuleCommonGetNextSnapshot = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonGetNextSnapshot');
+const SnapshotModuleMultiplePlannedTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleMultiplePlannedTest');
+const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleOnePlannedSnapshotTest');
+const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot');
 
-const liteFixture = createLiteFixture(deployCCTLiteUpgradeable)
+const liteFixture = createLiteFixture(deployCCTLiteUpgradeable);
 
 describe('ComplianceTokenCMTATLiteUpgradeable', function () {
   beforeEach(async function () {
-    Object.assign(this, await loadFixture(liteFixture))
-  })
+    Object.assign(this, await loadFixture(liteFixture));
+  });
 
   // Proxy-specific
   context('Re-initialization', function () {
     it('testCannotBeReinitialized', async function () {
-      const policyEngineAddress = await this.policyEngine.getAddress()
+      const policyEngineAddress = await this.policyEngine.getAddress();
       await expect(
-        this.cmtat.connect(this.admin).initialize(
-          this.admin.address,
-          ['CMTA Token', 'CMTAT', 0],
-          ['CMTAT_ISIN', ['doc1', 'https://example.com/doc1', ethers.keccak256(ethers.toUtf8Bytes('h'))], 'CMTAT_info'],
-          policyEngineAddress,
-          ethers.ZeroAddress,
-          ethers.ZeroAddress
-        )
-      ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization')
-    })
-  })
+        this.cmtat
+          .connect(this.admin)
+          .initialize(
+            this.admin.address,
+            ['CMTA Token', 'CMTAT', 0],
+            [
+              'CMTAT_ISIN',
+              ['doc1', 'https://example.com/doc1', ethers.keccak256(ethers.toUtf8Bytes('h'))],
+              'CMTAT_info',
+            ],
+            policyEngineAddress,
+            ethers.ZeroAddress,
+            ethers.ZeroAddress,
+          ),
+      ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization');
+    });
+  });
 
   // Core CMTAT commons
-  VersionModuleCommon()
-  PauseModuleCommon()
-  ERC20MintModuleCommon()
-  ERC20BurnModuleCommon()
-  ERC20BaseModuleCommon()
-  EnforcementModuleCommon()
+  VersionModuleCommon();
+  PauseModuleCommon();
+  ERC20MintModuleCommon();
+  ERC20BurnModuleCommon();
+  ERC20BaseModuleCommon();
+  EnforcementModuleCommon();
 
   // Extensions
-  ERC20EnforcementModuleCommon()
+  ERC20EnforcementModuleCommon();
 
   // options
-  ERC20CrossChainModuleCommon()
-  CCIPModuleCommon()
+  ERC20CrossChainModuleCommon();
+  CCIPModuleCommon();
 
   // Extensions
-  ExtraInfoModuleCommon()
+  ExtraInfoModuleCommon();
 
   // Engines
-  DocumentModuleCommon()
-  SnapshotModuleCommon()
+  DocumentModuleCommon();
+  SnapshotModuleCommon();
 
   // Snapshot scheduling & global
-  SnapshotModuleCommonScheduling()
-  SnapshotModuleCommonRescheduling()
-  SnapshotModuleCommonUnschedule()
-  SnapshotModuleCommonGetNextSnapshot()
-  SnapshotModuleMultiplePlannedTest()
-  SnapshotModuleOnePlannedSnapshotTest()
-  SnapshotModuleZeroPlannedSnapshotTest()
-})
+  SnapshotModuleCommonScheduling();
+  SnapshotModuleCommonRescheduling();
+  SnapshotModuleCommonUnschedule();
+  SnapshotModuleCommonGetNextSnapshot();
+  SnapshotModuleMultiplePlannedTest();
+  SnapshotModuleOnePlannedSnapshotTest();
+  SnapshotModuleZeroPlannedSnapshotTest();
+});

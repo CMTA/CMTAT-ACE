@@ -1,46 +1,47 @@
 # CMTAT ACE integration project
 
 ## Deployment versions
-Two versions are available; *lite* version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and *standard* version, which uses PolicyEngine to protect all external functions instead of OpenZeppelin role-based AccessControl.
+
+Two versions are available; _lite_ version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and _standard_ version, which uses PolicyEngine to protect all external functions instead of OpenZeppelin role-based AccessControl.
 
 ### Standard
 
 Replaces CMTAT's `AccessControlUpgradeable` (role-based) with `OwnableUpgradeable` (single owner) and integrates Chainlink ACE `PolicyProtectedUpgradeable` for all access control and compliance validation.
 
-| Contract | Proxy type |
-|----------|------------|
-| `ComplianceTokenCMTATStandalone` | None |
-| `ComplianceTokenCMTATUpgradeable` | Transparent |
+| Contract                              | Proxy type         |
+| ------------------------------------- | ------------------ |
+| `ComplianceTokenCMTATStandalone`      | None               |
+| `ComplianceTokenCMTATUpgradeable`     | Transparent        |
 | `ComplianceTokenCMTATUUPSUpgradeable` | UUPS (`onlyOwner`) |
 
 ### Lite
 
 Keeps CMTAT's `AccessControlUpgradeable` (role-based) for module authorization and adds Chainlink ACE PolicyEngine for transfer validation only, replacing CMTAT's RuleEngine.
 
-| Contract | Proxy type |
-|----------|------------|
-| `ComplianceTokenCMTATLiteStandalone` | None |
-| `ComplianceTokenCMTATLiteUpgradeable` | Transparent |
+| Contract                                  | Proxy type                            |
+| ----------------------------------------- | ------------------------------------- |
+| `ComplianceTokenCMTATLiteStandalone`      | None                                  |
+| `ComplianceTokenCMTATLiteUpgradeable`     | Transparent                           |
 | `ComplianceTokenCMTATLiteUUPSUpgradeable` | UUPS (`onlyRole(PROXY_UPGRADE_ROLE)`) |
 
 ## Changes from CMTAT
 
 ### Access Control
 
-| Aspect | CMTAT | Standard | Lite |
-|--------|-------|----------|------|
-| Base model | `AccessControlUpgradeable` with 9+ roles | `OwnableUpgradeable` (single owner) | `AccessControlUpgradeable` (unchanged) |
-| Authorization | `onlyRole(MINTER_ROLE)`, etc. | `runPolicy` modifier via PolicyEngine | `onlyRole()` for modules, PolicyEngine for transfers |
-| Role management | `grantRole()` / `revokeRole()` | Managed externally via `RoleBasedAccessControlPolicy` | CMTAT roles preserved |
+| Aspect          | CMTAT                                    | Standard                                              | Lite                                                 |
+| --------------- | ---------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| Base model      | `AccessControlUpgradeable` with 9+ roles | `OwnableUpgradeable` (single owner)                   | `AccessControlUpgradeable` (unchanged)               |
+| Authorization   | `onlyRole(MINTER_ROLE)`, etc.            | `runPolicy` modifier via PolicyEngine                 | `onlyRole()` for modules, PolicyEngine for transfers |
+| Role management | `grantRole()` / `revokeRole()`           | Managed externally via `RoleBasedAccessControlPolicy` | CMTAT roles preserved                                |
 
 ### Validation & Compliance
 
-| Aspect | CMTAT | Standard | Lite |
-|--------|-------|----------|------|
-| Validation layer | `CMTATBaseRuleEngine` → `ValidationModuleRuleEngine` | `PolicyProtectedUpgradeable` → `IPolicyEngine` | `ValidationModulePolicyEngine` → `IPolicyEngine` |
-| Engine type | RuleEngine (custom interface) | Chainlink ACE PolicyEngine | Chainlink ACE PolicyEngine |
-| Transfer check | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
-| ERC-1404 support | Via `ValidationModuleERC1404` | Not applicable (no module-level checks) | Via `PolicyValidationModuleERC1404` |
+| Aspect           | CMTAT                                                 | Standard                                       | Lite                                                            |
+| ---------------- | ----------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- |
+| Validation layer | `CMTATBaseRuleEngine` → `ValidationModuleRuleEngine`  | `PolicyProtectedUpgradeable` → `IPolicyEngine` | `ValidationModulePolicyEngine` → `IPolicyEngine`                |
+| Engine type      | RuleEngine (custom interface)                         | Chainlink ACE PolicyEngine                     | Chainlink ACE PolicyEngine                                      |
+| Transfer check   | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier  | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
+| ERC-1404 support | Via `ValidationModuleERC1404`                         | Not applicable (no module-level checks)        | Via `PolicyValidationModuleERC1404`                             |
 
 ### Initialization
 
@@ -92,9 +93,9 @@ The policy accepts an array of `IRule` contracts. When the PolicyEngine invokes 
 
 It supports two extractor layouts:
 
-| Extractor | Parameters | Used by |
-|-----------|------------|---------|
-| `ERC20TransferExtractor` | `[from, to, amount]` | Calls `detectTransferRestriction(from, to, amount)` |
+| Extractor                    | Parameters                    | Used by                                                          |
+| ---------------------------- | ----------------------------- | ---------------------------------------------------------------- |
+| `ERC20TransferExtractor`     | `[from, to, amount]`          | Calls `detectTransferRestriction(from, to, amount)`              |
 | `ERC20TransferFromExtractor` | `[spender, from, to, amount]` | Calls `detectTransferRestrictionFrom(spender, from, to, amount)` |
 
 ### Mock rules
@@ -109,53 +110,63 @@ Two mock `IRule` implementations are provided in `contracts/modules/chainlink-ac
 1. Deploy the extractor and set it on the PolicyEngine:
 
 ```javascript
-const extractor = await ethers.deployContract('ERC20TransferFromExtractor')
-const transferSelector = cmtat.interface.getFunction('transfer(address,uint256)').selector
-const transferFromSelector = cmtat.interface.getFunction('transferFrom(address,address,uint256)').selector
+const extractor = await ethers.deployContract('ERC20TransferFromExtractor');
+const transferSelector = cmtat.interface.getFunction('transfer(address,uint256)').selector;
+const transferFromSelector = cmtat.interface.getFunction(
+  'transferFrom(address,address,uint256)',
+).selector;
 
-await policyEngine.setExtractor(transferSelector, await extractor.getAddress())
-await policyEngine.setExtractor(transferFromSelector, await extractor.getAddress())
+await policyEngine.setExtractor(transferSelector, await extractor.getAddress());
+await policyEngine.setExtractor(transferFromSelector, await extractor.getAddress());
 ```
 
 2. Deploy rule contracts and the policy:
 
 ```javascript
-const maxAmountRule = await ethers.deployContract('MaxAmountRule', [1000n])
-const restrictedRule = await ethers.deployContract('RestrictedAddressRule', [[]])
+const maxAmountRule = await ethers.deployContract('MaxAmountRule', [1000n]);
+const restrictedRule = await ethers.deployContract('RestrictedAddressRule', [[]]);
 
-const configParams = abiCoder.encode(['address[]'], [
-  [await maxAmountRule.getAddress(), await restrictedRule.getAddress()]
-])
+const configParams = abiCoder.encode(
+  ['address[]'],
+  [[await maxAmountRule.getAddress(), await restrictedRule.getAddress()]],
+);
 
 const policy = await upgrades.deployProxy(
   await ethers.getContractFactory('TransferValidationPolicy'),
   [policyEngineAddress, adminAddress, configParams],
-  { initializer: 'initialize', unsafeAllow: ['constructor', 'missing-initializer', 'missing-initializer-call'] }
-)
+  {
+    initializer: 'initialize',
+    unsafeAllow: ['constructor', 'missing-initializer', 'missing-initializer-call'],
+  },
+);
 ```
 
 3. Register the policy for transfer selectors with parameter names:
 
 ```javascript
-const PARAM_SPENDER = keccak256(toUtf8Bytes('spender'))
-const PARAM_FROM = keccak256(toUtf8Bytes('from'))
-const PARAM_TO = keccak256(toUtf8Bytes('to'))
-const PARAM_AMOUNT = keccak256(toUtf8Bytes('amount'))
+const PARAM_SPENDER = keccak256(toUtf8Bytes('spender'));
+const PARAM_FROM = keccak256(toUtf8Bytes('from'));
+const PARAM_TO = keccak256(toUtf8Bytes('to'));
+const PARAM_AMOUNT = keccak256(toUtf8Bytes('amount'));
 
-await policyEngine.addPolicy(
-  cmtatAddress, transferSelector, policyAddress,
-  [PARAM_SPENDER, PARAM_FROM, PARAM_TO, PARAM_AMOUNT]
-)
-await policyEngine.addPolicy(
-  cmtatAddress, transferFromSelector, policyAddress,
-  [PARAM_SPENDER, PARAM_FROM, PARAM_TO, PARAM_AMOUNT]
-)
+await policyEngine.addPolicy(cmtatAddress, transferSelector, policyAddress, [
+  PARAM_SPENDER,
+  PARAM_FROM,
+  PARAM_TO,
+  PARAM_AMOUNT,
+]);
+await policyEngine.addPolicy(cmtatAddress, transferFromSelector, policyAddress, [
+  PARAM_SPENDER,
+  PARAM_FROM,
+  PARAM_TO,
+  PARAM_AMOUNT,
+]);
 ```
 
 4. Rules can be updated at any time by the policy owner:
 
 ```javascript
-await policy.setRules([newRuleAddress1, newRuleAddress2])
+await policy.setRules([newRuleAddress1, newRuleAddress2]);
 ```
 
 ### Writing custom rules
@@ -164,22 +175,30 @@ Implement the `IRule` interface to create custom transfer restriction logic:
 
 ```solidity
 contract MyCustomRule is IRule {
-    function detectTransferRestriction(address from, address to, uint256 amount)
-        public view override returns (uint8) {
-        // Return 0 for allowed, non-zero for rejected
-    }
+  function detectTransferRestriction(
+    address from,
+    address to,
+    uint256 amount
+  ) public view override returns (uint8) {
+    // Return 0 for allowed, non-zero for rejected
+  }
 
-    function detectTransferRestrictionFrom(address spender, address from, address to, uint256 amount)
-        public view override returns (uint8) {
-        // Validate spender + transfer params
-    }
+  function detectTransferRestrictionFrom(
+    address spender,
+    address from,
+    address to,
+    uint256 amount
+  ) public view override returns (uint8) {
+    // Validate spender + transfer params
+  }
 
-    function messageForTransferRestriction(uint8 code)
-        external pure override returns (string memory) {
-        // Return human-readable rejection reason
-    }
+  function messageForTransferRestriction(
+    uint8 code
+  ) external pure override returns (string memory) {
+    // Return human-readable rejection reason
+  }
 
-    // ... canTransfer(), canReturnTransferRestrictionCode()
+  // ... canTransfer(), canReturnTransferRestrictionCode()
 }
 ```
 
@@ -189,11 +208,13 @@ contract MyCustomRule is IRule {
 - Chainlink ACE ^1.0.0
 
 ## Initialize submodules
+
 ```shell
 git submodule update
 ```
 
 ## Install dependencies
+
 You can use any package manager either npm, yarn or pnpm. For example you can type:
 
 ```shell
@@ -201,6 +222,7 @@ npm install
 ```
 
 ## Compile contracts
+
 To compile
 
 ```shell
@@ -221,14 +243,14 @@ npx hardhat test
 
 Individual deployment scripts are available for each contract variant:
 
-| Script | Description |
-|--------|-------------|
-| `scripts/lite/deploy-lite-standalone.js` | Lite standalone (no proxy) |
-| `scripts/lite/deploy-lite-upgradeable.js` | Lite transparent proxy |
-| `scripts/lite/deploy-lite-uups.js` | Lite UUPS proxy |
-| `scripts/standard/deploy-standard-standalone.js` | Standard standalone (no proxy) |
-| `scripts/standard/deploy-standard-upgradeable.js` | Standard transparent proxy |
-| `scripts/standard/deploy-standard-uups.js` | Standard UUPS proxy |
+| Script                                            | Description                    |
+| ------------------------------------------------- | ------------------------------ |
+| `scripts/lite/deploy-lite-standalone.js`          | Lite standalone (no proxy)     |
+| `scripts/lite/deploy-lite-upgradeable.js`         | Lite transparent proxy         |
+| `scripts/lite/deploy-lite-uups.js`                | Lite UUPS proxy                |
+| `scripts/standard/deploy-standard-standalone.js`  | Standard standalone (no proxy) |
+| `scripts/standard/deploy-standard-upgradeable.js` | Standard transparent proxy     |
+| `scripts/standard/deploy-standard-uups.js`        | Standard UUPS proxy            |
 
 Run any script with:
 
@@ -255,6 +277,7 @@ npx hardhat run scripts/lite/deploy-lite-standalone.js
 The script also configures RBAC operation allowances and grants roles (`MINTER_ROLE`, `BURNER_ROLE`, `BURNER_FROM_ROLE`, `ENFORCER_ROLE`, `ERC20ENFORCER_ROLE`) to the admin account.
 
 Policy execution order per function:
+
 - `mint()` → PausePolicy → RBAC → SecureMintPolicy
 - `transfer()` / `transferFrom()` → PausePolicy → RBAC → TransferValidationPolicy
 - All other functions → PausePolicy → RBAC
@@ -301,6 +324,7 @@ npm run slither
 ```
 
 This generates timestamped reports in the `reports/` directory:
+
 - **JSON** — `reports/slither-report-<timestamp>.json`
 - **Markdown** — `reports/slither-report-<timestamp>.md`
 

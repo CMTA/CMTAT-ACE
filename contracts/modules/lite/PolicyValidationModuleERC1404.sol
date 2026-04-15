@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.20;
 
-
 /* ==== Tokenization === */
 import {IERC1404, IERC1404Extend} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol";
 import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
@@ -12,36 +11,29 @@ import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/
  *
  * Useful to restrict and validate transfers
  */
-abstract contract PolicyValidationModuleERC1404 is
-   ValidationModuleCore, IERC1404Extend
-{
+abstract contract PolicyValidationModuleERC1404 is ValidationModuleCore, IERC1404Extend {
     /* ============ State Variables ============ */
     string constant TEXT_TRANSFER_OK = "NoRestriction";
     string constant TEXT_UNKNOWN_CODE = "UnknownCode";
 
     /* EnforcementModule */
-    string internal constant TEXT_TRANSFER_REJECTED_FROM_FROZEN =
-        "AddrFromIsFrozen";
+    string internal constant TEXT_TRANSFER_REJECTED_FROM_FROZEN = "AddrFromIsFrozen";
 
-    string internal constant TEXT_TRANSFER_REJECTED_TO_FROZEN =
-        "AddrToIsFrozen";
+    string internal constant TEXT_TRANSFER_REJECTED_TO_FROZEN = "AddrToIsFrozen";
 
-    string internal constant TEXT_TRANSFER_REJECTED_SPENDER_FROZEN =
-        "AddrSpenderIsFrozen";
+    string internal constant TEXT_TRANSFER_REJECTED_SPENDER_FROZEN = "AddrSpenderIsFrozen";
 
     /* PauseModule */
-    string internal constant TEXT_TRANSFER_REJECTED_PAUSED =
-        "EnforcedPause";
+    string internal constant TEXT_TRANSFER_REJECTED_PAUSED = "EnforcedPause";
 
     /* Contract deactivated */
-    string internal constant TEXT_TRANSFER_REJECTED_DEACTIVATED =
-        "ContractDeactivated";
+    string internal constant TEXT_TRANSFER_REJECTED_DEACTIVATED = "ContractDeactivated";
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     /**
-     * @notice returns the human readable explanation 
+     * @notice returns the human readable explanation
      * corresponding to the error code returned by detectTransferRestriction
      * @param restrictionCode The error code returned by detectTransferRestriction
      * @return message The human readable explanation corresponding to the error code returned by detectTransferRestriction
@@ -49,39 +41,24 @@ abstract contract PolicyValidationModuleERC1404 is
      */
     function messageForTransferRestriction(
         uint8 restrictionCode
-    ) public virtual view override(IERC1404) returns (string memory message) {
+    ) public view virtual override(IERC1404) returns (string memory message) {
         if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
             return TEXT_TRANSFER_OK;
-        } else if (
-            restrictionCode ==
-            uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_PAUSED)
-        ) {
+        } else if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_PAUSED)) {
             return TEXT_TRANSFER_REJECTED_PAUSED;
-        } else if (
-            restrictionCode ==
-            uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_DEACTIVATED)
-        ) {
+        } else if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_DEACTIVATED)) {
             return TEXT_TRANSFER_REJECTED_DEACTIVATED;
-        } else if (
-            restrictionCode ==
-            uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_FROZEN)
-        ) {
+        } else if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_FROZEN)) {
             return TEXT_TRANSFER_REJECTED_FROM_FROZEN;
-        } else if (
-            restrictionCode ==
-            uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_TO_FROZEN)
-        ) {
+        } else if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_TO_FROZEN)) {
             return TEXT_TRANSFER_REJECTED_TO_FROZEN;
-        }  else if (
-            restrictionCode ==
-            uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_SPENDER_FROZEN)
-        ) {
+        } else if (restrictionCode == uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_SPENDER_FROZEN)) {
             return TEXT_TRANSFER_REJECTED_SPENDER_FROZEN;
         } else {
             return TEXT_UNKNOWN_CODE;
         }
     }
-    
+
     /**
      * @notice check if value token can be transferred from `from` to `to`
      * @param from address The address which you want to send tokens from
@@ -94,9 +71,9 @@ abstract contract PolicyValidationModuleERC1404 is
         address from,
         address to,
         uint256 value
-    ) public virtual view override(IERC1404) returns (uint8 code) {
-         uint8 codeReturn = _detectTransferRestriction(from, to, value);
-         if (codeReturn != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
+    ) public view virtual override(IERC1404) returns (uint8 code) {
+        uint8 codeReturn = _detectTransferRestriction(from, to, value);
+        if (codeReturn != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
             return codeReturn;
         } else {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
@@ -108,32 +85,32 @@ abstract contract PolicyValidationModuleERC1404 is
         address from,
         address to,
         uint256 value
-    ) public virtual view override(IERC1404Extend) returns (uint8 code) {
+    ) public view virtual override(IERC1404Extend) returns (uint8 code) {
         if (isFrozen(spender)) {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_SPENDER_FROZEN);
         } else {
             uint8 codeReturn = _detectTransferRestriction(from, to, value);
-            if (codeReturn != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK) ){
+            if (codeReturn != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
                 return codeReturn;
-            } else { 
+            } else {
                 return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
             }
-        } 
+        }
     }
 
-     /*//////////////////////////////////////////////////////////////
+    /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
     /**
-    * @dev override this function to add further restriction
-    */
+     * @dev override this function to add further restriction
+     */
     function _detectTransferRestriction(
         address from,
         address to,
         uint256 /* value */
-    ) internal virtual view  returns (uint8 code) {
-        if (deactivated()){
+    ) internal view virtual returns (uint8 code) {
+        if (deactivated()) {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_DEACTIVATED);
         } else if (paused()) {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_PAUSED);
@@ -141,8 +118,7 @@ abstract contract PolicyValidationModuleERC1404 is
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_FROZEN);
         } else if (isFrozen(to)) {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_TO_FROZEN);
-        } 
-        else {
+        } else {
             return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK);
         }
     }

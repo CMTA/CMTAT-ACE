@@ -1,9 +1,9 @@
-require('@nomicfoundation/hardhat-foundry')
-require('@nomicfoundation/hardhat-chai-matchers')
-require('@openzeppelin/hardhat-upgrades')
+require('@nomicfoundation/hardhat-foundry');
+require('@nomicfoundation/hardhat-chai-matchers');
+require('@openzeppelin/hardhat-upgrades');
 
-const { silenceWarnings } = require('@openzeppelin/upgrades-core')
-silenceWarnings()
+const { silenceWarnings } = require('@openzeppelin/upgrades-core');
+silenceWarnings();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -14,25 +14,25 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 50
+            runs: 50,
           },
-          evmVersion: 'prague'
-        }
+          evmVersion: 'prague',
+        },
       },
       {
         version: '0.8.26',
         settings: {
           optimizer: {
             enabled: true,
-            runs: 50
+            runs: 50,
           },
-          evmVersion: 'cancun'
-        }
-      }
-    ]
+          evmVersion: 'cancun',
+        },
+      },
+    ],
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test"
+    sources: './contracts',
+    tests: './test',
   },
 };

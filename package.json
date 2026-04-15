@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "hardhat test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write '**/*.{js,json,md}' 'contracts/**/*.sol'",
+    "format:check": "prettier --check '**/*.{js,json,md}' 'contracts/**/*.sol'",
     "slither": "./scripts/slither.sh"
   },
   "repository": {
@@ -22,8 +26,11 @@
     "@openzeppelin/contracts-upgradeable": "5.5.0",
     "@openzeppelin/hardhat-upgrades": "^3.2.0",
     "@openzeppelin/upgrades-core": "^1.44.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
     "hardhat": "^2.28.0",
     "hardhat-contract-sizer": "^2.10.0",
-    "hardhat-gas-reporter": "^1.0.9"
+    "hardhat-gas-reporter": "^1.0.9",
+    "prettier-plugin-solidity": "^2.3.1"
   }
 }

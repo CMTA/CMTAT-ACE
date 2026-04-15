@@ -1,16 +1,16 @@
 /**
  * Script example - do not use it for production
  */
-const { ethers, upgrades } = require("hardhat");
-const { ZeroAddress, keccak256, toUtf8Bytes } = require("ethers");
+const { ethers, upgrades } = require('hardhat');
+const { ZeroAddress, keccak256, toUtf8Bytes } = require('ethers');
 
 async function deployPolicyEngine(initialOwner) {
-  const Factory = await ethers.getContractFactory("PolicyEngine");
-  const contract = await upgrades.deployProxy(
-    Factory,
-    [true, initialOwner],
-    { initializer: "initialize", unsafeAllow: ["constructor"], silenceWarnings: true }
-  );
+  const Factory = await ethers.getContractFactory('PolicyEngine');
+  const contract = await upgrades.deployProxy(Factory, [true, initialOwner], {
+    initializer: 'initialize',
+    unsafeAllow: ['constructor'],
+    silenceWarnings: true,
+  });
   await contract.waitForDeployment();
   return contract;
 }
@@ -23,26 +23,33 @@ async function main() {
   const deployer = signers[0];
 
   if (isHardhatNetwork) {
-    console.log("Hardhat network detected, using account:", deployer.address);
+    console.log('Hardhat network detected, using account:', deployer.address);
   } else {
-    console.log("Deploying to network:", network.name, "with account:", deployer.address);
+    console.log('Deploying to network:', network.name, 'with account:', deployer.address);
   }
 
   // To change
   const forwarderIrrevocable = ZeroAddress;
-  const admin = isHardhatNetwork ? deployer.address : "0x1000000000000000000000000000000000000001";
-  const ERC20Attributes = ["Security Token", "ST", 8];
+  const admin = isHardhatNetwork ? deployer.address : '0x1000000000000000000000000000000000000001';
+  const ERC20Attributes = ['Security Token', 'ST', 8];
   const terms = {
-    name: "Token Terms v1",
-    uri: "https://cmta.ch/standards/cmta-token-cmtat",
-    documentHash: keccak256(toUtf8Bytes("terms-v1")),
+    name: 'Token Terms v1',
+    uri: 'https://cmta.ch/standards/cmta-token-cmtat',
+    documentHash: keccak256(toUtf8Bytes('terms-v1')),
   };
-  const extraInformationAttributes = ["1234567890", [terms.name, terms.uri, terms.documentHash], "CMTAT smart contract"];
+  const extraInformationAttributes = [
+    '1234567890',
+    [terms.name, terms.uri, terms.documentHash],
+    'CMTAT smart contract',
+  ];
 
   const policyEngineContract = await deployPolicyEngine(admin);
   const policyEngineAddress = await policyEngineContract.getAddress();
 
-  const Factory = await ethers.getContractFactory("ComplianceTokenCMTATLiteUUPSUpgradeable", deployer);
+  const Factory = await ethers.getContractFactory(
+    'ComplianceTokenCMTATLiteUUPSUpgradeable',
+    deployer,
+  );
   const cmtat = await upgrades.deployProxy(
     Factory,
     [
@@ -54,22 +61,23 @@ async function main() {
       ZeroAddress,
     ],
     {
-      initializer: "initialize",
+      initializer: 'initialize',
       constructorArgs: [forwarderIrrevocable],
-      unsafeAllow: ["missing-initializer", "constructor"],
+      unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
-      kind: "uups",
-    }
+      kind: 'uups',
+    },
   );
 
   await cmtat.waitForDeployment();
   const cmtatProxyAddress = await cmtat.getAddress();
   const cmtatImplAddress = await upgrades.erc1967.getImplementationAddress(cmtatProxyAddress);
-  const policyEngineImplAddress = await upgrades.erc1967.getImplementationAddress(policyEngineAddress);
-  console.log("PolicyEngine (proxy):                              ", policyEngineAddress);
-  console.log("PolicyEngine (impl):                               ", policyEngineImplAddress);
-  console.log("ComplianceTokenCMTATLiteUUPSUpgradeable (proxy):   ", cmtatProxyAddress);
-  console.log("ComplianceTokenCMTATLiteUUPSUpgradeable (impl):    ", cmtatImplAddress);
+  const policyEngineImplAddress =
+    await upgrades.erc1967.getImplementationAddress(policyEngineAddress);
+  console.log('PolicyEngine (proxy):                              ', policyEngineAddress);
+  console.log('PolicyEngine (impl):                               ', policyEngineImplAddress);
+  console.log('ComplianceTokenCMTATLiteUUPSUpgradeable (proxy):   ', cmtatProxyAddress);
+  console.log('ComplianceTokenCMTATLiteUUPSUpgradeable (impl):    ', cmtatImplAddress);
 }
 
 main().catch((error) => {

@@ -6,7 +6,6 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {CCTBaseERC2771} from "../../modules/standard/CCTBaseERC2771.sol";
 import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
 
-
 /**
  * @title ComplianceTokenCMTATUUPSUpgradeable
  * @author Chainlink
@@ -18,9 +17,7 @@ contract ComplianceTokenCMTATUUPSUpgradeable is CCTBaseERC2771, UUPSUpgradeable 
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
      */
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(
-        address forwarderIrrevocable
-    ) ERC2771Module(forwarderIrrevocable) {
+    constructor(address forwarderIrrevocable) ERC2771Module(forwarderIrrevocable) {
         // Disable the possibility to initialize the implementation
         _disableInitializers();
     }

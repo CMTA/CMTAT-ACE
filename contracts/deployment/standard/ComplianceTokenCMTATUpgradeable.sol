@@ -5,7 +5,6 @@ pragma solidity ^0.8.20;
 import {CCTBaseERC2771} from "../../modules/standard/CCTBaseERC2771.sol";
 import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
 
-
 /**
  * @title ComplianceTokenCMTATUpgradeable
  * @author Chainlink
@@ -17,9 +16,7 @@ contract ComplianceTokenCMTATUpgradeable is CCTBaseERC2771 {
      * @param forwarderIrrevocable address of the forwarder, required for the gasless support
      */
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(
-        address forwarderIrrevocable
-    ) ERC2771Module(forwarderIrrevocable) {
+    constructor(address forwarderIrrevocable) ERC2771Module(forwarderIrrevocable) {
         // Disable the possibility to initialize the implementation
         _disableInitializers();
     }

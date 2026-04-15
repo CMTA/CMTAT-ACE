@@ -31,8 +31,7 @@ contract TransferValidationPolicy is Policy {
     }
 
     // keccak256(abi.encode(uint256(keccak256("cmta.TransferValidationPolicy")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant STORAGE_LOCATION =
-        0x9d1bc980e8a6a99b0c67a28b08c935a5db13a988e2a9b52481bff1e80ee16800;
+    bytes32 private constant STORAGE_LOCATION = 0x9d1bc980e8a6a99b0c67a28b08c935a5db13a988e2a9b52481bff1e80ee16800;
 
     function _getStorage() private pure returns (TransferValidationStorage storage $) {
         assembly {
@@ -88,9 +87,9 @@ contract TransferValidationPolicy is Policy {
      *      the spender.
      */
     function run(
-        address, /* caller */
-        address, /* subject */
-        bytes4, /* selector */
+        address /* caller */,
+        address /* subject */,
+        bytes4 /* selector */,
         bytes[] calldata parameters,
         bytes calldata /* context */
     ) public view override returns (IPolicyEngine.PolicyResult) {

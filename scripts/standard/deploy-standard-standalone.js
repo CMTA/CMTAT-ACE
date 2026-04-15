@@ -1,16 +1,16 @@
 /**
  * Script example - do not use it for production
  */
-const { ethers, upgrades } = require("hardhat");
-const { ZeroAddress, keccak256, toUtf8Bytes } = require("ethers");
+const { ethers, upgrades } = require('hardhat');
+const { ZeroAddress, keccak256, toUtf8Bytes } = require('ethers');
 
 async function deployPolicyEngine(initialOwner) {
-  const Factory = await ethers.getContractFactory("PolicyEngine");
-  const contract = await upgrades.deployProxy(
-    Factory,
-    [true, initialOwner],
-    { initializer: "initialize", unsafeAllow: ["constructor"], silenceWarnings: true }
-  );
+  const Factory = await ethers.getContractFactory('PolicyEngine');
+  const contract = await upgrades.deployProxy(Factory, [true, initialOwner], {
+    initializer: 'initialize',
+    unsafeAllow: ['constructor'],
+    silenceWarnings: true,
+  });
   await contract.waitForDeployment();
   return contract;
 }
@@ -23,35 +23,36 @@ async function main() {
   const deployer = signers[0];
 
   if (isHardhatNetwork) {
-    console.log("Hardhat network detected, using account:", deployer.address);
+    console.log('Hardhat network detected, using account:', deployer.address);
   } else {
-    console.log("Deploying to network:", network.name, "with account:", deployer.address);
+    console.log('Deploying to network:', network.name, 'with account:', deployer.address);
   }
 
   // To change
   const forwarderIrrevocable = ZeroAddress;
-  const admin = isHardhatNetwork ? deployer.address : "0x1000000000000000000000000000000000000001";
+  const admin = isHardhatNetwork ? deployer.address : '0x1000000000000000000000000000000000000001';
   const ERC20Attributes = {
-    name: "Security Token",
-    symbol: "ST",
+    name: 'Security Token',
+    symbol: 'ST',
     decimalsIrrevocable: 0,
   };
   const terms = {
-    name: "Token Terms v2",
-    uri: "https://cmta.ch/standards/cmta-token-cmtat",
-    documentHash: keccak256(toUtf8Bytes("terms-v2")),
+    name: 'Token Terms v2',
+    uri: 'https://cmta.ch/standards/cmta-token-cmtat',
+    documentHash: keccak256(toUtf8Bytes('terms-v2')),
   };
   const extraInformationAttributes = {
-    tokenId: "1234567890",
+    tokenId: '1234567890',
     terms: terms,
-    information: "CMTAT smart contract",
+    information: 'CMTAT smart contract',
   };
 
   const policyEngineContract = await deployPolicyEngine(admin);
   const policyEngineAddress = await policyEngineContract.getAddress();
-  const policyEngineImplAddress = await upgrades.erc1967.getImplementationAddress(policyEngineAddress);
+  const policyEngineImplAddress =
+    await upgrades.erc1967.getImplementationAddress(policyEngineAddress);
 
-  const CMTATFactory = await ethers.getContractFactory("ComplianceTokenCMTATStandalone", deployer);
+  const CMTATFactory = await ethers.getContractFactory('ComplianceTokenCMTATStandalone', deployer);
   const cmtat = await CMTATFactory.deploy(
     forwarderIrrevocable,
     admin,
@@ -59,13 +60,13 @@ async function main() {
     extraInformationAttributes,
     policyEngineAddress,
     ZeroAddress,
-    ZeroAddress
+    ZeroAddress,
   );
 
   await cmtat.waitForDeployment();
-  console.log("PolicyEngine (proxy):                   ", policyEngineAddress);
-  console.log("PolicyEngine (impl):                    ", policyEngineImplAddress);
-  console.log("ComplianceTokenCMTATStandalone:         ", await cmtat.getAddress());
+  console.log('PolicyEngine (proxy):                   ', policyEngineAddress);
+  console.log('PolicyEngine (impl):                    ', policyEngineImplAddress);
+  console.log('ComplianceTokenCMTATStandalone:         ', await cmtat.getAddress());
 }
 
 main().catch((error) => {

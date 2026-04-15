@@ -8,7 +8,6 @@ import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol";
 
-
 /**
  * @title ComplianceTokenCMTATStandalone
  * @author Chainlink

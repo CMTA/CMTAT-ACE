@@ -25,12 +25,9 @@ contract ERC20TransferFromExtractor is IExtractor {
     bytes32 public constant PARAM_TO = keccak256("to");
     bytes32 public constant PARAM_AMOUNT = keccak256("amount");
 
-    function extract(IPolicyEngine.Payload calldata payload)
-        external
-        pure
-        override
-        returns (IPolicyEngine.Parameter[] memory)
-    {
+    function extract(
+        IPolicyEngine.Payload calldata payload
+    ) external pure override returns (IPolicyEngine.Parameter[] memory) {
         address spender;
         address from;
         address to;

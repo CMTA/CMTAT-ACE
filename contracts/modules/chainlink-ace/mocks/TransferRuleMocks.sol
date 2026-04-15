@@ -17,17 +17,15 @@ contract MaxAmountRule is IRule {
     }
 
     function detectTransferRestriction(
-        address, /* from */
-        address, /* to */
+        address /* from */,
+        address /* to */,
         uint256 amount
     ) public view override returns (uint8) {
-        return amount > maxAmount
-            ? AMOUNT_TOO_HIGH
-            : uint8(REJECTED_CODE_BASE.TRANSFER_OK);
+        return amount > maxAmount ? AMOUNT_TOO_HIGH : uint8(REJECTED_CODE_BASE.TRANSFER_OK);
     }
 
     function detectTransferRestrictionFrom(
-        address, /* spender */
+        address /* spender */,
         address from,
         address to,
         uint256 amount
@@ -35,11 +33,7 @@ contract MaxAmountRule is IRule {
         return detectTransferRestriction(from, to, amount);
     }
 
-    function canTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) public view override returns (bool) {
+    function canTransfer(address from, address to, uint256 amount) public view override returns (bool) {
         return detectTransferRestriction(from, to, amount) == 0;
     }
 
@@ -90,7 +84,7 @@ contract RestrictedAddressRule is IRule {
     }
 
     function detectTransferRestrictionFrom(
-        address, /* spender */
+        address /* spender */,
         address from,
         address to,
         uint256 amount
@@ -98,11 +92,7 @@ contract RestrictedAddressRule is IRule {
         return detectTransferRestriction(from, to, amount);
     }
 
-    function canTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) public view override returns (bool) {
+    function canTransfer(address from, address to, uint256 amount) public view override returns (bool) {
         return detectTransferRestriction(from, to, amount) == 0;
     }
 

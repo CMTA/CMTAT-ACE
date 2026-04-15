@@ -13,4 +13,3 @@ import {SecureMintPolicy} from "@chainlink/policy-management/policies/SecureMint
 import {ERC20TransferExtractor} from "@chainlink/policy-management/extractors/ERC20TransferExtractor.sol";
 import {SnapshotEngineMock} from "../../../submodules/CMTAT/contracts/mocks/SnapshotEngineMock.sol";
 import {DocumentEngineMock} from "../../../submodules/CMTAT/contracts/mocks/DocumentEngineMock.sol";
-    
