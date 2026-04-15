@@ -176,10 +176,7 @@ abstract contract CCTCommon is
         return CMTATBaseCommon.transferFrom(from, to, value);
     }
 
-    // Add onlyOwner modifier
-    function attachPolicyEngine(address policyEngine) external virtual override onlyOwner {
-        _attachPolicyEngine(policyEngine);
-    }
+    function _authorizeAttachPolicyEngine(address) internal virtual override onlyOwner {}
 
     /* ============ View functions ============ */
 

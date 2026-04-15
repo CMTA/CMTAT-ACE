@@ -76,8 +76,11 @@ abstract contract PolicyProtectedUpgradeable is Initializable, ERC165Upgradeable
         _;
     }
 
+    function _authorizeAttachPolicyEngine(address policyEngine) internal virtual;
+
     /// @inheritdoc IPolicyProtected
     function attachPolicyEngine(address policyEngine) external virtual override {
+        _authorizeAttachPolicyEngine(policyEngine);
         _attachPolicyEngine(policyEngine);
     }
 

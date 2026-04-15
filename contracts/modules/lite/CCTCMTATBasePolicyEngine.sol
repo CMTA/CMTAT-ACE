@@ -170,9 +170,7 @@ abstract contract CCTCMTATBasePolicyEngine is
         }
     }
 
-    function attachPolicyEngine(address policyEngine) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _attachPolicyEngine(policyEngine);
-    }
+    function _authorizeAttachPolicyEngine(address) internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
