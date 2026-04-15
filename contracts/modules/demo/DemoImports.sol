@@ -11,4 +11,6 @@ import {PausePolicy} from "@chainlink/policy-management/policies/PausePolicy.sol
 import {RoleBasedAccessControlPolicy} from "@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol";
 import {SecureMintPolicy} from "@chainlink/policy-management/policies/SecureMintPolicy.sol";
 import {ERC20TransferExtractor} from "@chainlink/policy-management/extractors/ERC20TransferExtractor.sol";
+import {SnapshotEngineMock} from "../../../submodules/CMTAT/contracts/mocks/SnapshotEngineMock.sol";
+import {DocumentEngineMock} from "../../../submodules/CMTAT/contracts/mocks/DocumentEngineMock.sol";
     

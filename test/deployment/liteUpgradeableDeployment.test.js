@@ -1,10 +1,9 @@
 const { ethers } = require('hardhat')
 const { expect } = require('chai')
 const {
-  fixture,
   loadFixture,
-  deployPolicyEngine,
-  deployCCTLiteUpgradeable
+  deployCCTLiteUpgradeable,
+  createLiteFixture
 } = require('../deploymentUtils')
 
 // Reuse CMTAT common modules
@@ -17,18 +16,23 @@ const ERC20EnforcementModuleCommon = require('../../submodules/CMTAT/test/common
 const VersionModuleCommon = require('../../submodules/CMTAT/test/common/VersionModuleCommon')
 const ERC20CrossChainModuleCommon = require('../../submodules/CMTAT/test/common/ERC20CrossChainModuleCommon')
 const CCIPModuleCommon = require('../../submodules/CMTAT/test/common/CCIPModuleCommon')
+const ExtraInfoModuleCommon = require('../../submodules/CMTAT/test/common/ExtraInfoModuleCommon')
+const DocumentModuleCommon = require('../../submodules/CMTAT/test/common/DocumentModule/DocumentModuleCommon')
+const SnapshotModuleCommon = require('../common/cmtat/SnapshotModuleCommon')
+// Snapshot scheduling & global modules from CMTAT
+const SnapshotModuleCommonScheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonScheduling')
+const SnapshotModuleCommonRescheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonRescheduling')
+const SnapshotModuleCommonUnschedule = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonUnschedule')
+const SnapshotModuleCommonGetNextSnapshot = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonGetNextSnapshot')
+const SnapshotModuleMultiplePlannedTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleMultiplePlannedTest')
+const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleOnePlannedSnapshotTest')
+const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot')
+
+const liteFixture = createLiteFixture(deployCCTLiteUpgradeable)
 
 describe('ComplianceTokenCMTATLiteUpgradeable', function () {
   beforeEach(async function () {
-    Object.assign(this, await loadFixture(fixture))
-    const policyEngine = await deployPolicyEngine(true, this.admin.address)
-    this.cmtat = await deployCCTLiteUpgradeable(
-      this._.address,
-      this.admin.address,
-      await policyEngine.getAddress()
-    )
-    this.policyEngine = policyEngine
-    this.erc1404 = true
+    Object.assign(this, await loadFixture(liteFixture))
   })
 
   // Proxy-specific
@@ -40,7 +44,9 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
           this.admin.address,
           ['CMTA Token', 'CMTAT', 0],
           ['CMTAT_ISIN', ['doc1', 'https://example.com/doc1', ethers.keccak256(ethers.toUtf8Bytes('h'))], 'CMTAT_info'],
-          policyEngineAddress
+          policyEngineAddress,
+          ethers.ZeroAddress,
+          ethers.ZeroAddress
         )
       ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization')
     })
@@ -60,4 +66,20 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
   // options
   ERC20CrossChainModuleCommon()
   CCIPModuleCommon()
+
+  // Extensions
+  ExtraInfoModuleCommon()
+
+  // Engines
+  DocumentModuleCommon()
+  SnapshotModuleCommon()
+
+  // Snapshot scheduling & global
+  SnapshotModuleCommonScheduling()
+  SnapshotModuleCommonRescheduling()
+  SnapshotModuleCommonUnschedule()
+  SnapshotModuleCommonGetNextSnapshot()
+  SnapshotModuleMultiplePlannedTest()
+  SnapshotModuleOnePlannedSnapshotTest()
+  SnapshotModuleZeroPlannedSnapshotTest()
 })

@@ -50,6 +50,8 @@ async function main() {
       ERC20Attributes,
       extraInformationAttributes,
       policyEngineAddress,
+      ZeroAddress,
+      ZeroAddress,
     ],
     {
       initializer: "initialize",

@@ -39,13 +39,17 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_
+        address policyEngine_,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) public virtual initializer {
         _initialize(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            policyEngine_
+            policyEngine_,
+            snapshotEngine_,
+            documentEngine_
         );
     }
 
@@ -56,13 +60,17 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_
+        address policyEngine_,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) internal virtual onlyInitializing{
         __CMTAT_init(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            policyEngine_
+            policyEngine_,
+            snapshotEngine_,
+            documentEngine_
         );
     }
 
@@ -73,7 +81,9 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_
+        address policyEngine_,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) internal virtual onlyInitializing {
         /* OpenZeppelin library */
         // OZ init_unchained functions are called firstly due to inheritance
@@ -87,6 +97,10 @@ abstract contract CCTCMTATBasePolicyEngine is CMTATBaseAccessControl, Validation
        
         /* Wrapper modules */
         __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
+
+        /* Engine modules */
+        __SnapshotEngineModule_init_unchained(snapshotEngine_);
+        __DocumentEngineModule_init_unchained(documentEngine_);
 
          /* Chainlink-ACE policy module */
         __PolicyProtected_init_unchained(policyEngine_);

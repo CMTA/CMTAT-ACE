@@ -13,6 +13,8 @@
  *   9. ERC20TransferFromExtractor – set for transferFrom()
  *  10. MaxAmountRule + RestrictedAddressRule (mock IRule contracts)
  *  11. TransferValidationPolicy (proxy) – added to transfer() and transferFrom()
+ *  12. DocumentEngineMock – set on the token
+ *  13. SnapshotEngineMock – set on the token, used for scheduling snapshots
  *
  * Script example - do not use it for production
  */
@@ -25,6 +27,8 @@ const BURNER_ROLE = keccak256(toUtf8Bytes("BURNER_ROLE"));
 const BURNER_FROM_ROLE = keccak256(toUtf8Bytes("BURNER_FROM_ROLE"));
 const ENFORCER_ROLE = keccak256(toUtf8Bytes("ENFORCER_ROLE"));
 const ERC20ENFORCER_ROLE = keccak256(toUtf8Bytes("ERC20ENFORCER_ROLE"));
+const SNAPSHOOTER_ROLE = keccak256(toUtf8Bytes("SNAPSHOOTER_ROLE"));
+const DOCUMENT_ROLE = keccak256(toUtf8Bytes("DOCUMENT_ROLE"));
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 /* ============ Helpers ============ */
@@ -107,9 +111,27 @@ async function main() {
   console.log("PolicyEngine deployed to:", policyEngineAddress);
 
   /* ============================================================
-   * 2. Deploy ComplianceTokenCMTATStandalone
+   * 2. Deploy Document & Snapshot Engine Mocks
    * ============================================================ */
-  console.log("\n--- Step 2: Deploy ComplianceTokenCMTATStandalone ---");
+  console.log("\n--- Step 2: Deploy Document & Snapshot Engine Mocks ---");
+
+  const DocumentEngineMockFactory = await ethers.getContractFactory("DocumentEngineMock");
+  const documentEngineMock = await DocumentEngineMockFactory.deploy();
+  await documentEngineMock.waitForDeployment();
+  const documentEngineAddress = await documentEngineMock.getAddress();
+  console.log("DocumentEngineMock deployed to:", documentEngineAddress);
+
+  // SnapshotEngineMock needs the token address, so deploy with ZeroAddress first, then update after token deploy
+  const SnapshotEngineMockFactory = await ethers.getContractFactory("SnapshotEngineMock");
+  const snapshotEngineMock = await SnapshotEngineMockFactory.deploy(ZeroAddress, admin);
+  await snapshotEngineMock.waitForDeployment();
+  const snapshotEngineAddress = await snapshotEngineMock.getAddress();
+  console.log("SnapshotEngineMock deployed to:", snapshotEngineAddress);
+
+  /* ============================================================
+   * 3. Deploy ComplianceTokenCMTATStandalone
+   * ============================================================ */
+  console.log("\n--- Step 3: Deploy ComplianceTokenCMTATStandalone ---");
   const forwarderIrrevocable = ZeroAddress;
   const ERC20Attributes = {
     name: "Security Token",
@@ -133,24 +155,30 @@ async function main() {
     admin,
     ERC20Attributes,
     extraInformationAttributes,
-    policyEngineAddress
+    policyEngineAddress,
+    snapshotEngineAddress,
+    documentEngineAddress
   );
   await cmtat.waitForDeployment();
   const cmtatAddress = await cmtat.getAddress();
   console.log("ComplianceTokenCMTATStandalone deployed to:", cmtatAddress);
 
+  // Update SnapshotEngineMock with the actual token address
+  await snapshotEngineMock.setERC20(cmtatAddress);
+  console.log("SnapshotEngineMock updated with token address");
+
   /* ============================================================
-   * 3. Deploy PausePolicy
+   * 4. Deploy PausePolicy
    * ============================================================ */
-  console.log("\n--- Step 3: Deploy PausePolicy ---");
+  console.log("\n--- Step 4: Deploy PausePolicy ---");
   const pausePolicy = await deployPausePolicy(policyEngineAddress, admin, false);
   const pausePolicyAddress = await pausePolicy.getAddress();
   console.log("PausePolicy deployed to:", pausePolicyAddress, "(initially unpaused)");
 
   /* ============================================================
-   * 4. Deploy RoleBasedAccessControlPolicy
+   * 5. Deploy RoleBasedAccessControlPolicy
    * ============================================================ */
-  console.log("\n--- Step 4: Deploy RoleBasedAccessControlPolicy ---");
+  console.log("\n--- Step 5: Deploy RoleBasedAccessControlPolicy ---");
   const rbacPolicy = await deployRBACPolicy(policyEngineAddress, admin);
   const rbacPolicyAddress = await rbacPolicy.getAddress();
   console.log("RoleBasedAccessControlPolicy deployed to:", rbacPolicyAddress);
@@ -185,9 +213,9 @@ async function main() {
   console.log("SecureMintPolicy deployed to:", secureMintPolicyAddress);
 
   /* ============================================================
-   * 6. Deploy MintBurnExtractor
+   * 7. Deploy MintBurnExtractor
    * ============================================================ */
-  console.log("\n--- Step 6: Deploy MintBurnExtractor ---");
+  console.log("\n--- Step 7: Deploy MintBurnExtractor ---");
   const ExtractorFactory = await ethers.getContractFactory("MintBurnExtractor");
   const mintBurnExtractor = await ExtractorFactory.deploy();
   await mintBurnExtractor.waitForDeployment();
@@ -195,9 +223,9 @@ async function main() {
   console.log("MintBurnExtractor deployed to:", extractorAddress);
 
   /* ============================================================
-   * 7. Collect function selectors
+   * 8. Collect function selectors
    * ============================================================ */
-  console.log("\n--- Step 7: Configure PolicyEngine ---");
+  console.log("\n--- Step 8: Configure PolicyEngine ---");
 
   const selectors = {
     // Mint / Burn
@@ -214,6 +242,9 @@ async function main() {
     // Admin
     setName:           cmtat.interface.getFunction("setName").selector,
     setSymbol:         cmtat.interface.getFunction("setSymbol").selector,
+    // Engines
+    setSnapshotEngine: cmtat.interface.getFunction("setSnapshotEngine").selector,
+    setDocumentEngine: cmtat.interface.getFunction("setDocumentEngine").selector,
   };
 
   console.log("Function selectors:");
@@ -222,16 +253,16 @@ async function main() {
   }
 
   /* ============================================================
-   * 8. Register extractor for mint selector
+   * 9. Register extractor for mint selector
    * ============================================================ */
-  console.log("\n--- Step 8: Set extractor for mint selector ---");
+  console.log("\n--- Step 9: Set extractor for mint selector ---");
   await policyEngine.connect(deployer).setExtractor(selectors.mint, extractorAddress);
   console.log("Extractor set for mint selector");
 
   /* ============================================================
-   * 9. Add PausePolicy to all external functions
+   * 10. Add PausePolicy to all external functions
    * ============================================================ */
-  console.log("\n--- Step 9: Add PausePolicy to all functions ---");
+  console.log("\n--- Step 10: Add PausePolicy to all functions ---");
   const allSelectors = Object.entries(selectors);
   for (const [name, sel] of allSelectors) {
     await policyEngine.connect(deployer).addPolicy(cmtatAddress, sel, pausePolicyAddress, []);
@@ -239,18 +270,18 @@ async function main() {
   }
 
   /* ============================================================
-   * 10. Add RBAC policy to all external functions
+   * 11. Add RBAC policy to all external functions
    * ============================================================ */
-  console.log("\n--- Step 10: Add RBAC policy to all functions ---");
+  console.log("\n--- Step 11: Add RBAC policy to all functions ---");
   for (const [name, sel] of allSelectors) {
     await policyEngine.connect(deployer).addPolicy(cmtatAddress, sel, rbacPolicyAddress, []);
     console.log(`  RBAC policy added for: ${name} (${sel})`);
   }
 
   /* ============================================================
-   * 11. Add SecureMint policy to mint function
+   * 12. Add SecureMint policy to mint function
    * ============================================================ */
-  console.log("\n--- Step 11: Add SecureMint policy to mint ---");
+  console.log("\n--- Step 12: Add SecureMint policy to mint ---");
   // SecureMintPolicy expects 1 parameter: "amount"
   // The extractor produces parameters named keccak256("amount") and keccak256("account")
   const PARAM_AMOUNT = keccak256(toUtf8Bytes("amount"));
@@ -263,9 +294,9 @@ async function main() {
   console.log("SecureMint policy added for mint selector");
 
   /* ============================================================
-   * 11b. Deploy ERC20TransferExtractor + ERC20TransferFromExtractor
+   * 12b. Deploy ERC20TransferExtractor + ERC20TransferFromExtractor
    * ============================================================ */
-  console.log("\n--- Step 11b: Deploy Transfer Extractors ---");
+  console.log("\n--- Step 12b: Deploy Transfer Extractors ---");
 
   const ERC20ExtractorFactory = await ethers.getContractFactory("ERC20TransferExtractor");
   const erc20TransferExtractor = await ERC20ExtractorFactory.deploy();
@@ -280,9 +311,9 @@ async function main() {
   console.log("ERC20TransferFromExtractor deployed to:", erc20TransferFromExtractorAddress);
 
   /* ============================================================
-   * 11c. Deploy mock rules + TransferValidationPolicy
+   * 12c. Deploy mock rules + TransferValidationPolicy
    * ============================================================ */
-  console.log("\n--- Step 11c: Deploy TransferValidationPolicy with mock rules ---");
+  console.log("\n--- Step 12c: Deploy TransferValidationPolicy with mock rules ---");
 
   // Deploy MaxAmountRule (max 1000 tokens)
   const MaxAmountRuleFactory = await ethers.getContractFactory("MaxAmountRule");
@@ -315,9 +346,9 @@ async function main() {
   console.log("TransferValidationPolicy deployed to:", transferPolicyAddress);
 
   /* ============================================================
-   * 11d. Set extractors and add TransferValidationPolicy
+   * 12d. Set extractors and add TransferValidationPolicy
    * ============================================================ */
-  console.log("\n--- Step 11d: Register extractors & TransferValidationPolicy ---");
+  console.log("\n--- Step 12d: Register extractors & TransferValidationPolicy ---");
 
   // Set ERC20TransferExtractor for transfer()
   await policyEngine.connect(deployer).setExtractor(selectors.transfer, erc20TransferExtractorAddress);
@@ -352,9 +383,9 @@ async function main() {
   console.log("TransferValidationPolicy added for transferFrom (4 params: spender, from, to, amount)");
 
   /* ============================================================
-   * 12. Grant operation allowances on RBAC policy
+   * 13. Grant operation allowances on RBAC policy
    * ============================================================ */
-  console.log("\n--- Step 12: Grant RBAC operation allowances ---");
+  console.log("\n--- Step 13: Grant RBAC operation allowances ---");
 
   // Map selectors to their logical roles
   const roleMapping = [
@@ -368,6 +399,8 @@ async function main() {
     { selector: selectors.unfreezePartial, role: ERC20ENFORCER_ROLE, name: "unfreezePartialTokens → ERC20ENFORCER_ROLE" },
     { selector: selectors.setName,         role: DEFAULT_ADMIN_ROLE, name: "setName → DEFAULT_ADMIN_ROLE" },
     { selector: selectors.setSymbol,       role: DEFAULT_ADMIN_ROLE, name: "setSymbol → DEFAULT_ADMIN_ROLE" },
+    { selector: selectors.setSnapshotEngine, role: SNAPSHOOTER_ROLE, name: "setSnapshotEngine → SNAPSHOOTER_ROLE" },
+    { selector: selectors.setDocumentEngine, role: DOCUMENT_ROLE,   name: "setDocumentEngine → DOCUMENT_ROLE" },
   ];
 
   for (const { selector, role, name } of roleMapping) {
@@ -376,15 +409,17 @@ async function main() {
   }
 
   /* ============================================================
-   * 13. Grant roles to the admin account
+   * 14. Grant roles to the admin account
    * ============================================================ */
-  console.log("\n--- Step 13: Grant roles to admin ---");
+  console.log("\n--- Step 14: Grant roles to admin ---");
   const rolesToGrant = [
     { role: MINTER_ROLE,       name: "MINTER_ROLE" },
     { role: BURNER_ROLE,       name: "BURNER_ROLE" },
     { role: BURNER_FROM_ROLE,  name: "BURNER_FROM_ROLE" },
     { role: ENFORCER_ROLE,     name: "ENFORCER_ROLE" },
     { role: ERC20ENFORCER_ROLE, name: "ERC20ENFORCER_ROLE" },
+    { role: SNAPSHOOTER_ROLE,  name: "SNAPSHOOTER_ROLE" },
+    { role: DOCUMENT_ROLE,     name: "DOCUMENT_ROLE" },
   ];
 
   for (const { role, name } of rolesToGrant) {
@@ -435,6 +470,8 @@ async function main() {
   console.log("MaxAmountRule:              ", maxAmountRuleAddress);
   console.log("RestrictedAddressRule:      ", restrictedAddressRuleAddress);
   console.log("Mock Reserve Feed:          ", mockFeedAddress);
+  console.log("DocumentEngineMock:         ", documentEngineAddress);
+  console.log("SnapshotEngineMock:         ", snapshotEngineAddress);
 
   console.log("\n--- Configuration ---");
   console.log(`Reserve amount:              1,000,000 tokens (${reserveAmount} raw with ${tokenDecimals} decimals)`);
@@ -448,7 +485,9 @@ async function main() {
   console.log("    → MaxAmountRule: max", maxTransferAmount.toString(), "raw units per transfer");
   console.log("    → RestrictedAddressRule: no addresses initially restricted");
   console.log("  - Policy execution order per function: PausePolicy → RBAC → (SecureMint on mint) → (TransferValidation on transfer/transferFrom)");
-  console.log("  - Admin has MINTER, BURNER, BURNER_FROM, ENFORCER, ERC20ENFORCER roles");
+  console.log("  - Admin has MINTER, BURNER, BURNER_FROM, ENFORCER, ERC20ENFORCER, SNAPSHOOTER, DOCUMENT roles");
+  console.log("  - DocumentEngineMock set at deploy (manages on-chain documents via IERC1643)");
+  console.log("  - SnapshotEngineMock set at deploy (enables snapshot scheduling for balance tracking)");
   console.log("========================================");
 }
 

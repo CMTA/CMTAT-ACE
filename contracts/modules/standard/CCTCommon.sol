@@ -42,13 +42,17 @@ abstract contract CCTCommon is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine
+        address policyEngine,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) public virtual initializer {
         _initialize(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            policyEngine
+            policyEngine,
+            snapshotEngine_,
+            documentEngine_
         );
     }
 
@@ -56,13 +60,17 @@ abstract contract CCTCommon is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine
+        address policyEngine,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) internal virtual onlyInitializing {
         __CMTAT_init(
             admin,
             ERC20Attributes_,
             extraInformationAttributes_,
-            policyEngine
+            policyEngine,
+            snapshotEngine_,
+            documentEngine_
         );
     }
 
@@ -74,7 +82,9 @@ abstract contract CCTCommon is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes_,
-        address policyEngine
+        address policyEngine,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) internal virtual onlyInitializing {
         __Ownable_init_unchained(admin);
         /* OpenZeppelin library */
@@ -91,6 +101,10 @@ abstract contract CCTCommon is
 
         /* Wrapper modules */
         __CMTAT_modules_init_unchained(ERC20Attributes_, ExtraInformationAttributes_ );
+
+        /* Engine modules */
+        __SnapshotEngineModule_init_unchained(snapshotEngine_);
+        __DocumentEngineModule_init_unchained(documentEngine_);
     }
 
     /*

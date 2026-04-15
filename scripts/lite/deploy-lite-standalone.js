@@ -57,7 +57,9 @@ async function main() {
     admin,
     ERC20Attributes,
     extraInformationAttributes,
-    policyEngineAddress
+    policyEngineAddress,
+    ZeroAddress,
+    ZeroAddress
   );
 
   await cmtat.waitForDeployment();

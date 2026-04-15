@@ -1,34 +1,8 @@
 const { expect } = require('chai')
-const {
-  ENFORCER_ROLE,
-  ERC20ENFORCER_ROLE,
-  DEFAULT_ADMIN_ROLE
-} = require('../../deploymentUtils')
 
 function ERC20EnforcementCommon () {
   context('ERC20 Enforcement Module', function () {
     beforeEach(async function () {
-      // Set up freeze/unfreeze/forcedTransfer with RBAC
-      const freezeSelector = this.cmtat.interface.getFunction('freezePartialTokens(address,uint256)').selector
-      const unfreezeSelector = this.cmtat.interface.getFunction('unfreezePartialTokens(address,uint256)').selector
-      const forcedTransferSelector = this.cmtat.interface.getFunction('forcedTransfer(address,address,uint256)').selector
-
-      await this.policyEngine.connect(this.admin).addPolicy(this.cmtatAddress, freezeSelector, this.rbacPolicyAddress, [])
-      await this.policyEngine.connect(this.admin).addPolicy(this.cmtatAddress, unfreezeSelector, this.rbacPolicyAddress, [])
-      await this.policyEngine.connect(this.admin).addPolicy(this.cmtatAddress, forcedTransferSelector, this.rbacPolicyAddress, [])
-
-      await this.rbacPolicy.connect(this.admin).grantOperationAllowanceToRole(freezeSelector, ERC20ENFORCER_ROLE)
-      await this.rbacPolicy.connect(this.admin).grantOperationAllowanceToRole(unfreezeSelector, ERC20ENFORCER_ROLE)
-      await this.rbacPolicy.connect(this.admin).grantOperationAllowanceToRole(forcedTransferSelector, ENFORCER_ROLE)
-
-      await this.rbacPolicy.connect(this.admin).grantRole(ERC20ENFORCER_ROLE, this.admin.address)
-      await this.rbacPolicy.connect(this.admin).grantRole(ENFORCER_ROLE, this.admin.address)
-
-      // Set up transfer for testing
-      const transferSelector = this.cmtat.interface.getFunction('transfer(address,uint256)').selector
-      await this.policyEngine.connect(this.admin).addPolicy(this.cmtatAddress, transferSelector, this.rbacPolicyAddress, [])
-      await this.rbacPolicy.connect(this.admin).grantOperationAllowanceToRole(transferSelector, DEFAULT_ADMIN_ROLE)
-
       await this.cmtat.connect(this.admin).mint(this.address1, 100n)
     })
 
@@ -50,7 +24,6 @@ function ERC20EnforcementCommon () {
     })
 
     it('testCannotTransferFrozenTokens', async function () {
-      await this.rbacPolicy.connect(this.admin).grantRole(DEFAULT_ADMIN_ROLE, this.address1)
       await this.cmtat.connect(this.admin)['freezePartialTokens(address,uint256)'](this.address1, 60n)
       // Active balance = 100 - 60 = 40, so transferring 50 should fail
       await expect(
@@ -59,7 +32,6 @@ function ERC20EnforcementCommon () {
     })
 
     it('testCanTransferActiveBalance', async function () {
-      await this.rbacPolicy.connect(this.admin).grantRole(DEFAULT_ADMIN_ROLE, this.address1)
       await this.cmtat.connect(this.admin)['freezePartialTokens(address,uint256)'](this.address1, 60n)
       // Active balance = 40, transferring 40 should work
       await this.cmtat.connect(this.address1).transfer(this.address2, 40n)

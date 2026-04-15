@@ -5,6 +5,8 @@ pragma solidity ^0.8.20;
 import {CCTBaseERC2771} from "../../modules/standard/CCTBaseERC2771.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
+import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol";
 
 
 /**
@@ -28,14 +30,18 @@ contract ComplianceTokenCMTATStandalone is CCTBaseERC2771 {
         address admin_,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_
+        address policyEngine_,
+        ISnapshotEngine snapshotEngine_,
+        IERC1643 documentEngine_
     ) ERC2771Module(forwarderIrrevocable_) {
         // Initialize the contract to avoid front-running
         initialize(
             admin_,
             ERC20Attributes_,
             extraInformationAttributes_,
-            policyEngine_
+            policyEngine_,
+            snapshotEngine_,
+            documentEngine_
         );
     }
 }

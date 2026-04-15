@@ -86,7 +86,7 @@ async function deployRBACPolicy (policyEngineAddress, ownerAddress) {
 
 /* ======== Standard Contract Deploy Helpers ======== */
 
-async function deployCCTStandalone (forwarder, admin, policyEngineAddress) {
+async function deployCCTStandalone (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const cmtat = await ethers.deployContract(
     'ComplianceTokenCMTATStandalone',
     [
@@ -94,13 +94,15 @@ async function deployCCTStandalone (forwarder, admin, policyEngineAddress) {
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ]
   )
   return cmtat
 }
 
-async function deployCCTUpgradeable (forwarder, admin, policyEngineAddress) {
+async function deployCCTUpgradeable (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATUpgradeable')
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -108,7 +110,9 @@ async function deployCCTUpgradeable (forwarder, admin, policyEngineAddress) {
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ],
     {
       initializer: 'initialize',
@@ -122,7 +126,7 @@ async function deployCCTUpgradeable (forwarder, admin, policyEngineAddress) {
 
 /* ======== Lite Contract Deploy Helpers ======== */
 
-async function deployCCTLiteStandalone (forwarder, admin, policyEngineAddress) {
+async function deployCCTLiteStandalone (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const cmtat = await ethers.deployContract(
     'ComplianceTokenCMTATLiteStandalone',
     [
@@ -130,13 +134,15 @@ async function deployCCTLiteStandalone (forwarder, admin, policyEngineAddress) {
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ]
   )
   return cmtat
 }
 
-async function deployCCTLiteUpgradeable (forwarder, admin, policyEngineAddress) {
+async function deployCCTLiteUpgradeable (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATLiteUpgradeable')
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -144,7 +150,9 @@ async function deployCCTLiteUpgradeable (forwarder, admin, policyEngineAddress) 
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ],
     {
       initializer: 'initialize',
@@ -158,7 +166,7 @@ async function deployCCTLiteUpgradeable (forwarder, admin, policyEngineAddress) 
 
 /* ======== UUPS Contract Deploy Helpers ======== */
 
-async function deployCCTUUPSUpgradeable (forwarder, admin, policyEngineAddress) {
+async function deployCCTUUPSUpgradeable (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATUUPSUpgradeable')
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -166,7 +174,9 @@ async function deployCCTUUPSUpgradeable (forwarder, admin, policyEngineAddress) 
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ],
     {
       initializer: 'initialize',
@@ -179,7 +189,7 @@ async function deployCCTUUPSUpgradeable (forwarder, admin, policyEngineAddress) 
   return cmtat
 }
 
-async function deployCCTLiteUUPSUpgradeable (forwarder, admin, policyEngineAddress) {
+async function deployCCTLiteUUPSUpgradeable (forwarder, admin, policyEngineAddress, snapshotEngine = ZERO_ADDRESS, documentEngine = ZERO_ADDRESS) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATLiteUUPSUpgradeable')
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -187,7 +197,9 @@ async function deployCCTLiteUUPSUpgradeable (forwarder, admin, policyEngineAddre
       admin,
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-      policyEngineAddress
+      policyEngineAddress,
+      snapshotEngine,
+      documentEngine
     ],
     {
       initializer: 'initialize',
@@ -198,6 +210,129 @@ async function deployCCTLiteUUPSUpgradeable (forwarder, admin, policyEngineAddre
     }
   )
   return cmtat
+}
+
+/* ======== Fixture Factories ======== */
+
+/**
+ * Creates a fixture for standard (PolicyEngine + RBAC) deployment tests.
+ * All contract deployment, policy registration, and role grants happen once;
+ * loadFixture snapshots the state and restores it for each test.
+ */
+function createStandardFixture (deployTokenFn) {
+  return async function standardFixture () {
+    const [_, admin, address1, address2, address3, deployerAddress, fakeRuleEngine, ruleEngine, attacker] = await ethers.getSigners()
+
+    // Deploy ACE infrastructure
+    const policyEngine = await deployPolicyEngine(true, admin.address)
+    const policyEngineAddress = await policyEngine.getAddress()
+
+    const pausePolicy = await deployPausePolicy(policyEngineAddress, admin.address, false)
+    const pausePolicyAddress = await pausePolicy.getAddress()
+
+    const rbacPolicy = await deployRBACPolicy(policyEngineAddress, admin.address)
+    const rbacPolicyAddress = await rbacPolicy.getAddress()
+
+    // Deploy compliance token
+    const cmtat = await deployTokenFn(_.address, admin.address, policyEngineAddress)
+    const cmtatAddress = await cmtat.getAddress()
+
+    // Collect all selectors
+    const mintSelector = cmtat.interface.getFunction('mint(address,uint256)').selector
+    const burnSelector = cmtat.interface.getFunction('burn(address,uint256)').selector
+    const selfBurnSelector = cmtat.interface.getFunction('burn(uint256)').selector
+    const burnFromSelector = cmtat.interface.getFunction('burnFrom').selector
+    const transferSelector = cmtat.interface.getFunction('transfer(address,uint256)').selector
+    const transferFromSelector = cmtat.interface.getFunction('transferFrom(address,address,uint256)').selector
+    const forcedTransferSelector = cmtat.interface.getFunction('forcedTransfer(address,address,uint256)').selector
+    const freezeSelector = cmtat.interface.getFunction('freezePartialTokens(address,uint256)').selector
+    const unfreezeSelector = cmtat.interface.getFunction('unfreezePartialTokens(address,uint256)').selector
+    const setNameSelector = cmtat.interface.getFunction('setName').selector
+    const setTokenIdSelector = cmtat.interface.getFunction('setTokenId').selector
+    const setDocumentEngineSelector = cmtat.interface.getFunction('setDocumentEngine').selector
+    const setSnapshotEngineSelector = cmtat.interface.getFunction('setSnapshotEngine').selector
+    const setCCIPAdminSelector = cmtat.interface.getFunction('setCCIPAdmin').selector
+    const crosschainMintSelector = cmtat.interface.getFunction('crosschainMint').selector
+    const crosschainBurnSelector = cmtat.interface.getFunction('crosschainBurn').selector
+
+    const allSelectors = [
+      mintSelector, burnSelector, selfBurnSelector, burnFromSelector,
+      forcedTransferSelector, freezeSelector, unfreezeSelector,
+      setNameSelector, setTokenIdSelector,
+      setDocumentEngineSelector, setSnapshotEngineSelector, setCCIPAdminSelector,
+      crosschainMintSelector, crosschainBurnSelector
+    ]
+
+    // Add PausePolicy + RBAC to all admin selectors
+    for (const sel of allSelectors) {
+      await policyEngine.connect(admin).addPolicy(cmtatAddress, sel, pausePolicyAddress, [])
+      await policyEngine.connect(admin).addPolicy(cmtatAddress, sel, rbacPolicyAddress, [])
+    }
+
+    // Transfer selectors get PausePolicy only (no RBAC - anyone can transfer)
+    await policyEngine.connect(admin).addPolicy(cmtatAddress, transferSelector, pausePolicyAddress, [])
+    await policyEngine.connect(admin).addPolicy(cmtatAddress, transferFromSelector, pausePolicyAddress, [])
+
+    // Grant operation allowances
+    const opAllowances = [
+      [mintSelector, MINTER_ROLE],
+      [burnSelector, BURNER_ROLE],
+      [selfBurnSelector, BURNER_SELF_ROLE],
+      [burnFromSelector, BURNER_FROM_ROLE],
+      [forcedTransferSelector, ENFORCER_ROLE],
+      [freezeSelector, ERC20ENFORCER_ROLE],
+      [unfreezeSelector, ERC20ENFORCER_ROLE],
+      [setNameSelector, DEFAULT_ADMIN_ROLE],
+      [setTokenIdSelector, DEFAULT_ADMIN_ROLE],
+      [setDocumentEngineSelector, DOCUMENT_ROLE],
+      [setSnapshotEngineSelector, SNAPSHOOTER_ROLE],
+      [setCCIPAdminSelector, DEFAULT_ADMIN_ROLE],
+      [crosschainMintSelector, CROSS_CHAIN_ROLE],
+      [crosschainBurnSelector, CROSS_CHAIN_ROLE]
+    ]
+    for (const [sel, role] of opAllowances) {
+      await rbacPolicy.connect(admin).grantOperationAllowanceToRole(sel, role)
+    }
+
+    // Grant roles to admin
+    const adminRoles = [MINTER_ROLE, BURNER_ROLE, ENFORCER_ROLE, ERC20ENFORCER_ROLE, DOCUMENT_ROLE, SNAPSHOOTER_ROLE]
+    for (const role of adminRoles) {
+      await rbacPolicy.connect(admin).grantRole(role, admin.address)
+    }
+
+    return {
+      _, admin, address1, address2, address3, deployerAddress, fakeRuleEngine, ruleEngine, attacker,
+      policyEngine, policyEngineAddress, pausePolicy, pausePolicyAddress,
+      rbacPolicy, rbacPolicyAddress,
+      cmtat, cmtatAddress,
+      mintSelector, burnSelector, selfBurnSelector, burnFromSelector,
+      transferSelector, transferFromSelector,
+      forcedTransferSelector, freezeSelector, unfreezeSelector,
+      setNameSelector, setTokenIdSelector,
+      setDocumentEngineSelector, setSnapshotEngineSelector, setCCIPAdminSelector,
+      crosschainMintSelector, crosschainBurnSelector,
+      erc1404: true
+    }
+  }
+}
+
+/**
+ * Creates a fixture for lite (AccessControl + PolicyEngine for validation) deployment tests.
+ * Deploys just the PolicyEngine and token; no PausePolicy or RBAC needed.
+ */
+function createLiteFixture (deployTokenFn) {
+  return async function liteFixture () {
+    const [_, admin, address1, address2, address3, deployerAddress, fakeRuleEngine, ruleEngine, attacker] = await ethers.getSigners()
+
+    const policyEngine = await deployPolicyEngine(true, admin.address)
+    const cmtat = await deployTokenFn(_.address, admin.address, await policyEngine.getAddress())
+
+    return {
+      _, admin, address1, address2, address3, deployerAddress, fakeRuleEngine, ruleEngine, attacker,
+      policyEngine, cmtat,
+      erc1404: true
+    }
+  }
 }
 
 module.exports = {
@@ -225,5 +360,7 @@ module.exports = {
   deployCCTUUPSUpgradeable,
   deployCCTLiteStandalone,
   deployCCTLiteUpgradeable,
-  deployCCTLiteUUPSUpgradeable
+  deployCCTLiteUUPSUpgradeable,
+  createStandardFixture,
+  createLiteFixture
 }
