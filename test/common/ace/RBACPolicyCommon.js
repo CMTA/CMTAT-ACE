@@ -1,14 +1,9 @@
 const { expect } = require('chai');
 const {
   MINTER_ROLE,
-  BURNER_ROLE,
   BURNER_FROM_ROLE,
   BURNER_SELF_ROLE,
   ENFORCER_ROLE,
-  ERC20ENFORCER_ROLE,
-  DEFAULT_ADMIN_ROLE,
-  DOCUMENT_ROLE,
-  SNAPSHOOTER_ROLE,
   CROSS_CHAIN_ROLE,
 } = require('../../deploymentUtils');
 

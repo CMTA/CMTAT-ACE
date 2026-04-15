@@ -1,14 +1,7 @@
 const { ethers, upgrades } = require('hardhat');
 const { expect } = require('chai');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
-const {
-  fixture,
-  MINTER_ROLE,
-  DEPLOYMENT_DECIMAL,
-  TERMS,
-  deployPolicyEngine,
-  deployCCTLiteStandalone,
-} = require('../deploymentUtils');
+const { fixture, deployPolicyEngine, deployCCTLiteStandalone } = require('../deploymentUtils');
 
 // Parameter name hashes matching the ERC20TransferFromExtractor
 const PARAM_SPENDER = ethers.keccak256(ethers.toUtf8Bytes('spender'));

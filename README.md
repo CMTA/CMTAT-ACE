@@ -237,6 +237,38 @@ To run tests:
 npx hardhat test
 ```
 
+# Linting & Formatting
+
+## ESLint
+
+Lint JavaScript files (tests, scripts, config):
+
+```shell
+npm run lint
+```
+
+Auto-fix fixable issues:
+
+```shell
+npm run lint:fix
+```
+
+## Prettier
+
+Check formatting for JS, JSON, Markdown, and Solidity:
+
+```shell
+npm run format:check
+```
+
+Auto-format all files:
+
+```shell
+npm run format
+```
+
+Solidity formatting uses [prettier-plugin-solidity](https://github.com/prettier-solidity/prettier-plugin-solidity) and is scoped to `contracts/**/*.sol` only (submodules and dependencies are excluded).
+
 # Scripts
 
 ## Deployment scripts
