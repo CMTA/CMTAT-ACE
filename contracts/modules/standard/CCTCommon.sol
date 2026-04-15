@@ -121,7 +121,7 @@ abstract contract CCTCommon is
                         PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
      /* ============  State Functions ============ */
-    function transfer(address to, uint256 value) public virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (bool) {
+    function transfer(address to, uint256 value) public virtual override(ERC20Upgradeable, CMTATBaseCommon) runPolicy returns (bool) {
          return CMTATBaseCommon.transfer(to, value);
     }
     /*
@@ -135,6 +135,7 @@ abstract contract CCTCommon is
         public
         virtual
         override(ERC20Upgradeable, CMTATBaseCommon)
+        runPolicy
         returns (bool)
     {
         return CMTATBaseCommon.transferFrom(from, to, value);
@@ -264,7 +265,7 @@ abstract contract CCTCommon is
     * @custom:access-control
     * - the caller must have the `DEFAULT_ADMIN_ROLE`.
     */
-    function _authorizeCCIPSetAdmin() internal virtual override(CCIPModule) runPolicy  {}
+    function _authorizeCCIPSetAdmin() internal virtual override(CCIPModule) runPolicy{}
 
     /** 
     * @dev 
@@ -275,7 +276,7 @@ abstract contract CCTCommon is
     * @custom:access-control
     * - the caller must have the `CROSS_CHAIN_ROLE`.
     */
-    function _checkTokenBridge(address caller) internal virtual override(ERC20CrossChainModule) runPolicy {}
+    function _checkTokenBridge(address caller) internal virtual override(ERC20CrossChainModule) runPolicy{}
 
 
     /** 

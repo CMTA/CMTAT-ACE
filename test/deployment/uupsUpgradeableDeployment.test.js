@@ -17,6 +17,7 @@ const PausePolicyCommon = require('../common/ace/PausePolicyCommon')
 const RBACPolicyCommon = require('../common/ace/RBACPolicyCommon')
 const CombinedPolicyCommon = require('../common/ace/CombinedPolicyCommon')
 const PolicyEngineCommon = require('../common/ace/PolicyEngineCommon')
+const CMTATModuleCommon = require('../common/cmtat/CMTATModuleCommon')
 
 describe('ComplianceTokenCMTATUUPSUpgradeable', function () {
   beforeEach(async function () {
@@ -124,4 +125,5 @@ describe('ComplianceTokenCMTATUUPSUpgradeable', function () {
   RBACPolicyCommon()
   CombinedPolicyCommon()
   PolicyEngineCommon()
+  CMTATModuleCommon()
 })
