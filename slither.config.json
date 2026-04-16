@@ -1,4 +1,4 @@
 {
-  "filter_paths": "node_modules,submodules,contracts/test",
+  "filter_paths": "node_modules,submodules,test",
   "compile_force_framework": "foundry"
 }

@@ -95,14 +95,12 @@ async function deployRBACPolicy(policyEngineAddress, ownerAddress) {
 /* ======== Standard Contract Deploy Helpers ======== */
 
 async function deployCCTStandalone(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
   documentEngine = ZERO_ADDRESS,
 ) {
   const cmtat = await ethers.deployContract('ComplianceTokenCMTATStandalone', [
-    forwarder,
     admin,
     ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
     ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
@@ -114,7 +112,6 @@ async function deployCCTStandalone(
 }
 
 async function deployCCTUpgradeable(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
@@ -133,7 +130,6 @@ async function deployCCTUpgradeable(
     ],
     {
       initializer: 'initialize',
-      constructorArgs: [forwarder],
       unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
     },
@@ -144,14 +140,12 @@ async function deployCCTUpgradeable(
 /* ======== Lite Contract Deploy Helpers ======== */
 
 async function deployCCTLiteStandalone(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
   documentEngine = ZERO_ADDRESS,
 ) {
   const cmtat = await ethers.deployContract('ComplianceTokenCMTATLiteStandalone', [
-    forwarder,
     admin,
     ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
     ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
@@ -163,7 +157,6 @@ async function deployCCTLiteStandalone(
 }
 
 async function deployCCTLiteUpgradeable(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
@@ -182,13 +175,6 @@ async function deployCCTLiteUpgradeable(
     ],
     {
       initializer: 'initialize',
-      constructorArgs: [
-        forwarder,
-        admin,
-        ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
-        ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
-        policyEngineAddress,
-      ],
       unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
     },
@@ -199,7 +185,6 @@ async function deployCCTLiteUpgradeable(
 /* ======== UUPS Contract Deploy Helpers ======== */
 
 async function deployCCTUUPSUpgradeable(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
@@ -218,7 +203,6 @@ async function deployCCTUUPSUpgradeable(
     ],
     {
       initializer: 'initialize',
-      constructorArgs: [forwarder],
       unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
       kind: 'uups',
@@ -228,7 +212,6 @@ async function deployCCTUUPSUpgradeable(
 }
 
 async function deployCCTLiteUUPSUpgradeable(
-  forwarder,
   admin,
   policyEngineAddress,
   snapshotEngine = ZERO_ADDRESS,
@@ -247,7 +230,6 @@ async function deployCCTLiteUUPSUpgradeable(
     ],
     {
       initializer: 'initialize',
-      constructorArgs: [forwarder],
       unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
       kind: 'uups',
@@ -288,7 +270,7 @@ function createStandardFixture(deployTokenFn) {
     const rbacPolicyAddress = await rbacPolicy.getAddress();
 
     // Deploy compliance token
-    const cmtat = await deployTokenFn(_.address, admin.address, policyEngineAddress);
+    const cmtat = await deployTokenFn(admin.address, policyEngineAddress);
     const cmtatAddress = await cmtat.getAddress();
 
     // Collect all selectors
@@ -440,7 +422,7 @@ function createLiteFixture(deployTokenFn) {
     ] = await ethers.getSigners();
 
     const policyEngine = await deployPolicyEngine(true, admin.address);
-    const cmtat = await deployTokenFn(_.address, admin.address, await policyEngine.getAddress());
+    const cmtat = await deployTokenFn(admin.address, await policyEngine.getAddress());
 
     return {
       _,

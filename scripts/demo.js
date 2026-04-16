@@ -144,7 +144,6 @@ async function main() {
    * 3. Deploy ComplianceTokenCMTATStandalone
    * ============================================================ */
   console.log('\n--- Step 3: Deploy ComplianceTokenCMTATStandalone ---');
-  const forwarderIrrevocable = ZeroAddress;
   const ERC20Attributes = {
     name: 'Security Token',
     symbol: 'ST',
@@ -163,7 +162,6 @@ async function main() {
 
   const CMTATFactory = await ethers.getContractFactory('ComplianceTokenCMTATStandalone', deployer);
   const cmtat = await CMTATFactory.deploy(
-    forwarderIrrevocable,
     admin,
     ERC20Attributes,
     extraInformationAttributes,

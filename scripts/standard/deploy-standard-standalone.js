@@ -28,9 +28,10 @@ async function main() {
     console.log('Deploying to network:', network.name, 'with account:', deployer.address);
   }
 
-  // To change
-  const forwarderIrrevocable = ZeroAddress;
+  // To change - set to deployed engine addresses if needed
   const admin = isHardhatNetwork ? deployer.address : '0x1000000000000000000000000000000000000001';
+  const snapshotEngine = ZeroAddress;
+  const documentEngine = ZeroAddress;
   const ERC20Attributes = {
     name: 'Security Token',
     symbol: 'ST',
@@ -54,13 +55,12 @@ async function main() {
 
   const CMTATFactory = await ethers.getContractFactory('ComplianceTokenCMTATStandalone', deployer);
   const cmtat = await CMTATFactory.deploy(
-    forwarderIrrevocable,
     admin,
     ERC20Attributes,
     extraInformationAttributes,
     policyEngineAddress,
-    ZeroAddress,
-    ZeroAddress,
+    snapshotEngine,
+    documentEngine,
   );
 
   await cmtat.waitForDeployment();

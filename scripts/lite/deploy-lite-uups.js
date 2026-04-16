@@ -28,9 +28,10 @@ async function main() {
     console.log('Deploying to network:', network.name, 'with account:', deployer.address);
   }
 
-  // To change
-  const forwarderIrrevocable = ZeroAddress;
+  // To change - set to deployed engine addresses if needed
   const admin = isHardhatNetwork ? deployer.address : '0x1000000000000000000000000000000000000001';
+  const snapshotEngine = ZeroAddress;
+  const documentEngine = ZeroAddress;
   const ERC20Attributes = ['Security Token', 'ST', 8];
   const terms = {
     name: 'Token Terms v1',
@@ -57,12 +58,11 @@ async function main() {
       ERC20Attributes,
       extraInformationAttributes,
       policyEngineAddress,
-      ZeroAddress,
-      ZeroAddress,
+      snapshotEngine,
+      documentEngine,
     ],
     {
       initializer: 'initialize',
-      constructorArgs: [forwarderIrrevocable],
       unsafeAllow: ['missing-initializer', 'constructor'],
       silenceWarnings: true,
       kind: 'uups',

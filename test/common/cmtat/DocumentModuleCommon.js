@@ -102,7 +102,6 @@ function DocumentModuleCommon() {
       // Deploy a fresh token with no document engine
       const policyEngineAddress = await this.policyEngine.getAddress();
       const freshCmtat = await deployCCTStandalone(
-        ethers.ZeroAddress,
         this.admin.address,
         policyEngineAddress,
       );

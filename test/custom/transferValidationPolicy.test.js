@@ -48,7 +48,6 @@ describe('TransferValidationPolicy', function () {
 
     // Deploy Lite Standalone token
     this.cmtat = await deployCCTLiteStandalone(
-      this._.address,
       this.admin.address,
       this.policyEngineAddress,
     );

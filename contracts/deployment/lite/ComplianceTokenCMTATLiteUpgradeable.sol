@@ -2,34 +2,16 @@
 
 pragma solidity ^0.8.20;
 
-import {CCTCMTATBaseERC2771} from "../../modules/lite/CCTCMTATBaseERC2771.sol";
-import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ERC2771Module} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC2771Module.sol";
+import {CCTCMTATBaseERC20CrossChain} from "../../modules/lite/CCTCMTATBaseERC20CrossChain.sol";
 
 /**
  * @title ComplianceTokenCMTATLite
  * @author Chainlink
  * @notice Standalone upgradeable lite Compliance Token contract with Chainlink ACE policy validation on CMTA transfers
  */
-contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC2771 {
-    /**
-     * @notice Contract version for standalone deployment
-     * @param forwarderIrrevocable address of the forwarder, required for the gasless support
-     * @param admin address of the admin of contract (Access Control)
-     * @param ERC20Attributes_ ERC20 name, symbol and decimals
-     * @param extraInformationAttributes_ tokenId, terms, information
-     * @param snapshotEngine_ address of the snapshot engine
-     * @param documentEngine_ address of the document engine
-     * @param policyEngine_ address of the policy engine
-     */
+contract ComplianceTokenCMTATLiteUpgradeable is CCTCMTATBaseERC20CrossChain {
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(
-        address forwarderIrrevocable,
-        address admin,
-        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
-        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_
-    ) ERC2771Module(forwarderIrrevocable) {
+    constructor() {
         // Disable the possibility to initialize the implementation
         _disableInitializers();
     }

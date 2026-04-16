@@ -70,7 +70,6 @@ describe('ComplianceTokenCMTATLiteUUPSUpgradeable', function () {
         this.admin,
       );
       await upgrades.upgradeProxy(await this.cmtat.getAddress(), FactoryV2, {
-        constructorArgs: [this._.address],
         unsafeAllow: ['missing-initializer', 'constructor'],
         silenceWarnings: true,
         kind: 'uups',
@@ -84,7 +83,6 @@ describe('ComplianceTokenCMTATLiteUUPSUpgradeable', function () {
       );
       await expect(
         upgrades.upgradeProxy(await this.cmtat.getAddress(), FactoryV2, {
-          constructorArgs: [this._.address],
           unsafeAllow: ['missing-initializer', 'constructor'],
           silenceWarnings: true,
           kind: 'uups',
@@ -104,7 +102,6 @@ describe('ComplianceTokenCMTATLiteUUPSUpgradeable', function () {
         this.admin,
       );
       const upgraded = await upgrades.upgradeProxy(await this.cmtat.getAddress(), FactoryV2, {
-        constructorArgs: [this._.address],
         unsafeAllow: ['missing-initializer', 'constructor'],
         silenceWarnings: true,
         kind: 'uups',
