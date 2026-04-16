@@ -101,10 +101,7 @@ function DocumentModuleCommon() {
     it('testGetEmptyDocumentsIfNoDocumentEngine', async function () {
       // Deploy a fresh token with no document engine
       const policyEngineAddress = await this.policyEngine.getAddress();
-      const freshCmtat = await deployCCTStandalone(
-        this.admin.address,
-        policyEngineAddress,
-      );
+      const freshCmtat = await deployCCTStandalone(this.admin.address, policyEngineAddress);
 
       const name = ethers.encodeBytes32String('doc1');
       const doc = await freshCmtat.getDocument(name);

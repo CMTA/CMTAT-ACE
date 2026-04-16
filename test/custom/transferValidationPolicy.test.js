@@ -47,10 +47,7 @@ describe('TransferValidationPolicy', function () {
     this.policyEngineAddress = await this.policyEngine.getAddress();
 
     // Deploy Lite Standalone token
-    this.cmtat = await deployCCTLiteStandalone(
-      this.admin.address,
-      this.policyEngineAddress,
-    );
+    this.cmtat = await deployCCTLiteStandalone(this.admin.address, this.policyEngineAddress);
     this.cmtatAddress = await this.cmtat.getAddress();
 
     // Deploy ERC20TransferFromExtractor
