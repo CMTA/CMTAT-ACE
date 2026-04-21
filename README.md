@@ -226,7 +226,7 @@ contract MyCustomRule is IRule {
 ## Initialize submodules
 
 ```shell
-git submodule update
+git submodule update. --init
 ```
 
 ## Install dependencies
