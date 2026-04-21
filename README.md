@@ -2,11 +2,11 @@
 
 ## Deployment versions
 
-Two versions are available; _lite_ version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and _standard_ version, which uses PolicyEngine to protect all external functions instead of OpenZeppelin role-based AccessControl.
+Two versions are available; _lite_ version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and _standard_ version, which uses PolicyEngine to protect state-changing operations instead of OpenZeppelin role-based AccessControl.
 
 ### Standard
 
-Replaces CMTAT's `AccessControlUpgradeable` (role-based) with `OwnableUpgradeable` (single owner) and integrates Chainlink ACE `PolicyProtectedUpgradeable` for all access control and compliance validation.
+Replaces CMTAT's `AccessControlUpgradeable` (role-based) with `OwnableUpgradeable` (single owner) and integrates Chainlink ACE `PolicyProtectedUpgradeable` for access control and compliance validation on state-changing operations (mint, burn, transfer, enforcement, admin functions).
 
 | Contract                              | Proxy type         |
 | ------------------------------------- | ------------------ |
@@ -45,15 +45,17 @@ Keeps CMTAT's `AccessControlUpgradeable` (role-based) for module authorization a
 
 ### Initialization
 
-The `Engine` struct parameter is replaced with a direct `address policyEngine_`:
+The `Engine` struct parameter is replaced with `address policyEngine_`, `ISnapshotEngine snapshotEngine_`, and `IERC1643 documentEngine_`:
 
 ```solidity
 // CMTAT
-constructor(..., ICMTATConstructor.Engine memory engines_)
+constructor(forwarder, admin, ..., ICMTATConstructor.Engine memory engines_)
 
 // ComplianceTokenCMTAT (Standard & Lite)
-constructor(..., address policyEngine_)
+constructor(admin, ..., address policyEngine_, ISnapshotEngine snapshotEngine_, IERC1643 documentEngine_)
 ```
+
+ERC-2771 (gasless transaction forwarding) has been removed from all deployment contracts. The standalone contracts no longer take a `forwarderIrrevocable` parameter, and the upgradeable contracts have parameterless constructors.
 
 ### Modules
 
@@ -61,11 +63,10 @@ All CMTAT functional modules are preserved in both variants:
 
 - ERC20MintModule, ERC20BurnModule
 - ERC20EnforcementModule (freeze/enforcement)
-- PauseModule (Standard: via PausePolicy; Lite: native)
+- PauseModule (Standard: `pause()`/`unpause()`/`deactivateContract()` are not exposed on the token — pausing is enforced externally via a PausePolicy on the PolicyEngine which rejects operations when paused; Lite: native `onlyRole(PAUSER_ROLE)`)
 - SnapshotEngineModule, DocumentEngineModule
 - ExtraInformationModule
 - ERC20CrossChainModule, CCIPModule
-- ERC2771Module (gasless transactions)
 
 ### Removed from Standard
 
@@ -74,6 +75,21 @@ All CMTAT functional modules are preserved in both variants:
 - `CMTATBaseRuleEngine` — replaced by `PolicyProtectedUpgradeable`
 - `ValidationModuleRuleEngine` — replaced by direct PolicyEngine calls
 - All `onlyRole()` authorization functions — replaced by `runPolicy` modifier
+- `pause()`, `unpause()`, `deactivateContract()` — not exposed on the token contract; the `_authorizePause` and `_authorizeDeactivate` hooks are intentionally left unimplemented so these functions remain abstract and are excluded from the compiled contract. Pausing is enforced externally via a PausePolicy attached to the PolicyEngine, which rejects protected operations when paused
+
+### Design notes
+
+#### Why `approve()` is not policy-protected
+
+`approve()` is intentionally not gated by `runPolicy` in either variant. An approval by itself does not move tokens — it only sets an allowance. The actual token movement happens via `transferFrom()`, which **is** policy-protected. Protecting `approve()` would add gas overhead without security benefit, since:
+
+1. A malicious or excessive approval has no effect until `transferFrom()` is called, at which point the PolicyEngine validates the transfer.
+2. The `ERC20TransferFromExtractor` extracts the `spender` address from `transferFrom()` calls, so policies can restrict which spenders are allowed to move tokens regardless of existing approvals.
+3. In the Lite variant, `approve()` is gated by `whenNotPaused` as a convenience (matching upstream CMTAT behavior), but this is not a security-critical check.
+
+### Removed from both variants
+
+- `ERC2771Module` — gasless transaction forwarding is not supported (ACE does not currently support ERC-2771)
 
 ### Added
 
@@ -295,24 +311,25 @@ npx hardhat run scripts/lite/deploy-lite-standalone.js
 `scripts/demo.js` provides a complete end-to-end deployment of the Standard variant with the full Chainlink ACE policy stack. It deploys and wires together all contracts in the correct order:
 
 1. **PolicyEngine** (proxy) — central policy orchestrator with `defaultAllow = true`
-2. **ComplianceTokenCMTATStandalone** — the token contract, attached to the PolicyEngine
-3. **PausePolicy** (proxy) — added to all external functions (mint, burn, transfer, enforcement, admin)
-4. **RoleBasedAccessControlPolicy** (proxy) — added to all external functions with role-to-selector mappings
-5. **MockV3Aggregator** — mock Chainlink reserve price feed (Hardhat network only)
-6. **SecureMintPolicy** (proxy) — added to `mint()`, enforces reserve-backed minting via price feed
-7. **MintBurnExtractor** — set for `mint()` selector, extracts `account` and `amount` parameters
-8. **ERC20TransferExtractor** — set for `transfer()` selector
-9. **ERC20TransferFromExtractor** — set for `transferFrom()` selector
-10. **MaxAmountRule** + **RestrictedAddressRule** — mock IRule contracts for transfer validation
-11. **TransferValidationPolicy** (proxy) — added to `transfer()` and `transferFrom()` with both rules
+2. **DocumentEngineMock** + **SnapshotEngineMock** — mock engine contracts for document/snapshot support
+3. **ComplianceTokenCMTATStandalone** — the token contract, attached to the PolicyEngine and engines
+4. **PausePolicy** (proxy) — added to all state-changing selectors (mint, burn, transfer, enforcement, admin)
+5. **RoleBasedAccessControlPolicy** (proxy) — added to admin selectors with role-to-selector mappings
+6. **MockV3Aggregator** — mock Chainlink reserve price feed (Hardhat network only)
+7. **SecureMintPolicy** (proxy) — added to `mint()`, enforces reserve-backed minting via price feed
+8. **MintBurnExtractor** — set for `mint()` selector, extracts `account` and `amount` parameters
+9. **ERC20TransferExtractor** — set for `transfer()` selector
+10. **ERC20TransferFromExtractor** — set for `transferFrom()` selector
+11. **MaxAmountRule** + **RestrictedAddressRule** — mock IRule contracts for transfer validation
+12. **TransferValidationPolicy** (proxy) — added to `transfer()` and `transferFrom()` with both rules
 
-The script also configures RBAC operation allowances and grants roles (`MINTER_ROLE`, `BURNER_ROLE`, `BURNER_FROM_ROLE`, `ENFORCER_ROLE`, `ERC20ENFORCER_ROLE`) to the admin account.
+The script also configures RBAC operation allowances and grants roles (`MINTER_ROLE`, `BURNER_ROLE`, `BURNER_FROM_ROLE`, `ENFORCER_ROLE`, `ERC20ENFORCER_ROLE`, `DOCUMENT_ROLE`, `SNAPSHOOTER_ROLE`) to the admin account.
 
 Policy execution order per function:
 
 - `mint()` → PausePolicy → RBAC → SecureMintPolicy
-- `transfer()` / `transferFrom()` → PausePolicy → RBAC → TransferValidationPolicy
-- All other functions → PausePolicy → RBAC
+- `transfer()` / `transferFrom()` → PausePolicy → TransferValidationPolicy
+- All other state-changing functions → PausePolicy → RBAC
 
 Run the demo on a local Hardhat network:
 

@@ -31,7 +31,7 @@ contract TransferValidationPolicy is Policy {
     }
 
     // keccak256(abi.encode(uint256(keccak256("cmta.TransferValidationPolicy")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant STORAGE_LOCATION = 0x9d1bc980e8a6a99b0c67a28b08c935a5db13a988e2a9b52481bff1e80ee16800;
+    bytes32 private constant STORAGE_LOCATION = 0xd90ded5881f9295c61e86b2e3b551acbb5fe06f9f79d0cec87ddc5bb60d48e00;
 
     function _getStorage() private pure returns (TransferValidationStorage storage $) {
         assembly {
@@ -49,6 +49,7 @@ contract TransferValidationPolicy is Policy {
             address[] memory ruleAddrs = abi.decode(parameters, (address[]));
             TransferValidationStorage storage $ = _getStorage();
             for (uint256 i = 0; i < ruleAddrs.length; ++i) {
+                require(ruleAddrs[i] != address(0), "Rule address cannot be zero");
                 $.rules.push(IRule(ruleAddrs[i]));
             }
         }
@@ -62,6 +63,7 @@ contract TransferValidationPolicy is Policy {
         TransferValidationStorage storage $ = _getStorage();
         delete $.rules;
         for (uint256 i = 0; i < rules_.length; ++i) {
+            require(address(rules_[i]) != address(0), "Rule address cannot be zero");
             $.rules.push(rules_[i]);
         }
     }
