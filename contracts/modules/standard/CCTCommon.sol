@@ -19,7 +19,6 @@ import {
     ERC20MintModule,
     ERC20MintModuleInternal
 } from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol";
-import {VersionModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/VersionModule.sol";
 import {ERC20BaseModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BaseModule.sol";
 /* = Option & Extension = */
 import {ERC20CrossChainModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol";
@@ -35,8 +34,6 @@ import {
 } from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/DocumentEngineModule.sol";
 import {SnapshotEngineModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/SnapshotEngineModule.sol";
 /* = Interface = */
-import {IERC5679} from "../../../submodules/CMTAT/contracts/interfaces/technical/IERC5679.sol";
-import {IBurnMintERC20} from "../../../submodules/CMTAT/contracts/interfaces/technical/IMintBurnToken.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */

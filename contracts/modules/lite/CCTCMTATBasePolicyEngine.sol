@@ -7,9 +7,7 @@ import {
     CMTATBaseAccessControl
 } from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
 import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
-import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
 import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
 import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
