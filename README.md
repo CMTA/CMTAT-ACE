@@ -26,6 +26,20 @@ Keeps CMTAT's `AccessControlUpgradeable` (role-based) for module authorization a
 
 ## Changes from CMTAT
 
+### Warning (Standard Variant)
+
+In the **Standard** variant, critical operations are authorized through ACE `runPolicy` checks instead of local `onlyRole(...)` checks. This includes core actions such as `mint`, burn functions, forced transfer/enforcement actions, and sensitive admin/configuration operations.
+
+This means `PolicyEngine` configuration is security-critical infrastructure. A bad config change can unintentionally allow or block sensitive actions.
+It also introduces a direct runtime dependency on Chainlink ACE contracts (PolicyEngine, attached policies, extractor/mapper configuration): if ACE contracts are unavailable, misconfigured, or incorrectly upgraded, authorization and compliance checks in the token are directly affected.
+
+Treat the following as privileged governance actions:
+
+- `addPolicy` / `removePolicy`
+- `setExtractor` / `setPolicyMapper`
+- `setDefaultAllow`
+- `attachPolicyEngine`
+
 ### Access Control
 
 | Aspect          | CMTAT                                    | Standard                                              | Lite                                                 |
