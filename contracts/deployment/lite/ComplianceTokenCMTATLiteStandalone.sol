@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 import {CCTCMTATBaseERC20CrossChain} from "../../modules/lite/CCTCMTATBaseERC20CrossChain.sol";
-import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol";
+import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
+import {IERC1643} from "CMTAT/interfaces/tokenization/draft-IERC1643.sol";
 
 /**
  * @title ComplianceTokenCMTATLite

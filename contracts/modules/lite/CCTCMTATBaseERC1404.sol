@@ -5,12 +5,12 @@ pragma solidity ^0.8.20;
 import {CCTCMTATBasePolicyEngine} from "./CCTCMTATBasePolicyEngine.sol";
 import {PolicyValidationModuleERC1404, IERC1404, IERC1404Extend} from "./PolicyValidationModuleERC1404.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
-import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
+import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
+} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 
 abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidationModuleERC1404 {
     /**

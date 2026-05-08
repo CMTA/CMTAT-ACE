@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
+import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
 import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";

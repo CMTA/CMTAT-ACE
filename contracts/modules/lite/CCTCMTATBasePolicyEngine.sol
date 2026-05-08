@@ -5,20 +5,20 @@ pragma solidity ^0.8.20;
 import {
     CMTATBaseCommon,
     CMTATBaseAccessControl
-} from "../../../submodules/CMTAT/contracts/modules/1_CMTATBaseAccessControl.sol";
+} from "CMTAT/modules/1_CMTATBaseAccessControl.sol";
 import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
-import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1643.sol";
+import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
+import {IERC1643} from "CMTAT/interfaces/tokenization/draft-IERC1643.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
-import {PauseModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/PauseModule.sol";
-import {EnforcementModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/EnforcementModule.sol";
-import {IERC7943FungibleTransferError} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC7943.sol";
+import {PauseModule} from "CMTAT/modules/wrapper/core/PauseModule.sol";
+import {EnforcementModule} from "CMTAT/modules/wrapper/core/EnforcementModule.sol";
+import {IERC7943FungibleTransferError} from "CMTAT/interfaces/tokenization/draft-IERC7943.sol";
 // Extensions
 import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
+} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 
 abstract contract CCTCMTATBasePolicyEngine is
     CMTATBaseAccessControl,

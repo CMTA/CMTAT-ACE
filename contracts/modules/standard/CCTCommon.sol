@@ -8,34 +8,34 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /* ==== CMTAT === */
-import {CMTATBaseCommon} from "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol";
+import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
 /* = Base = */
 /* = Core = */
 import {
     ERC20BurnModule,
     ERC20BurnModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol";
+} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {
     ERC20MintModule,
     ERC20MintModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol";
-import {ERC20BaseModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BaseModule.sol";
+} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BaseModule} from "CMTAT/modules/wrapper/core/ERC20BaseModule.sol";
 /* = Option & Extension = */
-import {ERC20CrossChainModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol";
-import {CCIPModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol";
-import {ExtraInformationModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ExtraInformationModule.sol";
+import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossChainModule.sol";
+import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
+import {ExtraInformationModule} from "CMTAT/modules/wrapper/extensions/ExtraInformationModule.sol";
 import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/ERC20EnforcementModule.sol";
+} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 import {
     DocumentEngineModule,
     IERC1643
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/DocumentEngineModule.sol";
-import {SnapshotEngineModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/extensions/SnapshotEngineModule.sol";
+} from "CMTAT/modules/wrapper/extensions/DocumentEngineModule.sol";
+import {SnapshotEngineModule} from "CMTAT/modules/wrapper/extensions/SnapshotEngineModule.sol";
 /* = Interface = */
-import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
+import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
 import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
 
