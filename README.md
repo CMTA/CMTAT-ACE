@@ -235,7 +235,7 @@ contract MyCustomRule is IRule {
 
 ## Library
 
-- CMTAT [v3.2.0-rc0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0-rc0)
+- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
 - Chainlink ACE ^1.0.0
 
 ## Initialize submodules
