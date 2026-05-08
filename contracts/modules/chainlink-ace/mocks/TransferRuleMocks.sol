@@ -55,7 +55,7 @@ contract RestrictedAddressRule is IRule {
     uint8 constant TO_RESTRICTED = 15;
 
     mapping(address => bool) public restricted;
-    address public owner;
+    address public immutable owner;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "only owner");
