@@ -45,7 +45,8 @@ abstract contract PolicyProtectedUpgradeable is Initializable, ERC165Upgradeable
     }
     /**
      * @dev Modifier to run the policy engine on the current method.
-     * @notice After the function execution completes, any context that was set will be automatically cleared.
+     * @notice Context is cleared only after successful execution of the guarded function.
+     *         If the guarded function reverts, this cleanup path is not reached and previously stored context remains.
      */
 
     modifier runPolicy() {
