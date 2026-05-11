@@ -165,3 +165,6 @@ ignition/deployments/chain-31337
 
 # Foudry files
 /cache_hardhat
+
+# custom local directory
+history

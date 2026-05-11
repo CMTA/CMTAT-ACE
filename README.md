@@ -1,8 +1,38 @@
 # CMTAT ACE integration project
 
+## Introduction
+
+This repository combines two components:
+
+- **CMTAT (CMTA Token)**: an open security-token standard from the [Capital Markets and Technology Association (CMTA)](https://www.cmta.ch/), with compliance-oriented modules such as conditional transfer controls, account freeze/enforcement, token pause, document and snapshot engines, and token lifecycle controls.
+- **Chainlink ACE (Automated Compliance Engine)**: a policy engine that evaluates configurable compliance and authorization policies at runtime for protected contract functions.
+
+In this integration, CMTAT provides the token feature set and module structure, while ACE provides dynamic policy enforcement.  
+The goal is to let issuers update compliance behavior through policy configuration without changing core token business logic.
+
+## Table of Contents
+
+- [Deployment versions](#deployment-versions)
+- [Changes from CMTAT](#changes-from-cmtat)
+- [TransferValidationPolicy](#transfervalidationpolicy)
+- [ERC-165 Interface Support](#erc-165-interface-support)
+- [Library](#library)
+- [Initialize submodules](#initialize-submodules)
+- [Install dependencies](#install-dependencies)
+- [Compile contracts](#compile-contracts)
+- [Testing](#testing)
+- [Linting & Formatting](#linting--formatting)
+- [Scripts](#scripts)
+- [Audit Reports Summary](#audit-reports-summary)
+- [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
+- [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
+
 ## Deployment versions
 
-Two versions are available; _lite_ version which substitutes RuleEngine with Chainlink ACE PolicyEngine, and _standard_ version, which uses PolicyEngine to protect state-changing operations instead of OpenZeppelin role-based AccessControl.
+Two versions are available:
+
+- **Lite**: substitutes RuleEngine with Chainlink ACE PolicyEngine for transfer validation, while keeping CMTAT role-based module authorization.
+- **Standard**: uses Chainlink ACE PolicyEngine as the authorization/compliance gate for state-changing operations, replacing local role-based authorization with policy checks.
 
 ### Standard
 
@@ -233,6 +263,16 @@ contract MyCustomRule is IRule {
 }
 ```
 
+## ERC-165 Interface Support
+
+This integration includes ERC-165 interface discovery for both the protected token side and policy side:
+
+- **Protected-token interface support**: `PolicyProtectedUpgradeable` exposes `IPolicyProtected` via `supportsInterface`, and the Standard/Lite token bases propagate that support through their own `supportsInterface` overrides.
+- **Policy interface support**: `TransferValidationPolicy` extends Chainlink ACE `Policy`, and `Policy` exposes `IPolicy` via ERC-165.
+- **Rule interface support in mocks**: the included `TransferRuleMocks` expose `IRule` via `supportsInterface` for compatibility testing.
+
+This allows integrators and tooling to programmatically verify interface compatibility before wiring policies, engines, and rule contracts together.
+
 ## Library
 
 - CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
@@ -241,7 +281,7 @@ contract MyCustomRule is IRule {
 ## Initialize submodules
 
 ```shell
-git submodule update. --init
+git submodule update --init --recursive
 ```
 
 ## Install dependencies
@@ -352,50 +392,247 @@ Run the demo on a local Hardhat network:
 npx hardhat run scripts/demo.js
 ```
 
-# Static Analysis (Slither)
+## Audit Reports Summary
 
-[Slither](https://github.com/crytic/slither) is a Solidity static analysis framework used to find vulnerabilities and code quality issues.
+This section summarizes the static-analysis reports available in this repository.
 
-## Setup
+### Slither
 
-Create and activate a Python virtual environment called `cct`:
+Here is the list of report performed with [Slither](https://github.com/crytic/slither)
+
+Setup:
 
 ```shell
 python3 -m venv cct
 chmod +x cct/bin/activate
 source cct/bin/activate
-```
-
-Install Slither inside the virtual environment:
-
-```shell
 pip install slither-analyzer
-```
-
-Verify the installation:
-
-```shell
 slither --version
 ```
 
-## Running
-
-Slither uses Foundry for compilation. Make sure `forge` is installed and the virtual environment is active:
+Run:
 
 ```shell
 source cct/bin/activate
 npm run slither
 ```
 
-This generates timestamped reports in the `reports/` directory:
+```bash
+slither . --checklist --filter-paths "openzeppelin-contracts|test|forge-std|mocks" > doc/audits/tools/slither-report.md
+```
+
+`npm run slither` generates timestamped reports in the `reports/` directory:
 
 - **JSON** — `reports/slither-report-<timestamp>.json`
 - **Markdown** — `reports/slither-report-<timestamp>.md`
 
-## Deactivating the virtual environment
+The direct `slither ... --checklist` command above writes a checklist-style report to `doc/audits/tools/slither-report.md`.
 
 When done, deactivate the virtual environment:
 
 ```shell
 deactivate
 ```
+
+| Version | Report | Assessment |
+| --- | --- | --- |
+| current | `doc/audits/tools/slither-report.md` | `doc/audits/tools/slither-report-feedback.md` |
+
+Report scope: repo-focused filtered checklist run.
+
+0 High · 9 Medium · 10 Low · 27 Informational
+
+| ID | Finding | Instances | Assessment |
+| --- | --- | --- | --- |
+| M-1 | `reentrancy-no-eth` | 3 | Contextual; expected external policy-engine calls and hook flow. Manual review required. |
+| M-2 | `uninitialized-local` | 6 | Likely analyzer limitation in extractor decode paths; treated as likely false positive. |
+| L-1 | `calls-loop` | 8 | Accepted by design where policy/rule chains iterate; monitor gas/complexity. |
+| L-2 | `reentrancy-events` | 2 | Informational reentrancy/event-order signal; no confirmed exploitable issue from checklist alone. |
+| I-1 | `assembly` | 2 | Expected in storage-slot patterns; informational. |
+| I-2 | `dead-code` | 2 | Cleanup candidate; not a direct security issue. |
+| I-3 | `naming-convention` | 23 | Style-only informational findings. |
+
+### Aderyn
+
+Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/aderyn)
+
+```bash
+aderyn -x mocks --output doc/audits/tools/aderyn-report.md
+```
+
+| Version | Report | Assessment |
+| --- | --- | --- |
+| current | `doc/audits/tools/aderyn-report.md` | `doc/audits/tools/aderyn-report-feedback.md` |
+
+Report scope: 17 Solidity files, 959 nSLOC.
+
+2 High · 10 Low
+
+| ID | Finding | Instances | Assessment |
+| --- | --- | --- | --- |
+| H-1 | Arbitrary `from` passed to `transferFrom` | 1 | Accepted in context — policy-gated flow; not treated as exploitable in this integration design. |
+| H-2 | Contract locks Ether without withdraw | 2 | Accepted false positive — token deployments are not intended as ETH custody contracts. |
+| L-1 | Centralization Risk | 11 | Accepted by design — privileged governance/control is intentional. |
+| L-2 | Unsafe ERC20 Operation | 7 | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
+| L-3 | Unspecific Solidity Pragma | 17 | Accepted by design — version ranges are intentionally used in this codebase. |
+| L-4 | Literal Instead of Constant | 2 | Informational — optional quality improvement. |
+| L-5 | PUSH0 Opcode | 17 | Environment-dependent informational finding in this setup. |
+| L-6 | Empty Block | 22 | Accepted by design — authorization hook pattern. |
+| L-7 | Loop Contains `require`/`revert` | 4 | Accepted by design — atomic validation and explicit failure signaling. |
+| L-8 | Unused State Variable | 1 | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`. |
+| L-9 | Costly operations inside loop | 2 | Accepted — expected tradeoff in policy/rule iteration paths. |
+| L-10 | Unused Import | 9 | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons). |
+
+## Policy-Protected Functions (Current Integration)
+
+This project now documents the policy-protected function selectors explicitly.
+The list below reflects the selectors wired in deployment/test flows (`scripts/demo.js`, `test/deploymentUtils.js`).
+
+### Core transfer selectors (Standard + Lite)
+
+| Function signature | Selector |
+| --- | --- |
+| `transfer(address,uint256)` | `0xa9059cbb` |
+| `transferFrom(address,address,uint256)` | `0x23b872dd` |
+
+### Admin/lifecycle selectors (Standard policy-authoritative flow)
+
+| Function signature | Selector |
+| --- | --- |
+| `mint(address,uint256)` | `0x40c10f19` |
+| `burn(address,uint256)` | `0x9dc29fac` |
+| `burn(uint256)` | `0x42966c68` |
+| `burnFrom(address,uint256)` | `0x79cc6790` |
+| `forcedTransfer(address,address,uint256)` | `0x9fc1d0e7` |
+| `freezePartialTokens(address,uint256)` | `0x125c4a33` |
+| `unfreezePartialTokens(address,uint256)` | `0x1fe56f7d` |
+| `setName(string)` | `0xc47f0027` |
+| `setSymbol(string)` | `0xb84c8246` |
+| `setTokenId(string)` | `0xdcfd616f` |
+| `setDocumentEngine(address)` | `0x33611079` |
+| `setSnapshotEngine(address)` | `0xe236aabf` |
+| `setCCIPAdmin(address)` | `0xa8fa343c` |
+| `crosschainMint(address,uint256)` | `0x18bf5077` |
+| `crosschainBurn(address,uint256)` | `0x2b8c49e3` |
+
+Note: exact policy chains per selector (PausePolicy, RBAC, TransferValidationPolicy, etc.) can vary by deployment configuration.
+
+## FAQ for Issuers Using CMTAT with ACE Policies
+
+> Warning: This FAQ is best-effort guidance for this repository integration. It may be incomplete and is not a substitute for official ACE documentation, legal advice, or a professional security review.
+
+### 1. What does ACE add to CMTAT?
+
+ACE moves compliance checks into separate policy contracts. This lets you update compliance rules without redeploying the token.
+
+### 2. Do I still need CMTAT roles if ACE controls authorization?
+
+Yes.
+
+- Keep CMTAT roles where possible as a second safety layer, so a policy misconfiguration alone is less likely to enable sensitive actions.
+- Treat ACE policy configuration as high-privilege admin control: changing policies, ordering, extractors, or `defaultAllow` can effectively allow or block critical token operations.
+
+### 3. Which CMTAT version should I choose: lite or standard?
+
+Use `lite` if you mainly need policy checks on transfers. Use `standard` if you also want policy checks on admin and lifecycle actions.
+
+### 4. Who should own and manage the PolicyEngine?
+
+Use a highly trusted governance setup, such as a multisig, DAO, or timelock. Whoever controls PolicyEngine settings effectively controls token compliance behavior.
+
+### 5. What is the minimum policy set for a production issuer?
+
+For token issuers, a common baseline is:
+
+- Pause policy.
+- Role-based access policy.
+- Transfer restriction policy (for example KYC/sanctions/rule checks).
+- A clearly defined default result (`defaultAllow=true` or `defaultAllow=false`).
+
+### 6. Should default policy outcome be allow or reject?
+
+Choose based on your operating model:
+
+- `defaultAllow=true`: allow by default, and block only when a policy rejects.
+- `defaultAllow=false`: reject by default, and allow only when policies explicitly allow.
+
+In ACE, `true` is the usual default behavior; confirm and document your choice before launch.
+
+### 7. How do I avoid policy ordering mistakes?
+
+Start with restrictive checks, then business-limit checks, and place permissive/bypass behavior only where intentionally needed. A policy that returns `Allow` stops evaluation of later policies.
+
+### 8. What happens if extractor or parameter mapping is wrong?
+
+Policies may read the wrong values or fail unexpectedly. Treat extractor and parameter mapping as security-critical configuration, and test them like contract code.
+
+### 9. Can I enforce different policies for transfer and transferFrom?
+
+Yes. `transfer` and `transferFrom` use different selectors, so configure and test both paths separately. Include spender-specific checks for `transferFrom`.
+
+### 10. How should I use context safely?
+
+Use one of the two ACE patterns:
+
+- Preferred for custom functions: pass `context` directly with `runPolicyWithContext(context)`.
+- For fixed interfaces (like ERC-20 functions): call `setContext(...)` and consume it in the same atomic transaction.
+
+Do not leave context pending across transactions.
+
+### 11. What governance process should I use for policy changes?
+
+Use a staged process:
+
+1. Propose the change and simulate it in staging.
+2. Review policy order, extractor mapping, and default outcome.
+3. Execute through timelock/multisig.
+4. Monitor events and transfer behavior after deployment.
+
+### 12. What should I monitor in production?
+
+Monitor:
+
+- Policy add/remove actions.
+- Extractor and mapping changes.
+- `defaultAllow` changes (this flips the fallback behavior when all policies return `Continue`: `true` = allow, `false` = reject).
+- Policy execution failures.
+- Sudden increases in rejected or bypassed actions.
+
+### 13. How do I prepare for regulator or auditor questions?
+
+Maintain an audit-ready change log with policy versions, activation times, approval records, and test evidence for each policy update.
+
+### 14. What are common integration mistakes?
+
+- Wrong policy order (accidental early bypass).
+- Missing extractor for a protected selector.
+- Incorrect parameter names or mapping.
+- No tests for revert/context behavior.
+- Weak governance around PolicyEngine admin changes.
+
+### 15. What should my pre-mainnet checklist include?
+
+- Role/admin key setup completed.
+- Policy chain and order reviewed.
+- Extractor and parameter mapping tested for each selector.
+- Default outcome verified for each contract.
+- Pause and incident runbook tested.
+- Upgrade and rollback plan approved.
+
+### 16. How do I handle an incident (bad policy push or false rejects)?
+
+Use an incident runbook with clear authority to pause sensitive actions, revert bad policy settings, communicate with counterparties, and re-enable flows in controlled phases.
+
+### 17. Do I need separate testing for upgrades?
+
+Yes. Run compliance regression tests for every upgrade, including policy-chain behavior, extractor decoding, and role/authorization invariants.
+
+### 18. What documentation should I publish to integrators?
+
+Publish a short integration guide that includes:
+
+- Which functions are policy-protected (function names/selectors).
+- What each policy does in normal operation.
+- Common failure cases and the revert reasons integrators may see.
+- How admin/policy changes are approved and announced.
+- Who to contact for support and incident escalation.
