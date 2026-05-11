@@ -436,7 +436,7 @@ deactivate
 
 | Version | Report | Assessment |
 | --- | --- | --- |
-| current | `doc/audits/tools/slither-report.md` | `doc/audits/tools/slither-report-feedback.md` |
+| current | [slither-report.md](./doc/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/slither-report-feedback.md) |
 
 Report scope: repo-focused filtered checklist run.
 
@@ -462,7 +462,7 @@ aderyn -x mocks --output doc/audits/tools/aderyn-report.md
 
 | Version | Report | Assessment |
 | --- | --- | --- |
-| current | `doc/audits/tools/aderyn-report.md` | `doc/audits/tools/aderyn-report-feedback.md` |
+| current | [aderyn-report.md](./doc/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/aderyn-report-feedback.md) |
 
 Report scope: 17 Solidity files, 959 nSLOC.
 
