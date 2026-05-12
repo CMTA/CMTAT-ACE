@@ -168,3 +168,4 @@ ignition/deployments/chain-31337
 
 # custom local directory
 history
+.codex

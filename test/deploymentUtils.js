@@ -403,6 +403,33 @@ function createStandardFixture(deployTokenFn) {
   };
 }
 
+async function withSnapshotEngine(baseFixture) {
+  const cmtatAddress = baseFixture.cmtatAddress ?? (await baseFixture.cmtat.getAddress());
+  const transferEngineMock = await ethers.deployContract('SnapshotEngineMock', [
+    cmtatAddress,
+    baseFixture.admin.address,
+  ]);
+  await transferEngineMock.waitForDeployment();
+  await (
+    await baseFixture.cmtat
+      .connect(baseFixture.admin)
+      .setSnapshotEngine(await transferEngineMock.getAddress())
+  ).wait();
+  return {
+    ...baseFixture,
+    cmtatAddress,
+    transferEngineMock,
+  };
+}
+
+function createStandardFixtureWithSnapshot(deployTokenFn) {
+  const baseFactory = createStandardFixture(deployTokenFn);
+  return async function standardFixtureWithSnapshot() {
+    const base = await baseFactory();
+    return withSnapshotEngine(base);
+  };
+}
+
 /**
  * Creates a fixture for lite (AccessControl + PolicyEngine for validation) deployment tests.
  * Deploys just the PolicyEngine and token; no PausePolicy or RBAC needed.
@@ -441,6 +468,14 @@ function createLiteFixture(deployTokenFn) {
   };
 }
 
+function createLiteFixtureWithSnapshot(deployTokenFn) {
+  const baseFactory = createLiteFixture(deployTokenFn);
+  return async function liteFixtureWithSnapshot() {
+    const base = await baseFactory();
+    return withSnapshotEngine(base);
+  };
+}
+
 module.exports = {
   ZERO_ADDRESS,
   DEPLOYMENT_DECIMAL,
@@ -468,5 +503,7 @@ module.exports = {
   deployCCTLiteUpgradeable,
   deployCCTLiteUUPSUpgradeable,
   createStandardFixture,
+  createStandardFixtureWithSnapshot,
   createLiteFixture,
+  createLiteFixtureWithSnapshot,
 };

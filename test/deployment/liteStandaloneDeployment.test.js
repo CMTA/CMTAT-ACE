@@ -1,4 +1,9 @@
-const { loadFixture, deployCCTLiteStandalone, createLiteFixture } = require('../deploymentUtils');
+const {
+  loadFixture,
+  deployCCTLiteStandalone,
+  createLiteFixture,
+  createLiteFixtureWithSnapshot,
+} = require('../deploymentUtils');
 
 // Reuse CMTAT common modules
 const PauseModuleCommon = require('../../submodules/CMTAT/test/common/PauseModuleCommon');
@@ -23,40 +28,41 @@ const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/tes
 const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot');
 
 const liteFixture = createLiteFixture(deployCCTLiteStandalone);
+const liteFixtureWithSnapshot = createLiteFixtureWithSnapshot(deployCCTLiteStandalone);
 
 describe('ComplianceTokenCMTATLiteStandalone', function () {
-  beforeEach(async function () {
-    Object.assign(this, await loadFixture(liteFixture));
+  context('snapshotEngine = 0 (no snapshot suites)', function () {
+    beforeEach(async function () {
+      Object.assign(this, await loadFixture(liteFixture));
+      this.dontCheckTimestamp = true;
+    });
+
+    VersionModuleCommon();
+    PauseModuleCommon();
+    ERC20MintModuleCommon();
+    ERC20BurnModuleCommon();
+    ERC20BaseModuleCommon();
+    EnforcementModuleCommon();
+    ERC20EnforcementModuleCommon();
+    ERC20CrossChainModuleCommon();
+    CCIPModuleCommon();
+    ExtraInfoModuleCommon();
+    DocumentModuleCommon();
   });
 
-  // Core CMTAT commons
-  VersionModuleCommon();
-  PauseModuleCommon();
-  ERC20MintModuleCommon();
-  ERC20BurnModuleCommon();
-  ERC20BaseModuleCommon();
-  EnforcementModuleCommon();
+  context('snapshotEngine is set (snapshot suites)', function () {
+    beforeEach(async function () {
+      Object.assign(this, await loadFixture(liteFixtureWithSnapshot));
+      this.dontCheckTimestamp = true;
+    });
 
-  // Extensions
-  ERC20EnforcementModuleCommon();
-
-  // options
-  ERC20CrossChainModuleCommon();
-  CCIPModuleCommon();
-
-  // Extensions
-  ExtraInfoModuleCommon();
-
-  // Engines
-  DocumentModuleCommon();
-  SnapshotModuleCommon();
-
-  // Snapshot scheduling & global
-  SnapshotModuleCommonScheduling();
-  SnapshotModuleCommonRescheduling();
-  SnapshotModuleCommonUnschedule();
-  SnapshotModuleCommonGetNextSnapshot();
-  SnapshotModuleMultiplePlannedTest();
-  SnapshotModuleOnePlannedSnapshotTest();
-  SnapshotModuleZeroPlannedSnapshotTest();
+    SnapshotModuleCommon(false);
+    SnapshotModuleCommonScheduling();
+    SnapshotModuleCommonRescheduling();
+    SnapshotModuleCommonUnschedule();
+    SnapshotModuleCommonGetNextSnapshot();
+    SnapshotModuleMultiplePlannedTest();
+    SnapshotModuleOnePlannedSnapshotTest();
+    SnapshotModuleZeroPlannedSnapshotTest();
+  });
 });

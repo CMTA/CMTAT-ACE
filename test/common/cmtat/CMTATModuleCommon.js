@@ -23,13 +23,16 @@ const SnapshotModuleZeroPlannedSnapshotTest = require('../../../submodules/CMTAT
  *   this.policyEngine, this.rbacPolicy, this.rbacPolicyAddress, this.cmtatAddress
  *   this.mintSelector, this.burnSelector
  */
-function CMTATModuleCommon() {
+function CMTATModuleCommon(includeSnapshotModules = true, snapshotZeroDefault = true) {
   ERC20BaseCommon();
   MintModuleCommon();
   BurnModuleCommon();
   ERC20EnforcementCommon();
   DocumentModuleCommon();
-  SnapshotModuleCommon();
+  if (!includeSnapshotModules) {
+    return;
+  }
+  SnapshotModuleCommon(snapshotZeroDefault);
 
   // Snapshot scheduling & global (from CMTAT)
   SnapshotModuleCommonScheduling();
