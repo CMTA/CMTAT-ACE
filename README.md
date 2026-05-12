@@ -276,7 +276,9 @@ This allows integrators and tooling to programmatically verify interface compati
 ## Library
 
 - CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
-- Chainlink ACE ^1.0.0
+- Chainlink ACE `1.0.0`
+- OpenZeppelin Contracts `5.6.1`
+- OpenZeppelin Contracts Upgradeable `5.6.1`
 
 ## Initialize submodules
 
