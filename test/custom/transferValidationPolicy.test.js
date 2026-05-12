@@ -439,6 +439,52 @@ describe('TransferValidationPolicy', function () {
     });
   });
 
+  describe('Direct run() parameter layouts', function () {
+    beforeEach(async function () {
+      this.maxAmountRule = await ethers.deployContract('MaxAmountRule', [100n]);
+      this.transferPolicy = await deployTransferValidationPolicy(
+        this.policyEngineAddress,
+        this.admin.address,
+        [await this.maxAmountRule.getAddress()],
+      );
+    });
+
+    it('covers 3-parameter layout branch and allows transfer within max', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [50n]),
+      ];
+
+      const result = await this.transferPolicy.run(
+        this.admin.address,
+        this.cmtatAddress,
+        this.transferSelector,
+        params,
+        '0x',
+      );
+      expect(result).to.equal(2); // PolicyResult.Continue
+    });
+
+    it('covers 3-parameter layout branch and rejects transfer above max', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [101n]),
+      ];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      ).to.be.reverted;
+    });
+  });
+
   describe('No policy attached (defaultAllow = true)', function () {
     it('should allow transfers when no policy is registered for transfer selector', async function () {
       // PolicyEngine has defaultAllow = true and no policy for transfer
