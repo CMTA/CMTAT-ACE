@@ -2,7 +2,12 @@
 
 pragma solidity ^0.8.20;
 
-import {IRule} from "../../../../submodules/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol";
+
+/**
+ * @dev WARNING: Mock rule contracts for tests/examples only.
+ *      Not designed, reviewed, or hardened for production deployments.
+ */
 
 /**
  * @title MaxAmountRule
@@ -37,6 +42,28 @@ contract MaxAmountRule is IRule {
         return detectTransferRestriction(from, to, amount) == 0;
     }
 
+    function canTransferFrom(
+        address /* spender */,
+        address from,
+        address to,
+        uint256 amount
+    ) external view override returns (bool) {
+        return canTransfer(from, to, amount);
+    }
+
+    function transferred(address /* from */, address /* to */, uint256 /* value */) external pure override {}
+
+    function transferred(
+        address /* spender */,
+        address /* from */,
+        address /* to */,
+        uint256 /* value */
+    ) external pure override {}
+
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
+        return interfaceId == type(IRule).interfaceId;
+    }
+
     function canReturnTransferRestrictionCode(uint8 code) public pure override returns (bool) {
         return code == AMOUNT_TOO_HIGH;
     }
@@ -55,7 +82,7 @@ contract RestrictedAddressRule is IRule {
     uint8 constant TO_RESTRICTED = 15;
 
     mapping(address => bool) public restricted;
-    address public owner;
+    address public immutable owner;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "only owner");
@@ -94,6 +121,28 @@ contract RestrictedAddressRule is IRule {
 
     function canTransfer(address from, address to, uint256 amount) public view override returns (bool) {
         return detectTransferRestriction(from, to, amount) == 0;
+    }
+
+    function canTransferFrom(
+        address /* spender */,
+        address from,
+        address to,
+        uint256 amount
+    ) external view override returns (bool) {
+        return canTransfer(from, to, amount);
+    }
+
+    function transferred(address /* from */, address /* to */, uint256 /* value */) external pure override {}
+
+    function transferred(
+        address /* spender */,
+        address /* from */,
+        address /* to */,
+        uint256 /* value */
+    ) external pure override {}
+
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
+        return interfaceId == type(IRule).interfaceId;
     }
 
     function canReturnTransferRestrictionCode(uint8 code) public pure override returns (bool) {

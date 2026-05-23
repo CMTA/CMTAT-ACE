@@ -378,7 +378,11 @@ describe('TransferValidationPolicy', function () {
 
       // Now add a MaxAmountRule via setRules
       const maxAmountRule = await ethers.deployContract('MaxAmountRule', [100n]);
-      await this.transferPolicy.connect(this.admin).setRules([await maxAmountRule.getAddress()]);
+      await expect(
+        this.transferPolicy.connect(this.admin).setRules([await maxAmountRule.getAddress()]),
+      )
+        .to.emit(this.transferPolicy, 'RulesUpdated')
+        .withArgs(0n, 1n);
 
       // Transfer above max should now fail
       await expect(this.cmtat.connect(this.admin).transfer(this.address2.address, 101n)).to.be
@@ -402,6 +406,22 @@ describe('TransferValidationPolicy', function () {
       ).to.be.reverted;
     });
 
+    it('should emit RulesUpdated with previous and new count when replacing rules', async function () {
+      const rule1 = await ethers.deployContract('MaxAmountRule', [100n]);
+      const rule2 = await ethers.deployContract('RestrictedAddressRule', [[]]);
+      const rule3 = await ethers.deployContract('MaxAmountRule', [500n]);
+
+      this.transferPolicy = await deployTransferValidationPolicy(
+        this.policyEngineAddress,
+        this.admin.address,
+        [await rule1.getAddress(), await rule2.getAddress()],
+      );
+
+      await expect(this.transferPolicy.connect(this.admin).setRules([await rule3.getAddress()]))
+        .to.emit(this.transferPolicy, 'RulesUpdated')
+        .withArgs(2n, 1n);
+    });
+
     it('should report correct rules and rulesCount', async function () {
       const rule1 = await ethers.deployContract('MaxAmountRule', [100n]);
       const rule2 = await ethers.deployContract('RestrictedAddressRule', [[]]);
@@ -416,6 +436,52 @@ describe('TransferValidationPolicy', function () {
       const rules = await this.transferPolicy.rules();
       expect(rules[0]).to.equal(await rule1.getAddress());
       expect(rules[1]).to.equal(await rule2.getAddress());
+    });
+  });
+
+  describe('Direct run() parameter layouts', function () {
+    beforeEach(async function () {
+      this.maxAmountRule = await ethers.deployContract('MaxAmountRule', [100n]);
+      this.transferPolicy = await deployTransferValidationPolicy(
+        this.policyEngineAddress,
+        this.admin.address,
+        [await this.maxAmountRule.getAddress()],
+      );
+    });
+
+    it('covers 3-parameter layout branch and allows transfer within max', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [50n]),
+      ];
+
+      const result = await this.transferPolicy.run(
+        this.admin.address,
+        this.cmtatAddress,
+        this.transferSelector,
+        params,
+        '0x',
+      );
+      expect(result).to.equal(2); // PolicyResult.Continue
+    });
+
+    it('covers 3-parameter layout branch and rejects transfer above max', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [101n]),
+      ];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      ).to.be.reverted;
     });
   });
 

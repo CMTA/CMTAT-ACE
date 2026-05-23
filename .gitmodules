@@ -2,3 +2,6 @@
 	path = submodules/CMTAT
 	url = https://github.com/CMTA/CMTAT
 	branch = master
+[submodule "submodules/RuleEngine"]
+	path = submodules/RuleEngine
+	url = https://github.com/CMTA/RuleEngine

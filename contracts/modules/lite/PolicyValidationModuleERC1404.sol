@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 /* ==== Tokenization === */
-import {IERC1404, IERC1404Extend} from "../../../submodules/CMTAT/contracts/interfaces/tokenization/draft-IERC1404.sol";
-import {ValidationModuleCore} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ValidationModuleCore.sol";
+import {IERC1404, IERC1404Extend} from "CMTAT/interfaces/tokenization/draft-IERC1404.sol";
+import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
 
 /**
  * @dev Validation module (ERC-1404)

@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Policy} from "@chainlink/policy-management/core/Policy.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
-import {IRule} from "../../../../submodules/CMTAT/contracts/mocks/RuleEngine/interfaces/IRule.sol";
+import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol";
 
 /**
  * @title TransferValidationPolicy
@@ -24,6 +24,7 @@ import {IRule} from "../../../../submodules/CMTAT/contracts/mocks/RuleEngine/int
  */
 contract TransferValidationPolicy is Policy {
     string public constant override typeAndVersion = "TransferValidationPolicy 1.0.0";
+    event RulesUpdated(uint256 previousCount, uint256 newCount);
 
     /// @custom:storage-location erc7201:cmta.TransferValidationPolicy
     struct TransferValidationStorage {
@@ -61,11 +62,13 @@ contract TransferValidationPolicy is Policy {
      */
     function setRules(IRule[] calldata rules_) external onlyOwner {
         TransferValidationStorage storage $ = _getStorage();
+        uint256 previousCount = $.rules.length;
         delete $.rules;
         for (uint256 i = 0; i < rules_.length; ++i) {
             require(address(rules_[i]) != address(0), "Rule address cannot be zero");
             $.rules.push(rules_[i]);
         }
+        emit RulesUpdated(previousCount, rules_.length);
     }
 
     /**

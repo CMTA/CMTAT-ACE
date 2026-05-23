@@ -1,6 +1,11 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const { loadFixture, deployCCTLiteUpgradeable, createLiteFixture } = require('../deploymentUtils');
+const {
+  loadFixture,
+  deployCCTLiteUpgradeable,
+  createLiteFixture,
+  createLiteFixtureWithSnapshot,
+} = require('../deploymentUtils');
 
 // Reuse CMTAT common modules
 const PauseModuleCommon = require('../../submodules/CMTAT/test/common/PauseModuleCommon');
@@ -25,63 +30,63 @@ const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/tes
 const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot');
 
 const liteFixture = createLiteFixture(deployCCTLiteUpgradeable);
+const liteFixtureWithSnapshot = createLiteFixtureWithSnapshot(deployCCTLiteUpgradeable);
 
 describe('ComplianceTokenCMTATLiteUpgradeable', function () {
-  beforeEach(async function () {
-    Object.assign(this, await loadFixture(liteFixture));
-  });
-
-  // Proxy-specific
-  context('Re-initialization', function () {
-    it('testCannotBeReinitialized', async function () {
-      const policyEngineAddress = await this.policyEngine.getAddress();
-      await expect(
-        this.cmtat
-          .connect(this.admin)
-          .initialize(
-            this.admin.address,
-            ['CMTA Token', 'CMTAT', 0],
-            [
-              'CMTAT_ISIN',
-              ['doc1', 'https://example.com/doc1', ethers.keccak256(ethers.toUtf8Bytes('h'))],
-              'CMTAT_info',
-            ],
-            policyEngineAddress,
-            ethers.ZeroAddress,
-            ethers.ZeroAddress,
-          ),
-      ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization');
+  context('snapshotEngine = 0 (no snapshot suites)', function () {
+    beforeEach(async function () {
+      Object.assign(this, await loadFixture(liteFixture));
+      this.dontCheckTimestamp = true;
     });
+
+    context('Re-initialization', function () {
+      it('testCannotBeReinitialized', async function () {
+        const policyEngineAddress = await this.policyEngine.getAddress();
+        await expect(
+          this.cmtat
+            .connect(this.admin)
+            .initialize(
+              this.admin.address,
+              ['CMTA Token', 'CMTAT', 0],
+              [
+                'CMTAT_ISIN',
+                ['doc1', 'https://example.com/doc1', ethers.keccak256(ethers.toUtf8Bytes('h'))],
+                'CMTAT_info',
+              ],
+              policyEngineAddress,
+              ethers.ZeroAddress,
+              ethers.ZeroAddress,
+            ),
+        ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization');
+      });
+    });
+
+    VersionModuleCommon();
+    PauseModuleCommon();
+    ERC20MintModuleCommon();
+    ERC20BurnModuleCommon();
+    ERC20BaseModuleCommon();
+    EnforcementModuleCommon();
+    ERC20EnforcementModuleCommon();
+    ERC20CrossChainModuleCommon();
+    CCIPModuleCommon();
+    ExtraInfoModuleCommon();
+    DocumentModuleCommon();
   });
 
-  // Core CMTAT commons
-  VersionModuleCommon();
-  PauseModuleCommon();
-  ERC20MintModuleCommon();
-  ERC20BurnModuleCommon();
-  ERC20BaseModuleCommon();
-  EnforcementModuleCommon();
+  context('snapshotEngine is set (snapshot suites)', function () {
+    beforeEach(async function () {
+      Object.assign(this, await loadFixture(liteFixtureWithSnapshot));
+      this.dontCheckTimestamp = true;
+    });
 
-  // Extensions
-  ERC20EnforcementModuleCommon();
-
-  // options
-  ERC20CrossChainModuleCommon();
-  CCIPModuleCommon();
-
-  // Extensions
-  ExtraInfoModuleCommon();
-
-  // Engines
-  DocumentModuleCommon();
-  SnapshotModuleCommon();
-
-  // Snapshot scheduling & global
-  SnapshotModuleCommonScheduling();
-  SnapshotModuleCommonRescheduling();
-  SnapshotModuleCommonUnschedule();
-  SnapshotModuleCommonGetNextSnapshot();
-  SnapshotModuleMultiplePlannedTest();
-  SnapshotModuleOnePlannedSnapshotTest();
-  SnapshotModuleZeroPlannedSnapshotTest();
+    SnapshotModuleCommon(false);
+    SnapshotModuleCommonScheduling();
+    SnapshotModuleCommonRescheduling();
+    SnapshotModuleCommonUnschedule();
+    SnapshotModuleCommonGetNextSnapshot();
+    SnapshotModuleMultiplePlannedTest();
+    SnapshotModuleOnePlannedSnapshotTest();
+    SnapshotModuleZeroPlannedSnapshotTest();
+  });
 });

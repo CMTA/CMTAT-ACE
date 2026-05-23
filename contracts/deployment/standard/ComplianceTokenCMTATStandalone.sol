@@ -3,9 +3,9 @@
 pragma solidity ^0.8.20;
 
 import {CCTCommon} from "../../modules/standard/CCTCommon.sol";
-import {ICMTATConstructor} from "../../../submodules/CMTAT/contracts/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "../../../submodules/CMTAT/contracts/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "../../../submodules/CMTAT/contracts/interfaces/engine/IDocumentEngine.sol";
+import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
+import {IERC1643} from "CMTAT/interfaces/engine/IDocumentEngine.sol";
 
 /**
  * @title ComplianceTokenCMTATStandalone

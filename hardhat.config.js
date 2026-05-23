@@ -1,6 +1,7 @@
 require('@nomicfoundation/hardhat-foundry');
 require('@nomicfoundation/hardhat-chai-matchers');
 require('@openzeppelin/hardhat-upgrades');
+require('solidity-coverage')
 
 const { silenceWarnings } = require('@openzeppelin/upgrades-core');
 silenceWarnings();

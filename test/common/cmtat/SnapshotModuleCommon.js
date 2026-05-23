@@ -2,7 +2,7 @@ const { expect } = require('chai');
 
 const ZERO_ADDRESS = ethers.ZeroAddress;
 
-function SnapshotModuleCommon() {
+function SnapshotModuleCommon(expectZeroDefault = true) {
   context('Snapshot Engine Module', function () {
     it('testCanSetSnapshotEngine', async function () {
       const snapshotEngineMock = await ethers.deployContract('SnapshotEngineMock', [
@@ -23,9 +23,11 @@ function SnapshotModuleCommon() {
       ).to.be.revertedWithCustomError(this.cmtat, 'CMTAT_SnapshotModule_SameValue');
     });
 
-    it('testSnapshotEngineIsZeroByDefault', async function () {
-      expect(await this.cmtat.snapshotEngine()).to.equal(ZERO_ADDRESS);
-    });
+    if (expectZeroDefault) {
+      it('testSnapshotEngineIsZeroByDefault', async function () {
+        expect(await this.cmtat.snapshotEngine()).to.equal(ZERO_ADDRESS);
+      });
+    }
   });
 }
 

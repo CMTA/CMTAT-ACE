@@ -2,18 +2,18 @@
 
 pragma solidity ^0.8.20;
 
-import {ERC20CrossChainModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/ERC20CrossChainModule.sol";
-import {CCIPModule} from "../../../submodules/CMTAT/contracts/modules/wrapper/options/CCIPModule.sol";
+import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossChainModule.sol";
+import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
 import {CCTCMTATBaseERC1404} from "./CCTCMTATBaseERC1404.sol";
-import {CMTATBaseCommon} from "../../../submodules/CMTAT/contracts/modules/0_CMTATBaseCommon.sol";
+import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
 import {
     ERC20MintModule,
     ERC20MintModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20MintModule.sol";
+} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
 import {
     ERC20BurnModule,
     ERC20BurnModuleInternal
-} from "../../../submodules/CMTAT/contracts/modules/wrapper/core/ERC20BurnModule.sol";
+} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
