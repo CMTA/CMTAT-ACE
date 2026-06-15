@@ -9,8 +9,8 @@ Please follow [https://changelog.md](https://changelog.md) conventions and the o
 Given a version number MAJOR.MINOR.PATCH, increment the:
 
 1. MAJOR version when the new version makes:
-   -  Incompatible proxy **storage** change internally or through the upgrade of an external library (OpenZeppelin)
-   -  A significant change in external APIs (public/external functions) or in the internal architecture
+   - Incompatible proxy **storage** change internally or through the upgrade of an external library (OpenZeppelin)
+   - A significant change in external APIs (public/external functions) or in the internal architecture
 2. MINOR version when the new version adds functionality in a backward compatible manner
 3. PATCH version when the new version makes backward compatible bug fixes
 
@@ -29,9 +29,10 @@ Reference: [keepachangelog.com/en/1.1.0/](https://keepachangelog.com/en/1.1.0/)
 
 Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
-## [0.1.0] - 
+## [0.1.0] -
 
 ### Added
+
 - Initial release of **CMTAT-ACE**, integrating CMTAT modules with Chainlink ACE PolicyEngine.
 - Two deployment variants:
   - **Standard**: policy-authoritative access and compliance through ACE `runPolicy`.
