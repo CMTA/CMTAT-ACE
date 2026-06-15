@@ -134,7 +134,10 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       const payload = {
         selector: '0x40c10f19',
         sender: this.admin.address,
-        data: ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [this.address1.address, 123n]),
+        data: ethers.AbiCoder.defaultAbiCoder().encode(
+          ['address', 'uint256'],
+          [this.address1.address, 123n],
+        ),
         context: '0x',
       };
 
@@ -144,14 +147,19 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[0].value)[0]).to.equal(
         this.address1.address,
       );
-      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(123n);
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
+        123n,
+      );
     });
 
     it('extracts account and amount for burnFrom(address,uint256)', async function () {
       const payload = {
         selector: '0x79cc6790',
         sender: this.admin.address,
-        data: ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [this.address2.address, 50n]),
+        data: ethers.AbiCoder.defaultAbiCoder().encode(
+          ['address', 'uint256'],
+          [this.address2.address, 50n],
+        ),
         context: '0x',
       };
 
@@ -159,7 +167,9 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[0].value)[0]).to.equal(
         this.address2.address,
       );
-      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(50n);
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
+        50n,
+      );
     });
 
     it('uses sender as account for burn(uint256)', async function () {
@@ -174,7 +184,9 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[0].value)[0]).to.equal(
         this.address3.address,
       );
-      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(77n);
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
+        77n,
+      );
     });
 
     it('reverts on unsupported selector', async function () {

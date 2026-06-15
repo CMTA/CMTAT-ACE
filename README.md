@@ -36,7 +36,7 @@ Two versions are available:
 
 ### Standard
 
-Replaces CMTAT's `AccessControlUpgradeable` (role-based) with `OwnableUpgradeable` (single owner) and integrates Chainlink ACE `PolicyProtectedUpgradeable` for access control and compliance validation on state-changing operations (mint, burn, transfer, enforcement, admin functions).
+Replaces CMTAT's `AccessControlUpgradeable` (role-based) with `OwnableUpgradeable` (single owner) and integrates Chainlink ACE `PolicyProtectedBaseUpgradeable` for access control and compliance validation on state-changing operations (mint, burn, transfer, enforcement, admin functions).
 
 | Contract                              | Proxy type         |
 | ------------------------------------- | ------------------ |
@@ -81,12 +81,12 @@ Treat the following as privileged governance actions:
 
 ### Validation & Compliance
 
-| Aspect           | CMTAT                                                 | Standard                                       | Lite                                                            |
-| ---------------- | ----------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- |
-| Validation layer | `CMTATBaseRuleEngine` → `ValidationModuleRuleEngine`  | `PolicyProtectedUpgradeable` → `IPolicyEngine` | `ValidationModulePolicyEngine` → `IPolicyEngine`                |
-| Engine type      | RuleEngine (custom interface)                         | Chainlink ACE PolicyEngine                     | Chainlink ACE PolicyEngine                                      |
-| Transfer check   | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier  | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
-| ERC-1404 support | Via `ValidationModuleERC1404`                         | Not applicable (no module-level checks)        | Via `PolicyValidationModuleERC1404`                             |
+| Aspect           | CMTAT                                                 | Standard                                           | Lite                                                            |
+| ---------------- | ----------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------- |
+| Validation layer | `CMTATBaseRuleEngine` → `ValidationModuleRuleEngine`  | `PolicyProtectedBaseUpgradeable` → `IPolicyEngine` | `ValidationModulePolicyEngine` → `IPolicyEngine`                |
+| Engine type      | RuleEngine (custom interface)                         | Chainlink ACE PolicyEngine                         | Chainlink ACE PolicyEngine                                      |
+| Transfer check   | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier      | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
+| ERC-1404 support | Via `ValidationModuleERC1404`                         | Not applicable (no module-level checks)            | Via `PolicyValidationModuleERC1404`                             |
 
 ### Initialization
 
@@ -117,7 +117,7 @@ All CMTAT functional modules are preserved in both variants:
 
 - `CMTATBaseAccessControl` — replaced by `OwnableUpgradeable`
 - `AccessControlModule` — role management removed from contract
-- `CMTATBaseRuleEngine` — replaced by `PolicyProtectedUpgradeable`
+- `CMTATBaseRuleEngine` — replaced by `PolicyProtectedBaseUpgradeable`
 - `ValidationModuleRuleEngine` — replaced by direct PolicyEngine calls
 - All `onlyRole()` authorization functions — replaced by `runPolicy` modifier
 - `pause()`, `unpause()`, `deactivateContract()` — not exposed on the token contract; the `_authorizePause` and `_authorizeDeactivate` hooks are intentionally left unimplemented so these functions remain abstract and are excluded from the compiled contract. Pausing is enforced externally via a PausePolicy attached to the PolicyEngine, which rejects protected operations when paused
@@ -138,7 +138,7 @@ All CMTAT functional modules are preserved in both variants:
 
 ### Added
 
-- `PolicyProtectedUpgradeable` — Chainlink ACE integration with ERC-7201 storage, `runPolicy` modifier, and policy engine lifecycle management
+- `PolicyProtectedBaseUpgradeable` — Chainlink ACE integration with ERC-7201 storage, `runPolicy` modifier, and policy engine lifecycle management
 - `ValidationModulePolicyEngine` (Lite) — hybrid validation combining CMTAT module checks with PolicyEngine
 - `PolicyValidationModuleERC1404` (Lite) — ERC-1404 transfer restriction codes with PolicyEngine awareness
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
@@ -267,7 +267,7 @@ contract MyCustomRule is IRule {
 
 This integration includes ERC-165 interface discovery for both the protected token side and policy side:
 
-- **Protected-token interface support**: `PolicyProtectedUpgradeable` exposes `IPolicyProtected` via `supportsInterface`, and the Standard/Lite token bases propagate that support through their own `supportsInterface` overrides.
+- **Protected-token interface support**: `PolicyProtectedBaseUpgradeable` exposes `IPolicyProtected` via `supportsInterface`, and the Standard/Lite token bases propagate that support through their own `supportsInterface` overrides.
 - **Policy interface support**: `TransferValidationPolicy` extends Chainlink ACE `Policy`, and `Policy` exposes `IPolicy` via ERC-165.
 - **Rule interface support in mocks**: the included `TransferRuleMocks` expose `IRule` via `supportsInterface` for compatibility testing.
 
@@ -291,7 +291,7 @@ git submodule update --init --recursive
 You can use any package manager either npm, yarn or pnpm. For example you can type:
 
 ```shell
-npm install
+bun install
 ```
 
 ## Compile contracts
@@ -299,31 +299,31 @@ npm install
 To compile
 
 ```shell
-npx hardhat compile
+bunx hardhat compile
 ```
 
-# Testing
+## Testing
 
 To run tests:
 
 ```shell
-npx hardhat test
+bunx hardhat test
 ```
 
-# Linting & Formatting
+## Linting & Formatting
 
 ## ESLint
 
 Lint JavaScript files (tests, scripts, config):
 
 ```shell
-npm run lint
+bun run lint
 ```
 
 Auto-fix fixable issues:
 
 ```shell
-npm run lint:fix
+bun run lint:fix
 ```
 
 ## Prettier
@@ -331,18 +331,18 @@ npm run lint:fix
 Check formatting for JS, JSON, Markdown, and Solidity:
 
 ```shell
-npm run format:check
+bun run format:check
 ```
 
 Auto-format all files:
 
 ```shell
-npm run format
+bun run format
 ```
 
 Solidity formatting uses [prettier-plugin-solidity](https://github.com/prettier-solidity/prettier-plugin-solidity) and is scoped to `contracts/**/*.sol` only (submodules and dependencies are excluded).
 
-# Scripts
+## Scripts
 
 ## Deployment scripts
 
@@ -360,7 +360,7 @@ Individual deployment scripts are available for each contract variant:
 Run any script with:
 
 ```shell
-npx hardhat run scripts/lite/deploy-lite-standalone.js
+bunx hardhat run scripts/lite/deploy-lite-standalone.js
 ```
 
 ## Demo script
@@ -391,7 +391,7 @@ Policy execution order per function:
 Run the demo on a local Hardhat network:
 
 ```shell
-npx hardhat run scripts/demo.js
+bunx hardhat run scripts/demo.js
 ```
 
 ## Audit Reports Summary
@@ -416,14 +416,14 @@ Run:
 
 ```shell
 source cct/bin/activate
-npm run slither
+bun run slither
 ```
 
 ```bash
-slither . --checklist --filter-paths "openzeppelin-contracts|test|forge-std|mocks" > doc/audits/tools/slither-report.md
+slither . --checklist > doc/audits/tools/slither-report.md
 ```
 
-`npm run slither` generates timestamped reports in the `reports/` directory:
+`bun run slither` generates timestamped reports in the `reports/` directory:
 
 - **JSON** — `reports/slither-report-<timestamp>.json`
 - **Markdown** — `reports/slither-report-<timestamp>.md`
@@ -436,23 +436,23 @@ When done, deactivate the virtual environment:
 deactivate
 ```
 
-| Version | Report | Assessment |
-| --- | --- | --- |
+| Version | Report                                                    | Assessment                                                                  |
+| ------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
 | current | [slither-report.md](./doc/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/slither-report-feedback.md) |
 
 Report scope: repo-focused filtered checklist run.
 
 0 High · 9 Medium · 10 Low · 27 Informational
 
-| ID | Finding | Instances | Assessment |
-| --- | --- | --- | --- |
-| M-1 | `reentrancy-no-eth` | 3 | Contextual; expected external policy-engine calls and hook flow. Manual review required. |
-| M-2 | `uninitialized-local` | 6 | Likely analyzer limitation in extractor decode paths; treated as likely false positive. |
-| L-1 | `calls-loop` | 8 | Accepted by design where policy/rule chains iterate; monitor gas/complexity. |
-| L-2 | `reentrancy-events` | 2 | Informational reentrancy/event-order signal; no confirmed exploitable issue from checklist alone. |
-| I-1 | `assembly` | 2 | Expected in storage-slot patterns; informational. |
-| I-2 | `dead-code` | 2 | Cleanup candidate; not a direct security issue. |
-| I-3 | `naming-convention` | 23 | Style-only informational findings. |
+| ID  | Finding               | Instances | Assessment                                                                                        |
+| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| M-1 | `reentrancy-no-eth`   | 3         | Contextual; expected external policy-engine calls and hook flow. Manual review required.          |
+| M-2 | `uninitialized-local` | 6         | Likely analyzer limitation in extractor decode paths; treated as likely false positive.           |
+| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                      |
+| L-2 | `reentrancy-events`   | 2         | Informational reentrancy/event-order signal; no confirmed exploitable issue from checklist alone. |
+| I-1 | `assembly`            | 2         | Expected in storage-slot patterns; informational.                                                 |
+| I-2 | `dead-code`           | 2         | Cleanup candidate; not a direct security issue.                                                   |
+| I-3 | `naming-convention`   | 23        | Style-only informational findings.                                                                |
 
 ### Aderyn
 
@@ -462,28 +462,36 @@ Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/ade
 aderyn -x mocks --output doc/audits/tools/aderyn-report.md
 ```
 
-| Version | Report | Assessment |
-| --- | --- | --- |
+| Version | Report                                                  | Assessment                                                                |
+| ------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
 | current | [aderyn-report.md](./doc/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/aderyn-report-feedback.md) |
 
 Report scope: 17 Solidity files, 959 nSLOC.
 
 2 High · 10 Low
 
-| ID | Finding | Instances | Assessment |
-| --- | --- | --- | --- |
-| H-1 | Arbitrary `from` passed to `transferFrom` | 1 | Accepted in context — policy-gated flow; not treated as exploitable in this integration design. |
-| H-2 | Contract locks Ether without withdraw | 2 | Accepted false positive — token deployments are not intended as ETH custody contracts. |
-| L-1 | Centralization Risk | 11 | Accepted by design — privileged governance/control is intentional. |
-| L-2 | Unsafe ERC20 Operation | 7 | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
-| L-3 | Unspecific Solidity Pragma | 17 | Accepted by design — version ranges are intentionally used in this codebase. |
-| L-4 | Literal Instead of Constant | 2 | Informational — optional quality improvement. |
-| L-5 | PUSH0 Opcode | 17 | Environment-dependent informational finding in this setup. |
-| L-6 | Empty Block | 22 | Accepted by design — authorization hook pattern. |
-| L-7 | Loop Contains `require`/`revert` | 4 | Accepted by design — atomic validation and explicit failure signaling. |
-| L-8 | Unused State Variable | 1 | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`. |
-| L-9 | Costly operations inside loop | 2 | Accepted — expected tradeoff in policy/rule iteration paths. |
-| L-10 | Unused Import | 9 | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons). |
+| ID   | Finding                                   | Instances | Assessment                                                                                          |
+| ---- | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| H-1  | Arbitrary `from` passed to `transferFrom` | 1         | Accepted in context — policy-gated flow; not treated as exploitable in this integration design.     |
+| H-2  | Contract locks Ether without withdraw     | 2         | Accepted false positive — token deployments are not intended as ETH custody contracts.              |
+| L-1  | Centralization Risk                       | 11        | Accepted by design — privileged governance/control is intentional.                                  |
+| L-2  | Unsafe ERC20 Operation                    | 7         | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
+| L-3  | Unspecific Solidity Pragma                | 17        | Accepted by design — version ranges are intentionally used in this codebase.                        |
+| L-4  | Literal Instead of Constant               | 2         | Informational — optional quality improvement.                                                       |
+| L-5  | PUSH0 Opcode                              | 17        | Environment-dependent informational finding in this setup.                                          |
+| L-6  | Empty Block                               | 22        | Accepted by design — authorization hook pattern.                                                    |
+| L-7  | Loop Contains `require`/`revert`          | 4         | Accepted by design — atomic validation and explicit failure signaling.                              |
+| L-8  | Unused State Variable                     | 1         | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`.                 |
+| L-9  | Costly operations inside loop             | 2         | Accepted — expected tradeoff in policy/rule iteration paths.                                        |
+| L-10 | Unused Import                             | 9         | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons).                    |
+
+## Coverage
+
+Writes coverage files to _doc/coverage_ using **solidity-coverage** hardhat plugin with config at **.solcover.js**
+
+```bash
+bunx hardhat coverage
+```
 
 ## Policy-Protected Functions (Current Integration)
 
@@ -492,30 +500,30 @@ The list below reflects the selectors wired in deployment/test flows (`scripts/d
 
 ### Core transfer selectors (Standard + Lite)
 
-| Function signature | Selector |
-| --- | --- |
-| `transfer(address,uint256)` | `0xa9059cbb` |
+| Function signature                      | Selector     |
+| --------------------------------------- | ------------ |
+| `transfer(address,uint256)`             | `0xa9059cbb` |
 | `transferFrom(address,address,uint256)` | `0x23b872dd` |
 
 ### Admin/lifecycle selectors (Standard policy-authoritative flow)
 
-| Function signature | Selector |
-| --- | --- |
-| `mint(address,uint256)` | `0x40c10f19` |
-| `burn(address,uint256)` | `0x9dc29fac` |
-| `burn(uint256)` | `0x42966c68` |
-| `burnFrom(address,uint256)` | `0x79cc6790` |
+| Function signature                        | Selector     |
+| ----------------------------------------- | ------------ |
+| `mint(address,uint256)`                   | `0x40c10f19` |
+| `burn(address,uint256)`                   | `0x9dc29fac` |
+| `burn(uint256)`                           | `0x42966c68` |
+| `burnFrom(address,uint256)`               | `0x79cc6790` |
 | `forcedTransfer(address,address,uint256)` | `0x9fc1d0e7` |
-| `freezePartialTokens(address,uint256)` | `0x125c4a33` |
-| `unfreezePartialTokens(address,uint256)` | `0x1fe56f7d` |
-| `setName(string)` | `0xc47f0027` |
-| `setSymbol(string)` | `0xb84c8246` |
-| `setTokenId(string)` | `0xdcfd616f` |
-| `setDocumentEngine(address)` | `0x33611079` |
-| `setSnapshotEngine(address)` | `0xe236aabf` |
-| `setCCIPAdmin(address)` | `0xa8fa343c` |
-| `crosschainMint(address,uint256)` | `0x18bf5077` |
-| `crosschainBurn(address,uint256)` | `0x2b8c49e3` |
+| `freezePartialTokens(address,uint256)`    | `0x125c4a33` |
+| `unfreezePartialTokens(address,uint256)`  | `0x1fe56f7d` |
+| `setName(string)`                         | `0xc47f0027` |
+| `setSymbol(string)`                       | `0xb84c8246` |
+| `setTokenId(string)`                      | `0xdcfd616f` |
+| `setDocumentEngine(address)`              | `0x33611079` |
+| `setSnapshotEngine(address)`              | `0xe236aabf` |
+| `setCCIPAdmin(address)`                   | `0xa8fa343c` |
+| `crosschainMint(address,uint256)`         | `0x18bf5077` |
+| `crosschainBurn(address,uint256)`         | `0x2b8c49e3` |
 
 Note: exact policy chains per selector (PausePolicy, RBAC, TransferValidationPolicy, etc.) can vary by deployment configuration.
 

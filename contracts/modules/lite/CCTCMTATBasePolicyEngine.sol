@@ -2,11 +2,8 @@
 
 pragma solidity ^0.8.20;
 
-import {
-    CMTATBaseCommon,
-    CMTATBaseAccessControl
-} from "CMTAT/modules/1_CMTATBaseAccessControl.sol";
-import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
+import {CMTATBaseCommon, CMTATBaseAccessControl} from "CMTAT/modules/1_CMTATBaseAccessControl.sol";
+import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
 import {IERC1643} from "CMTAT/interfaces/tokenization/draft-IERC1643.sol";
@@ -108,7 +105,7 @@ abstract contract CCTCMTATBasePolicyEngine is
         __DocumentEngineModule_init_unchained(documentEngine_);
 
         /* Chainlink-ACE policy module */
-        __PolicyProtected_init_unchained(policyEngine_);
+        __PolicyProtectedBase_init_unchained(policyEngine_);
     }
 
     /*
@@ -195,9 +192,9 @@ abstract contract CCTCMTATBasePolicyEngine is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(CMTATBaseAccessControl, PolicyProtectedUpgradeable) returns (bool) {
+    ) public view virtual override(CMTATBaseAccessControl, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
             CMTATBaseAccessControl.supportsInterface(interfaceId) ||
-            PolicyProtectedUpgradeable.supportsInterface(interfaceId);
+            PolicyProtectedBaseUpgradeable.supportsInterface(interfaceId);
     }
 }

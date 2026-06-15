@@ -3,11 +3,11 @@
 pragma solidity ^0.8.20;
 
 import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
-import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyProtectedUpgradeable {
+abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyProtectedBaseUpgradeable {
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -15,7 +15,7 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
     /* ============ View functions ============ */
     /**
      * @inheritdoc ValidationModuleCore
-     * @dev call the ruleEngine if set
+     * @dev call the policy engine if set
      */
     function canTransfer(
         address from,
@@ -27,7 +27,7 @@ abstract contract ValidationModulePolicyEngine is ValidationModuleCore, PolicyPr
 
     /**
      * @inheritdoc ValidationModuleCore
-     * @dev call the ruleEngine if set
+     * @dev call the policy engine if set
      */
     function canTransferFrom(
         address spender,

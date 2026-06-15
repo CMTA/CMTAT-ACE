@@ -1,7 +1,8 @@
 require('@nomicfoundation/hardhat-foundry');
 require('@nomicfoundation/hardhat-chai-matchers');
 require('@openzeppelin/hardhat-upgrades');
-require('solidity-coverage')
+require('hardhat-dependency-compiler');
+require('solidity-coverage');
 
 const { silenceWarnings } = require('@openzeppelin/upgrades-core');
 silenceWarnings();
@@ -35,5 +36,17 @@ module.exports = {
   paths: {
     sources: './contracts',
     tests: './test',
+  },
+  dependencyCompiler: {
+    paths: [
+      '@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol',
+      '@chainlink/policy-management/core/PolicyEngine.sol',
+      '@chainlink/policy-management/policies/PausePolicy.sol',
+      '@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol',
+      '@chainlink/policy-management/policies/SecureMintPolicy.sol',
+      '@chainlink/policy-management/extractors/ERC20TransferExtractor.sol',
+      'CMTAT/mocks/SnapshotEngineMock.sol',
+      'CMTAT/mocks/DocumentEngineMock.sol',
+    ],
   },
 };

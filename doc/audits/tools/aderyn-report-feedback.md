@@ -19,15 +19,15 @@ Report scope: 17 Solidity files, 959 nSLOC.
 | H-1 | Arbitrary `from` passed to `transferFrom` | 1 | Accepted in context — policy-gated flow; not treated as exploitable in this integration design. |
 | H-2 | Contract locks Ether without withdraw | 2 | Accepted false positive — token deployments are not intended as ETH custody contracts. |
 | L-1 | Centralization risk | 11 | Accepted by design — privileged governance/control is intentional. |
-| L-2 | Unsafe ERC20 operation | 7 | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
-| L-3 | Unspecific Solidity pragma | 17 | Accepted by design — version ranges are intentionally used in this codebase. |
+| L-2 | Costly operations inside loop | 2 | Accepted — expected tradeoff in policy/rule iteration paths. |
+| L-3 | Empty block | 22 | Accepted by design — authorization hook pattern. |
 | L-4 | Literal instead of constant | 2 | Informational — optional quality improvement. |
-| L-5 | PUSH0 opcode | 17 | Environment-dependent informational; not a direct vulnerability finding in this deployment context. |
-| L-6 | Empty block | 22 | Accepted by design — authorization hook pattern. |
-| L-7 | Loop contains `require`/`revert` | 4 | Accepted by design — atomic validation and explicit failure signaling. |
-| L-8 | Unused state variable | 1 | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`. |
-| L-9 | Costly operations inside loop | 2 | Accepted — expected tradeoff in policy/rule iteration paths. |
-| L-10 | Unused import | 9 | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons). |
+| L-5 | PUSH0 opcode | 15 | Environment-dependent informational; not a direct vulnerability finding in this deployment context. |
+| L-6 | Loop contains `require`/`revert` | 4 | Accepted by design — atomic validation and explicit failure signaling. |
+| L-7 | Unsafe ERC20 operation | 7 | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
+| L-8 | Unspecific Solidity pragma | 15 | Accepted by design — version ranges are intentionally used in this codebase. |
+| L-9 | Unused state variable | 1 | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`. |
+
 
 ## Executive triage
 
@@ -51,35 +51,23 @@ Report scope: 17 Solidity files, 959 nSLOC.
 
 ## Low findings (grouped)
 
-### L-1 (centralization), L-3 (pragma), L-4/L-5/L-6/L-7/L-9
+### L-1 (centralization), L-8 (pragma), L-2/L-3/L-4/L-5/L-6
 
 - Status: **Informational / accepted**
 - Rationale: these are style/governance/design heuristics and do not by themselves indicate exploitable defects in this integration.
 
-### L-2: Unsafe ERC20 operation
+### L-7: Unsafe ERC20 operation
 
 - Status: **Accepted false positive**
 - Rationale: flagged sites are interface selectors/existing token-module flows, not unsafe raw token transfer integrations requiring `SafeERC20` wrappers.
 
-### L-8: Unused state variable
+### L-9: Unused state variable
 
 - Status: **False positive**
 - Rationale: flagged constant `STORAGE_LOCATION` is consumed in inline assembly (`_getStorage()`), which static analyzers may miss.
 
-### L-10: Unused import
-
-- Status: **Partially fixed + partially intentional**
-
-Fixed in this repo:
-- `contracts/modules/lite/CCTCMTATBasePolicyEngine.sol`
-- `contracts/modules/standard/CCTCommon.sol`
-
-Intentionally kept:
-- `contracts/modules/demo/DemoImports.sol` (artifact-compilation anchor for demo/deploy flows)
-- `contracts/modules/lite/CCTCMTATBaseERC1404.sol` (`@inheritdoc` doc-resolution dependency)
 
 ## Recommended follow-up
 
-1. Keep `L-10` intentional cases documented as exceptions.
-2. Document `L-8` as an inline-assembly false positive in audit triage notes.
-3. Continue prioritizing repo-owned paths over dependency findings in audit triage.
+1. Document `L-8` as an inline-assembly false positive in audit triage notes.
+2. Continue prioritizing repo-owned paths over dependency findings in audit triage.

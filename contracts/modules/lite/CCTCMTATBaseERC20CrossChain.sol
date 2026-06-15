@@ -6,14 +6,8 @@ import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossCha
 import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
 import {CCTCMTATBaseERC1404} from "./CCTCMTATBaseERC1404.sol";
 import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
-import {
-    ERC20MintModule,
-    ERC20MintModuleInternal
-} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
-import {
-    ERC20BurnModule,
-    ERC20BurnModuleInternal
-} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
+import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 

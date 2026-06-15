@@ -11,14 +11,8 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
 /* = Base = */
 /* = Core = */
-import {
-    ERC20BurnModule,
-    ERC20BurnModuleInternal
-} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
-import {
-    ERC20MintModule,
-    ERC20MintModuleInternal
-} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
+import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
 import {ERC20BaseModule} from "CMTAT/modules/wrapper/core/ERC20BaseModule.sol";
 /* = Option & Extension = */
 import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossChainModule.sol";
@@ -28,21 +22,18 @@ import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
 } from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
-import {
-    DocumentEngineModule,
-    IERC1643
-} from "CMTAT/modules/wrapper/extensions/DocumentEngineModule.sol";
+import {DocumentEngineModule, IERC1643} from "CMTAT/modules/wrapper/extensions/DocumentEngineModule.sol";
 import {SnapshotEngineModule} from "CMTAT/modules/wrapper/extensions/SnapshotEngineModule.sol";
 /* = Interface = */
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
 import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
-import {PolicyProtectedUpgradeable} from "../chainlink-ace/modified/PolicyProtectedUpgradeable.sol";
+import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 
 abstract contract CCTCommon is
     OwnableUpgradeable,
     ERC20CrossChainModule,
-    PolicyProtectedUpgradeable,
+    PolicyProtectedBaseUpgradeable,
     CMTATBaseCommon,
     CCIPModule
 {
@@ -104,7 +95,7 @@ abstract contract CCTCommon is
         // Openzeppelin
         __CMTAT_openzeppelin_init_unchained(ERC20Attributes_);
 
-        __PolicyProtected_init_unchained(policyEngine);
+        __PolicyProtectedBase_init_unchained(policyEngine);
 
         /* Wrapper modules */
         __CMTAT_modules_init_unchained(ERC20Attributes_, ExtraInformationAttributes_);
@@ -200,10 +191,10 @@ abstract contract CCTCommon is
 
     function supportsInterface(
         bytes4 _interfaceId
-    ) public view virtual override(IERC165, ERC20CrossChainModule, PolicyProtectedUpgradeable) returns (bool) {
+    ) public view virtual override(IERC165, ERC20CrossChainModule, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
             ERC20CrossChainModule.supportsInterface(_interfaceId) ||
-            PolicyProtectedUpgradeable.supportsInterface(_interfaceId);
+            PolicyProtectedBaseUpgradeable.supportsInterface(_interfaceId);
     }
 
     /* ==== Mint and Burn Operations ==== */

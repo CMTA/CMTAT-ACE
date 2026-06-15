@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
-import {PolicyProtectedUpgradeable} from "../modified/PolicyProtectedUpgradeable.sol";
 import {ValidationModulePolicyEngine} from "../../lite/ValidationModulePolicyEngine.sol";
 
 contract MockPolicyEngine is IPolicyEngine {
@@ -67,38 +65,16 @@ contract MockPolicyEngine is IPolicyEngine {
         return 0;
     }
 
+    function upgradePolicy(address, address, bytes calldata) external pure override {}
+
     function setDefaultPolicyAllow(bool) external pure override {}
 
     function setTargetDefaultPolicyAllow(address, bool) external pure override {}
 }
 
-contract PolicyProtectedUpgradeableHarness is Initializable, PolicyProtectedUpgradeable {
-    uint256 public counter;
-
-    error ForcedRevert();
-
-    function initialize(address policyEngine) external initializer {
-        __PolicyProtected_init(policyEngine);
-    }
-
-    function _authorizeAttachPolicyEngine(address) internal pure override {}
-
-    function guardedRun() external runPolicy {
-        counter += 1;
-    }
-
-    function guardedRunWithContext(bytes calldata context) external runPolicyWithContext(context) {
-        counter += 1;
-    }
-
-    function guardedRunAndRevert() external runPolicy {
-        revert ForcedRevert();
-    }
-}
-
-contract ValidationModulePolicyEngineHarness is Initializable, ValidationModulePolicyEngine {
+contract ValidationModulePolicyEngineHarness is ValidationModulePolicyEngine {
     function initializeWithPolicyEngine(address policyEngine) external initializer {
-        __PolicyProtected_init(policyEngine);
+        __PolicyProtectedBase_init(policyEngine);
     }
 
     function _authorizeAttachPolicyEngine(address) internal pure override {}
@@ -117,12 +93,7 @@ contract ValidationModulePolicyEngineHarness is Initializable, ValidationModuleP
         return _tryCheckPolicies(selector, sender, data);
     }
 
-    function exposedTransferred(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) external returns (bool) {
+    function exposedTransferred(address spender, address from, address to, uint256 value) external returns (bool) {
         return _transferred(spender, from, to, value);
     }
 }

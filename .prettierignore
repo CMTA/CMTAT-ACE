@@ -3,3 +3,4 @@ submodules/
 artifacts/
 cache_hardhat/
 typechain-types/
+doc/

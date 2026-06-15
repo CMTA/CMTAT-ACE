@@ -1,23 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPORTS_DIR="reports"
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-JSON_REPORT="${REPORTS_DIR}/slither-report-${TIMESTAMP}.json"
-MD_REPORT="${REPORTS_DIR}/slither-report-${TIMESTAMP}.md"
+REPORT_PATH="doc/audits/tools/slither-report.md"
 
-mkdir -p "$REPORTS_DIR"
-
-# Compile first so Slither can skip its own compile step
-echo "Compiling contracts..."
-forge build
-
-echo "Running Slither analysis..."
-
-# Run Slither with JSON output
-slither . --json "$JSON_REPORT" --checklist --markdown-root "$(pwd)/" > "$MD_REPORT" 2>&1 || true
+# Run Slither with JSON output (non-zero exit is normal when findings exist)
+slither . --checklist > $REPORT_PATH || true
 
 echo ""
 echo "Reports generated:"
-echo "  JSON: $JSON_REPORT"
-echo "  Markdown: $MD_REPORT"
+echo "Markdown: $REPORT_PATH"
+exit 0

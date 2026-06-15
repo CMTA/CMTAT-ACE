@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 import {CCTCMTATBasePolicyEngine} from "./CCTCMTATBasePolicyEngine.sol";
 import {PolicyValidationModuleERC1404, IERC1404, IERC1404Extend} from "./PolicyValidationModuleERC1404.sol";
-import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
 import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {
@@ -39,7 +38,7 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
     }
 
     /**
-     * @inheritdoc ValidationModulePolicyEngine
+     * @inheritdoc CCTCMTATBasePolicyEngine
      */
     function canTransfer(
         address from,
@@ -50,7 +49,7 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
     }
 
     /**
-     * @inheritdoc ValidationModulePolicyEngine
+     * @inheritdoc CCTCMTATBasePolicyEngine
      */
     function canTransferFrom(
         address spender,
