@@ -483,6 +483,79 @@ describe('TransferValidationPolicy', function () {
         ),
       ).to.be.reverted;
     });
+
+    it('reverts with InvalidParametersLength when run() has 0 parameters', async function () {
+      const params = [];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      )
+        .to.be.revertedWithCustomError(this.transferPolicy, 'InvalidParametersLength')
+        .withArgs(0n);
+    });
+
+    it('reverts with InvalidParametersLength when run() has 1 parameter', async function () {
+      const params = [ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address])];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      )
+        .to.be.revertedWithCustomError(this.transferPolicy, 'InvalidParametersLength')
+        .withArgs(1n);
+    });
+
+    it('reverts with InvalidParametersLength when run() has 2 parameters', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+      ];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      )
+        .to.be.revertedWithCustomError(this.transferPolicy, 'InvalidParametersLength')
+        .withArgs(2n);
+    });
+
+    it('reverts with InvalidParametersLength when run() has 5 parameters', async function () {
+      const params = [
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.admin.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address1.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [50n]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['address'], [this.address2.address]),
+        ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [1n]),
+      ];
+
+      await expect(
+        this.transferPolicy.run(
+          this.admin.address,
+          this.cmtatAddress,
+          this.transferSelector,
+          params,
+          '0x',
+        ),
+      )
+        .to.be.revertedWithCustomError(this.transferPolicy, 'InvalidParametersLength')
+        .withArgs(5n);
+    });
   });
 
   describe('No policy attached (defaultAllow = true)', function () {

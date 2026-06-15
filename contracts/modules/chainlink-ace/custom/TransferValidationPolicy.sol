@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Policy} from "@chainlink/policy-management/core/Policy.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
-import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol";
+import {IRule} from "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
 
 /**
  * @title TransferValidationPolicy
@@ -23,6 +23,8 @@ import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol"
  *      the policy reverts with PolicyRejected containing the rule's message.
  */
 contract TransferValidationPolicy is Policy {
+    error InvalidParametersLength(uint256 length);
+
     string public constant override typeAndVersion = "TransferValidationPolicy 1.0.0";
     event RulesUpdated(uint256 previousCount, uint256 newCount);
 
@@ -101,7 +103,7 @@ contract TransferValidationPolicy is Policy {
         TransferValidationStorage storage $ = _getStorage();
         uint256 len = $.rules.length;
 
-        if (parameters.length >= 4) {
+        if (parameters.length == 4) {
             // ERC20TransferFromExtractor layout: [spender, from, to, amount]
             address spender = abi.decode(parameters[0], (address));
             address from = abi.decode(parameters[1], (address));
@@ -115,7 +117,7 @@ contract TransferValidationPolicy is Policy {
                     revert IPolicyEngine.PolicyRejected(message);
                 }
             }
-        } else {
+        } else if (parameters.length == 3) {
             // ERC20TransferExtractor layout: [from, to, amount]
             address from = abi.decode(parameters[0], (address));
             address to = abi.decode(parameters[1], (address));
@@ -128,6 +130,9 @@ contract TransferValidationPolicy is Policy {
                     revert IPolicyEngine.PolicyRejected(message);
                 }
             }
+        } else {
+            // This should never happen due to the initial length check, but included for completeness
+            revert InvalidParametersLength(parameters.length);
         }
 
         return IPolicyEngine.PolicyResult.Continue;
