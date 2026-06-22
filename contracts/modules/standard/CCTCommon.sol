@@ -26,8 +26,11 @@ import {CMTATBaseDocument} from "CMTAT/modules/1_CMTATBaseDocument.sol";
 import {DocumentERC1643Module} from "CMTAT/modules/wrapper/extensions/DocumentERC1643Module.sol";
 /* = Interface = */
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
 /* ==== Chainlink ACE === */
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 
 abstract contract CCTCommon is
     OwnableUpgradeable,
@@ -169,8 +172,82 @@ abstract contract CCTCommon is
         bytes4 _interfaceId
     ) public view virtual override(IERC165, ERC20CrossChainModule, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
+            _interfaceId == type(IERC7943Fungible).interfaceId ||
             ERC20CrossChainModule.supportsInterface(_interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(_interfaceId);
+    }
+
+    /* ============ ERC-7943 (uRWA) check surface ============ */
+    /**
+     * @notice Account-level send eligibility (ERC-7943 `canSend`).
+     * @dev In the Standard (policy-authoritative) variant there is no on-chain account allowlist or
+     * account freeze on the token itself: send/receive eligibility is decided per-transfer by the
+     * PolicyEngine inside {canTransfer}. This therefore reports no token-level account restriction.
+     * MUST NOT revert and MUST NOT encode quantitative rules.
+     */
+    function canSend(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice Account-level receive eligibility (ERC-7943 `canReceive`). See {canSend}.
+     */
+    function canReceive(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice Transfer-level authorization check (ERC-7943 `canTransfer`).
+     * @dev Combines the unfrozen-balance check, the account-level {canSend}/{canReceive} checks, and
+     * the PolicyEngine's permissioned rules (queried via the read-only `check`). MUST NOT revert.
+     */
+    function canTransfer(address from, address to, uint256 value) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transfer.selector, from, abi.encode(to, value));
+    }
+
+    /**
+     * @notice Spender-aware transfer-level authorization check (mirrors {canTransfer} for `transferFrom`).
+     */
+    function canTransferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transferFrom.selector, spender, abi.encode(from, to, value));
+    }
+
+    /**
+     * @dev Read-only PolicyEngine evaluation. `check` reverts on rejection (preserving the reason);
+     * here we only need a boolean, so a revert is mapped to `false`. Returns `true` when no engine
+     * is attached (no policy enforcement).
+     */
+    function _canTransferWithPolicyEngine(
+        bytes4 selector,
+        address sender,
+        bytes memory data
+    ) internal view virtual returns (bool) {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        if (address(policyEngine_) == address(0)) {
+            return true;
+        }
+        try
+            policyEngine_.check(
+                IPolicyEngine.Payload({selector: selector, sender: sender, data: data, context: getContext()})
+            )
+        {
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /* ==== Mint and Burn Operations ==== */

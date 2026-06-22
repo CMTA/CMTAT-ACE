@@ -365,6 +365,28 @@ This integration includes ERC-165 interface discovery for both the protected tok
 
 This allows integrators and tooling to programmatically verify interface compatibility before wiring policies, engines, and rule contracts together.
 
+### ERC-7943 (uRWA) support
+
+Both variants advertise the ERC-7943 (uRWA) **fungible** interface id `0x3edbb4c4` via
+`supportsInterface`, and implement its check/enforcement surface:
+
+- `forcedTransfer`, `setFrozenTokens`, `getFrozenTokens` — enforcement (from CMTAT's
+  `ERC20EnforcementModule`).
+- `canTransfer(from,to,amount)`, `canSend(account)`, `canReceive(account)` — non-reverting view
+  checks. `canTransfer` combines the unfrozen-balance check, `canSend`/`canReceive`, and the
+  PolicyEngine's permissioned rules (queried via the read-only `check`, mapping a revert to
+  `false`).
+
+Notes:
+
+- **Lite** uses CMTAT's account freeze, so `canSend`/`canReceive` return `false` for a frozen
+  account.
+- **Standard** has no on-chain account allowlist/freeze on the token (send/receive eligibility is
+  decided per transfer by the PolicyEngine inside `canTransfer`), so `canSend`/`canReceive` report
+  no token-level account restriction. The authoritative gate is `canTransfer`.
+
+Conformance is covered by `test/custom/erc7943Compliance.test.js`.
+
 ## Library
 
 - CMTAT [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1)

@@ -9,6 +9,7 @@ import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
 import {PauseModule} from "CMTAT/modules/wrapper/core/PauseModule.sol";
 import {EnforcementModule} from "CMTAT/modules/wrapper/core/EnforcementModule.sol";
 import {IERC7943FungibleTransferError} from "CMTAT/interfaces/tokenization/draft-IERC7943.sol";
+import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
 // Extensions
 import {
     ERC20EnforcementModule,
@@ -168,6 +169,7 @@ abstract contract CCTCMTATBasePolicyEngine is
         bytes4 interfaceId
     ) public view virtual override(CMTATBaseAccessControl, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
+            interfaceId == type(IERC7943Fungible).interfaceId ||
             CMTATBaseAccessControl.supportsInterface(interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(interfaceId);
     }
