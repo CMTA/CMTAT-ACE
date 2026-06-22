@@ -227,27 +227,23 @@ function RBACPolicyCommon() {
       ).to.be.revertedWithCustomError(this.policyEngine, 'PolicyRunRejected');
     });
 
-    // ---- setDocumentEngine (Document Management) ----
+    // ---- setDocument (In-contract Document Management) ----
 
-    it('testAllowSetDocumentEngineByDocumentRole', async function () {
-      await this.cmtat.connect(this.admin).setDocumentEngine(this.address1);
+    it('testAllowSetDocumentByDocumentRole', async function () {
+      const name = ethers.encodeBytes32String('doc1');
+      const uri = 'https://github.com/CMTA/CMTAT';
+      const documentHash = ethers.encodeBytes32String('hash1');
+      await this.cmtat.connect(this.admin).setDocument(name, uri, documentHash);
+      const doc = await this.cmtat.getDocument(name);
+      expect(doc.uri).to.equal(uri);
     });
 
-    it('testRejectSetDocumentEngineWithoutDocumentRole', async function () {
+    it('testRejectSetDocumentWithoutDocumentRole', async function () {
+      const name = ethers.encodeBytes32String('doc1');
+      const uri = 'https://github.com/CMTA/CMTAT';
+      const documentHash = ethers.encodeBytes32String('hash1');
       await expect(
-        this.cmtat.connect(this.address1).setDocumentEngine(this.address2),
-      ).to.be.revertedWithCustomError(this.policyEngine, 'PolicyRunRejected');
-    });
-
-    // ---- setSnapshotEngine (Snapshots) ----
-
-    it('testAllowSetSnapshotEngineBySnapshooterRole', async function () {
-      await this.cmtat.connect(this.admin).setSnapshotEngine(this.address1);
-    });
-
-    it('testRejectSetSnapshotEngineWithoutSnapshooterRole', async function () {
-      await expect(
-        this.cmtat.connect(this.address1).setSnapshotEngine(this.address2),
+        this.cmtat.connect(this.address1).setDocument(name, uri, documentHash),
       ).to.be.revertedWithCustomError(this.policyEngine, 'PolicyRunRejected');
     });
 

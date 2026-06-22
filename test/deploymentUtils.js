@@ -18,7 +18,6 @@ const PAUSER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('PAUSER_ROLE'));
 const ENFORCER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ENFORCER_ROLE'));
 const ERC20ENFORCER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ERC20ENFORCER_ROLE'));
 const DOCUMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes('DOCUMENT_ROLE'));
-const SNAPSHOOTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('SNAPSHOOTER_ROLE'));
 const CROSS_CHAIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes('CROSS_CHAIN_ROLE'));
 const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -94,29 +93,17 @@ async function deployRBACPolicy(policyEngineAddress, ownerAddress) {
 
 /* ======== Standard Contract Deploy Helpers ======== */
 
-async function deployCCTStandalone(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTStandalone(admin, policyEngineAddress) {
   const cmtat = await ethers.deployContract('ComplianceTokenCMTATStandalone', [
     admin,
     ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
     ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
     policyEngineAddress,
-    snapshotEngine,
-    documentEngine,
   ]);
   return cmtat;
 }
 
-async function deployCCTUpgradeable(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTUpgradeable(admin, policyEngineAddress) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATUpgradeable');
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -125,8 +112,6 @@ async function deployCCTUpgradeable(
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
       policyEngineAddress,
-      snapshotEngine,
-      documentEngine,
     ],
     {
       initializer: 'initialize',
@@ -139,29 +124,17 @@ async function deployCCTUpgradeable(
 
 /* ======== Lite Contract Deploy Helpers ======== */
 
-async function deployCCTLiteStandalone(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTLiteStandalone(admin, policyEngineAddress) {
   const cmtat = await ethers.deployContract('ComplianceTokenCMTATLiteStandalone', [
     admin,
     ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
     ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
     policyEngineAddress,
-    snapshotEngine,
-    documentEngine,
   ]);
   return cmtat;
 }
 
-async function deployCCTLiteUpgradeable(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTLiteUpgradeable(admin, policyEngineAddress) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATLiteUpgradeable');
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -170,8 +143,6 @@ async function deployCCTLiteUpgradeable(
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
       policyEngineAddress,
-      snapshotEngine,
-      documentEngine,
     ],
     {
       initializer: 'initialize',
@@ -184,12 +155,7 @@ async function deployCCTLiteUpgradeable(
 
 /* ======== UUPS Contract Deploy Helpers ======== */
 
-async function deployCCTUUPSUpgradeable(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTUUPSUpgradeable(admin, policyEngineAddress) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATUUPSUpgradeable');
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -198,8 +164,6 @@ async function deployCCTUUPSUpgradeable(
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
       policyEngineAddress,
-      snapshotEngine,
-      documentEngine,
     ],
     {
       initializer: 'initialize',
@@ -211,12 +175,7 @@ async function deployCCTUUPSUpgradeable(
   return cmtat;
 }
 
-async function deployCCTLiteUUPSUpgradeable(
-  admin,
-  policyEngineAddress,
-  snapshotEngine = ZERO_ADDRESS,
-  documentEngine = ZERO_ADDRESS,
-) {
+async function deployCCTLiteUUPSUpgradeable(admin, policyEngineAddress) {
   const Factory = await ethers.getContractFactory('ComplianceTokenCMTATLiteUUPSUpgradeable');
   const cmtat = await upgrades.deployProxy(
     Factory,
@@ -225,8 +184,6 @@ async function deployCCTLiteUUPSUpgradeable(
       ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
       ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
       policyEngineAddress,
-      snapshotEngine,
-      documentEngine,
     ],
     {
       initializer: 'initialize',
@@ -293,8 +250,7 @@ function createStandardFixture(deployTokenFn) {
     ).selector;
     const setNameSelector = cmtat.interface.getFunction('setName').selector;
     const setTokenIdSelector = cmtat.interface.getFunction('setTokenId').selector;
-    const setDocumentEngineSelector = cmtat.interface.getFunction('setDocumentEngine').selector;
-    const setSnapshotEngineSelector = cmtat.interface.getFunction('setSnapshotEngine').selector;
+    const setDocumentSelector = cmtat.interface.getFunction('setDocument').selector;
     const setCCIPAdminSelector = cmtat.interface.getFunction('setCCIPAdmin').selector;
     const crosschainMintSelector = cmtat.interface.getFunction('crosschainMint').selector;
     const crosschainBurnSelector = cmtat.interface.getFunction('crosschainBurn').selector;
@@ -309,8 +265,7 @@ function createStandardFixture(deployTokenFn) {
       unfreezeSelector,
       setNameSelector,
       setTokenIdSelector,
-      setDocumentEngineSelector,
-      setSnapshotEngineSelector,
+      setDocumentSelector,
       setCCIPAdminSelector,
       crosschainMintSelector,
       crosschainBurnSelector,
@@ -341,8 +296,7 @@ function createStandardFixture(deployTokenFn) {
       [unfreezeSelector, ERC20ENFORCER_ROLE],
       [setNameSelector, DEFAULT_ADMIN_ROLE],
       [setTokenIdSelector, DEFAULT_ADMIN_ROLE],
-      [setDocumentEngineSelector, DOCUMENT_ROLE],
-      [setSnapshotEngineSelector, SNAPSHOOTER_ROLE],
+      [setDocumentSelector, DOCUMENT_ROLE],
       [setCCIPAdminSelector, DEFAULT_ADMIN_ROLE],
       [crosschainMintSelector, CROSS_CHAIN_ROLE],
       [crosschainBurnSelector, CROSS_CHAIN_ROLE],
@@ -352,14 +306,7 @@ function createStandardFixture(deployTokenFn) {
     }
 
     // Grant roles to admin
-    const adminRoles = [
-      MINTER_ROLE,
-      BURNER_ROLE,
-      ENFORCER_ROLE,
-      ERC20ENFORCER_ROLE,
-      DOCUMENT_ROLE,
-      SNAPSHOOTER_ROLE,
-    ];
+    const adminRoles = [MINTER_ROLE, BURNER_ROLE, ENFORCER_ROLE, ERC20ENFORCER_ROLE, DOCUMENT_ROLE];
     for (const role of adminRoles) {
       await rbacPolicy.connect(admin).grantRole(role, admin.address);
     }
@@ -393,40 +340,12 @@ function createStandardFixture(deployTokenFn) {
       unfreezeSelector,
       setNameSelector,
       setTokenIdSelector,
-      setDocumentEngineSelector,
-      setSnapshotEngineSelector,
+      setDocumentSelector,
       setCCIPAdminSelector,
       crosschainMintSelector,
       crosschainBurnSelector,
       erc1404: true,
     };
-  };
-}
-
-async function withSnapshotEngine(baseFixture) {
-  const cmtatAddress = baseFixture.cmtatAddress ?? (await baseFixture.cmtat.getAddress());
-  const transferEngineMock = await ethers.deployContract('SnapshotEngineMock', [
-    cmtatAddress,
-    baseFixture.admin.address,
-  ]);
-  await transferEngineMock.waitForDeployment();
-  await (
-    await baseFixture.cmtat
-      .connect(baseFixture.admin)
-      .setSnapshotEngine(await transferEngineMock.getAddress())
-  ).wait();
-  return {
-    ...baseFixture,
-    cmtatAddress,
-    transferEngineMock,
-  };
-}
-
-function createStandardFixtureWithSnapshot(deployTokenFn) {
-  const baseFactory = createStandardFixture(deployTokenFn);
-  return async function standardFixtureWithSnapshot() {
-    const base = await baseFactory();
-    return withSnapshotEngine(base);
   };
 }
 
@@ -451,6 +370,10 @@ function createLiteFixture(deployTokenFn) {
     const policyEngine = await deployPolicyEngine(true, admin.address);
     const cmtat = await deployTokenFn(admin.address, await policyEngine.getAddress());
 
+    // Lite tokens use CMTAT role-based access control. Grant DOCUMENT_ROLE so the
+    // admin can manage in-contract documents (reused CMTAT document common needs it).
+    await cmtat.connect(admin).grantRole(DOCUMENT_ROLE, admin.address);
+
     return {
       _,
       admin,
@@ -468,14 +391,6 @@ function createLiteFixture(deployTokenFn) {
   };
 }
 
-function createLiteFixtureWithSnapshot(deployTokenFn) {
-  const baseFactory = createLiteFixture(deployTokenFn);
-  return async function liteFixtureWithSnapshot() {
-    const base = await baseFactory();
-    return withSnapshotEngine(base);
-  };
-}
-
 module.exports = {
   ZERO_ADDRESS,
   DEPLOYMENT_DECIMAL,
@@ -488,7 +403,6 @@ module.exports = {
   ENFORCER_ROLE,
   ERC20ENFORCER_ROLE,
   DOCUMENT_ROLE,
-  SNAPSHOOTER_ROLE,
   CROSS_CHAIN_ROLE,
   DEFAULT_ADMIN_ROLE,
   fixture,
@@ -503,7 +417,5 @@ module.exports = {
   deployCCTLiteUpgradeable,
   deployCCTLiteUUPSUpgradeable,
   createStandardFixture,
-  createStandardFixtureWithSnapshot,
   createLiteFixture,
-  createLiteFixtureWithSnapshot,
 };

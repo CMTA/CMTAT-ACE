@@ -13,13 +13,14 @@
  *   9. ERC20TransferFromExtractor – set for transferFrom()
  *  10. MaxAmountRule + RestrictedAddressRule (mock IRule contracts)
  *  11. TransferValidationPolicy (proxy) – added to transfer() and transferFrom()
- *  12. DocumentEngineMock – set on the token
- *  13. SnapshotEngineMock – set on the token, used for scheduling snapshots
+ *
+ * Documents are managed in-contract via DocumentERC1643Module (DOCUMENT_ROLE);
+ * there is no external document or snapshot engine in this integration.
  *
  * Script example - do not use it for production
  */
 const { ethers, upgrades } = require('hardhat');
-const { ZeroAddress, keccak256, toUtf8Bytes, AbiCoder } = require('ethers');
+const { keccak256, toUtf8Bytes, AbiCoder } = require('ethers');
 
 /* ============ Role Constants ============ */
 const MINTER_ROLE = keccak256(toUtf8Bytes('MINTER_ROLE'));
@@ -27,7 +28,6 @@ const BURNER_ROLE = keccak256(toUtf8Bytes('BURNER_ROLE'));
 const BURNER_FROM_ROLE = keccak256(toUtf8Bytes('BURNER_FROM_ROLE'));
 const ENFORCER_ROLE = keccak256(toUtf8Bytes('ENFORCER_ROLE'));
 const ERC20ENFORCER_ROLE = keccak256(toUtf8Bytes('ERC20ENFORCER_ROLE'));
-const SNAPSHOOTER_ROLE = keccak256(toUtf8Bytes('SNAPSHOOTER_ROLE'));
 const DOCUMENT_ROLE = keccak256(toUtf8Bytes('DOCUMENT_ROLE'));
 const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -123,27 +123,9 @@ async function main() {
   console.log('PolicyEngine deployed to:', policyEngineAddress);
 
   /* ============================================================
-   * 2. Deploy Document & Snapshot Engine Mocks
+   * 2. Deploy ComplianceTokenCMTATStandalone
    * ============================================================ */
-  console.log('\n--- Step 2: Deploy Document & Snapshot Engine Mocks ---');
-
-  const DocumentEngineMockFactory = await ethers.getContractFactory('DocumentEngineMock');
-  const documentEngineMock = await DocumentEngineMockFactory.deploy();
-  await documentEngineMock.waitForDeployment();
-  const documentEngineAddress = await documentEngineMock.getAddress();
-  console.log('DocumentEngineMock deployed to:', documentEngineAddress);
-
-  // SnapshotEngineMock needs the token address, so deploy with ZeroAddress first, then update after token deploy
-  const SnapshotEngineMockFactory = await ethers.getContractFactory('SnapshotEngineMock');
-  const snapshotEngineMock = await SnapshotEngineMockFactory.deploy(ZeroAddress, admin);
-  await snapshotEngineMock.waitForDeployment();
-  const snapshotEngineAddress = await snapshotEngineMock.getAddress();
-  console.log('SnapshotEngineMock deployed to:', snapshotEngineAddress);
-
-  /* ============================================================
-   * 3. Deploy ComplianceTokenCMTATStandalone
-   * ============================================================ */
-  console.log('\n--- Step 3: Deploy ComplianceTokenCMTATStandalone ---');
+  console.log('\n--- Step 2: Deploy ComplianceTokenCMTATStandalone ---');
   const ERC20Attributes = {
     name: 'Security Token',
     symbol: 'ST',
@@ -166,16 +148,10 @@ async function main() {
     ERC20Attributes,
     extraInformationAttributes,
     policyEngineAddress,
-    snapshotEngineAddress,
-    documentEngineAddress,
   );
   await cmtat.waitForDeployment();
   const cmtatAddress = await cmtat.getAddress();
   console.log('ComplianceTokenCMTATStandalone deployed to:', cmtatAddress);
-
-  // Update SnapshotEngineMock with the actual token address
-  await snapshotEngineMock.setERC20(cmtatAddress);
-  console.log('SnapshotEngineMock updated with token address');
 
   /* ============================================================
    * 4. Deploy PausePolicy
@@ -256,9 +232,8 @@ async function main() {
     // Admin
     setName: cmtat.interface.getFunction('setName').selector,
     setSymbol: cmtat.interface.getFunction('setSymbol').selector,
-    // Engines
-    setSnapshotEngine: cmtat.interface.getFunction('setSnapshotEngine').selector,
-    setDocumentEngine: cmtat.interface.getFunction('setDocumentEngine').selector,
+    // Documents (in-contract ERC-1643)
+    setDocument: cmtat.interface.getFunction('setDocument').selector,
   };
 
   console.log('Function selectors:');
@@ -448,14 +423,9 @@ async function main() {
       name: 'setSymbol → DEFAULT_ADMIN_ROLE',
     },
     {
-      selector: selectors.setSnapshotEngine,
-      role: SNAPSHOOTER_ROLE,
-      name: 'setSnapshotEngine → SNAPSHOOTER_ROLE',
-    },
-    {
-      selector: selectors.setDocumentEngine,
+      selector: selectors.setDocument,
       role: DOCUMENT_ROLE,
-      name: 'setDocumentEngine → DOCUMENT_ROLE',
+      name: 'setDocument → DOCUMENT_ROLE',
     },
   ];
 
@@ -474,7 +444,6 @@ async function main() {
     { role: BURNER_FROM_ROLE, name: 'BURNER_FROM_ROLE' },
     { role: ENFORCER_ROLE, name: 'ENFORCER_ROLE' },
     { role: ERC20ENFORCER_ROLE, name: 'ERC20ENFORCER_ROLE' },
-    { role: SNAPSHOOTER_ROLE, name: 'SNAPSHOOTER_ROLE' },
     { role: DOCUMENT_ROLE, name: 'DOCUMENT_ROLE' },
   ];
 
@@ -527,8 +496,6 @@ async function main() {
   console.log('MaxAmountRule:              ', maxAmountRuleAddress);
   console.log('RestrictedAddressRule:      ', restrictedAddressRuleAddress);
   console.log('Mock Reserve Feed:          ', mockFeedAddress);
-  console.log('DocumentEngineMock:         ', documentEngineAddress);
-  console.log('SnapshotEngineMock:         ', snapshotEngineAddress);
 
   console.log('\n--- Configuration ---');
   console.log(
@@ -546,12 +513,9 @@ async function main() {
   console.log(
     '  - Policy execution order per function: PausePolicy → RBAC → (SecureMint on mint) → (TransferValidation on transfer/transferFrom)',
   );
+  console.log('  - Admin has MINTER, BURNER, BURNER_FROM, ENFORCER, ERC20ENFORCER, DOCUMENT roles');
   console.log(
-    '  - Admin has MINTER, BURNER, BURNER_FROM, ENFORCER, ERC20ENFORCER, SNAPSHOOTER, DOCUMENT roles',
-  );
-  console.log('  - DocumentEngineMock set at deploy (manages on-chain documents via IERC1643)');
-  console.log(
-    '  - SnapshotEngineMock set at deploy (enables snapshot scheduling for balance tracking)',
+    '  - Documents are managed in-contract via setDocument() (DocumentERC1643Module, DOCUMENT_ROLE)',
   );
   console.log('========================================');
 }

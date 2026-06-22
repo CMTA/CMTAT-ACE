@@ -90,15 +90,19 @@ Treat the following as privileged governance actions:
 
 ### Initialization
 
-The `Engine` struct parameter is replaced with `address policyEngine_`, `ISnapshotEngine snapshotEngine_`, and `IERC1643 documentEngine_`:
+The `Engine` struct parameter is replaced with a single `address policyEngine_`:
 
 ```solidity
 // CMTAT
 constructor(forwarder, admin, ..., ICMTATConstructor.Engine memory engines_)
 
 // ComplianceTokenCMTAT (Standard & Lite)
-constructor(admin, ..., address policyEngine_, ISnapshotEngine snapshotEngine_, IERC1643 documentEngine_)
+constructor(admin, ..., address policyEngine_)
 ```
+
+Document management is handled in-contract via CMTAT's `DocumentERC1643Module` (no external
+document engine), and the snapshot engine has been removed from this integration, so neither a
+`documentEngine_` nor a `snapshotEngine_` parameter is taken.
 
 ERC-2771 (gasless transaction forwarding) has been removed from all deployment contracts. The standalone contracts no longer take a `forwarderIrrevocable` parameter, and the upgradeable contracts have parameterless constructors.
 
@@ -109,9 +113,13 @@ All CMTAT functional modules are preserved in both variants:
 - ERC20MintModule, ERC20BurnModule
 - ERC20EnforcementModule (freeze/enforcement)
 - PauseModule (Standard: `pause()`/`unpause()`/`deactivateContract()` are not exposed on the token — pausing is enforced externally via a PausePolicy on the PolicyEngine which rejects operations when paused; Lite: native `onlyRole(PAUSER_ROLE)`)
-- SnapshotEngineModule, DocumentEngineModule
+- DocumentERC1643Module (in-contract ERC-1643 document management, `DOCUMENT_ROLE`)
 - ExtraInformationModule
 - ERC20CrossChainModule, CCIPModule
+
+> The external `DocumentEngineModule` and the `SnapshotEngineModule` from CMTAT are **not**
+> used in this integration: documents are managed in-contract via `DocumentERC1643Module`, and
+> snapshot support has been removed.
 
 ### Removed from Standard
 
@@ -275,8 +283,8 @@ This allows integrators and tooling to programmatically verify interface compati
 
 ## Library
 
-- CMTAT [v3.2.0](https://github.com/CMTA/CMTAT/releases/tag/v3.2.0)
-- Chainlink ACE `1.0.0`
+- CMTAT [v3.3.0-rc1](https://github.com/CMTA/CMTAT/releases/tag/v3.3.0-rc1)
+- Chainlink ACE `1.1.1`
 - OpenZeppelin Contracts `5.6.1`
 - OpenZeppelin Contracts Upgradeable `5.6.1`
 
@@ -368,19 +376,20 @@ bunx hardhat run scripts/lite/deploy-lite-standalone.js
 `scripts/demo.js` provides a complete end-to-end deployment of the Standard variant with the full Chainlink ACE policy stack. It deploys and wires together all contracts in the correct order:
 
 1. **PolicyEngine** (proxy) — central policy orchestrator with `defaultAllow = true`
-2. **DocumentEngineMock** + **SnapshotEngineMock** — mock engine contracts for document/snapshot support
-3. **ComplianceTokenCMTATStandalone** — the token contract, attached to the PolicyEngine and engines
-4. **PausePolicy** (proxy) — added to all state-changing selectors (mint, burn, transfer, enforcement, admin)
-5. **RoleBasedAccessControlPolicy** (proxy) — added to admin selectors with role-to-selector mappings
-6. **MockV3Aggregator** — mock Chainlink reserve price feed (Hardhat network only)
-7. **SecureMintPolicy** (proxy) — added to `mint()`, enforces reserve-backed minting via price feed
-8. **MintBurnExtractor** — set for `mint()` selector, extracts `account` and `amount` parameters
-9. **ERC20TransferExtractor** — set for `transfer()` selector
-10. **ERC20TransferFromExtractor** — set for `transferFrom()` selector
-11. **MaxAmountRule** + **RestrictedAddressRule** — mock IRule contracts for transfer validation
-12. **TransferValidationPolicy** (proxy) — added to `transfer()` and `transferFrom()` with both rules
+2. **ComplianceTokenCMTATStandalone** — the token contract, attached to the PolicyEngine
+3. **PausePolicy** (proxy) — added to all state-changing selectors (mint, burn, transfer, enforcement, admin)
+4. **RoleBasedAccessControlPolicy** (proxy) — added to admin selectors with role-to-selector mappings
+5. **MockV3Aggregator** — mock Chainlink reserve price feed (Hardhat network only)
+6. **SecureMintPolicy** (proxy) — added to `mint()`, enforces reserve-backed minting via price feed
+7. **MintBurnExtractor** — set for `mint()` selector, extracts `account` and `amount` parameters
+8. **ERC20TransferExtractor** — set for `transfer()` selector
+9. **ERC20TransferFromExtractor** — set for `transferFrom()` selector
+10. **MaxAmountRule** + **RestrictedAddressRule** — mock IRule contracts for transfer validation
+11. **TransferValidationPolicy** (proxy) — added to `transfer()` and `transferFrom()` with both rules
 
-The script also configures RBAC operation allowances and grants roles (`MINTER_ROLE`, `BURNER_ROLE`, `BURNER_FROM_ROLE`, `ENFORCER_ROLE`, `ERC20ENFORCER_ROLE`, `DOCUMENT_ROLE`, `SNAPSHOOTER_ROLE`) to the admin account.
+Documents are managed in-contract via `setDocument()` (`DocumentERC1643Module`, `DOCUMENT_ROLE`); there is no external document or snapshot engine.
+
+The script also configures RBAC operation allowances and grants roles (`MINTER_ROLE`, `BURNER_ROLE`, `BURNER_FROM_ROLE`, `ENFORCER_ROLE`, `ERC20ENFORCER_ROLE`, `DOCUMENT_ROLE`) to the admin account.
 
 Policy execution order per function:
 
@@ -519,8 +528,7 @@ The list below reflects the selectors wired in deployment/test flows (`scripts/d
 | `setName(string)`                         | `0xc47f0027` |
 | `setSymbol(string)`                       | `0xb84c8246` |
 | `setTokenId(string)`                      | `0xdcfd616f` |
-| `setDocumentEngine(address)`              | `0x33611079` |
-| `setSnapshotEngine(address)`              | `0xe236aabf` |
+| `setDocument(bytes32,string,bytes32)`     | `0x010648ca` |
 | `setCCIPAdmin(address)`                   | `0xa8fa343c` |
 | `crosschainMint(address,uint256)`         | `0x18bf5077` |
 | `crosschainBurn(address,uint256)`         | `0x2b8c49e3` |

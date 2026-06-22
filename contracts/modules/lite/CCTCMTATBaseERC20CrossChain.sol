@@ -151,13 +151,4 @@ abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModu
         onlyRole(BURNER_SELF_ROLE)
         whenNotPaused
     {}
-
-    /* ==== ERC-20 OpenZeppelin ==== */
-    function _update(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override(ERC20Upgradeable, CMTATBaseCommon) {
-        return CMTATBaseCommon._update(from, to, amount);
-    }
 }

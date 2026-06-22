@@ -22,11 +22,10 @@ import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
 } from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
-import {DocumentEngineModule, IERC1643} from "CMTAT/modules/wrapper/extensions/DocumentEngineModule.sol";
-import {SnapshotEngineModule} from "CMTAT/modules/wrapper/extensions/SnapshotEngineModule.sol";
+import {CMTATBaseDocument} from "CMTAT/modules/1_CMTATBaseDocument.sol";
+import {DocumentERC1643Module} from "CMTAT/modules/wrapper/extensions/DocumentERC1643Module.sol";
 /* = Interface = */
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
 /* ==== Chainlink ACE === */
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 
@@ -35,42 +34,25 @@ abstract contract CCTCommon is
     ERC20CrossChainModule,
     PolicyProtectedBaseUpgradeable,
     CMTATBaseCommon,
+    CMTATBaseDocument,
     CCIPModule
 {
     function initialize(
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) public virtual initializer {
-        _initialize(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine,
-            snapshotEngine_,
-            documentEngine_
-        );
+        _initialize(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
     }
 
     function _initialize(
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) internal virtual onlyInitializing {
-        __CMTAT_init(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine,
-            snapshotEngine_,
-            documentEngine_
-        );
+        __CMTAT_init(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
     }
 
     /**
@@ -80,9 +62,7 @@ abstract contract CCTCommon is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) internal virtual onlyInitializing {
         __Ownable_init_unchained(admin);
         /* OpenZeppelin library */
@@ -99,10 +79,6 @@ abstract contract CCTCommon is
 
         /* Wrapper modules */
         __CMTAT_modules_init_unchained(ERC20Attributes_, ExtraInformationAttributes_);
-
-        /* Engine modules */
-        __SnapshotEngineModule_init_unchained(snapshotEngine_);
-        __DocumentEngineModule_init_unchained(documentEngine_);
     }
 
     /*
@@ -253,7 +229,7 @@ abstract contract CCTCommon is
      * @custom:access-control
      * - the caller must have the `DOCUMENT_ROLE`.
      */
-    function _authorizeDocumentManagement() internal virtual override(DocumentEngineModule) runPolicy {}
+    function _authorizeDocumentManagement() internal virtual override(DocumentERC1643Module) runPolicy {}
 
     /**
      * @custom:access-control
@@ -272,12 +248,6 @@ abstract contract CCTCommon is
      * - the caller must have the `DEFAULT_ADMIN_ROLE`.
      */
     function _authorizeForcedTransfer() internal virtual override(ERC20EnforcementModule) runPolicy {}
-
-    /**
-     * @custom:access-control
-     * - the caller must have the `SNAPSHOOTER_ROLE`.
-     */
-    function _authorizeSnapshots() internal virtual override(SnapshotEngineModule) runPolicy {}
 
     /**
      * @custom:access-control
@@ -309,13 +279,4 @@ abstract contract CCTCommon is
      * - We don't allow token holder to burn their own tokens if they don't have this role.
      */
     function _authorizeSelfBurn() internal virtual override(ERC20CrossChainModule) runPolicy {}
-
-    /* ==== ERC-20 OpenZeppelin ==== */
-    function _update(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override(ERC20Upgradeable, CMTATBaseCommon) {
-        return CMTATBaseCommon._update(from, to, amount);
-    }
 }

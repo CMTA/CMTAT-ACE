@@ -2,11 +2,9 @@
 
 pragma solidity ^0.8.20;
 
-import {CMTATBaseCommon, CMTATBaseAccessControl} from "CMTAT/modules/1_CMTATBaseAccessControl.sol";
+import {CMTATBaseCommon, CMTATBaseAccessControl} from "CMTAT/modules/2_CMTATBaseAccessControl.sol";
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "CMTAT/interfaces/tokenization/draft-IERC1643.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
 import {PauseModule} from "CMTAT/modules/wrapper/core/PauseModule.sol";
 import {EnforcementModule} from "CMTAT/modules/wrapper/core/EnforcementModule.sol";
@@ -41,18 +39,9 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) public virtual initializer {
-        _initialize(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine_,
-            snapshotEngine_,
-            documentEngine_
-        );
+        _initialize(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine_);
     }
 
     /**
@@ -62,18 +51,9 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) internal virtual onlyInitializing {
-        __CMTAT_init(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine_,
-            snapshotEngine_,
-            documentEngine_
-        );
+        __CMTAT_init(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine_);
     }
 
     /**
@@ -83,9 +63,7 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) internal virtual onlyInitializing {
         /* OpenZeppelin library */
         // OZ init_unchained functions are called firstly due to inheritance
@@ -99,10 +77,6 @@ abstract contract CCTCMTATBasePolicyEngine is
 
         /* Wrapper modules */
         __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
-
-        /* Engine modules */
-        __SnapshotEngineModule_init_unchained(snapshotEngine_);
-        __DocumentEngineModule_init_unchained(documentEngine_);
 
         /* Chainlink-ACE policy module */
         __PolicyProtectedBase_init_unchained(policyEngine_);
