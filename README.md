@@ -23,6 +23,7 @@ The goal is to let issuers update compliance behavior through policy configurati
 - [Testing](#testing)
 - [Linting & Formatting](#linting--formatting)
 - [Scripts](#scripts)
+- [Policy preflight check](#policy-preflight-check)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
 - [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
@@ -402,6 +403,31 @@ Run the demo on a local Hardhat network:
 ```shell
 bunx hardhat run scripts/demo.js
 ```
+
+## Policy preflight check
+
+`scripts/preflight.js` verifies that a deployed token will **not** have its state-changing
+operations bricked by the PolicyEngine configuration, and prints per-selector policy coverage.
+
+> **Important:** This integration is designed for **`defaultAllow = true`**. The bundled policies
+> (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`,
+> never `Allowed`, so the engine always falls through to the default. With `defaultAllow = false`,
+> **every** policy-routed operation (mint/burn/transfer/…) reverts — even selectors that have
+> policies attached — and the token is effectively frozen. The token must also be **attached** to
+> the engine. The preflight reconstructs the effective `defaultAllow` (global + per-target) and
+> attachment state from on-chain events and **exits non-zero** if the token would be bricked, so
+> it can gate a deployment pipeline.
+
+```shell
+POLICY_ENGINE=0x... TOKEN=0x... \
+  [TOKEN_CONTRACT=ComplianceTokenCMTATLiteStandalone] \
+  bunx hardhat run scripts/preflight.js --network <network>
+```
+
+`TOKEN_CONTRACT` defaults to `ComplianceTokenCMTATStandalone`; set it to the Lite artifact when
+checking a Lite deployment. The invariant tests in
+`test/deployment/preflightPolicyCoverage.test.js` assert the preflight verdict matches real
+on-chain behavior.
 
 ## Audit Reports Summary
 
