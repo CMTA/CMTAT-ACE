@@ -20,11 +20,12 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
 
     /**
      * @notice ERC-1404 restriction code returned when the ACE PolicyEngine rejects the transfer.
-     * @dev Chosen outside the CMTAT `REJECTED_CODE_BASE` enum range so it never collides with the
-     * module-level codes. Returned by {detectTransferRestriction} / {detectTransferRestrictionFrom}
-     * when the module checks pass but the PolicyEngine (KYC/sanctions/limits/...) would reject.
+     * @dev `7` is the next code after the CMTAT `REJECTED_CODE_BASE` enum (which occupies 0..6), so
+     * it does not collide with the module-level codes. Returned by {detectTransferRestriction} /
+     * {detectTransferRestrictionFrom} when the module checks pass but the PolicyEngine
+     * (KYC/sanctions/limits/...) would reject.
      */
-    uint8 public constant TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE = 200;
+    uint8 public constant TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE = 7;
     string internal constant TEXT_TRANSFER_REJECTED_BY_POLICY_ENGINE = "PolicyEngine:transferRejected";
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
@@ -52,7 +53,7 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
      * @notice ERC-1404 transfer-restriction code, made PolicyEngine-aware.
      * @dev Runs the CMTAT module checks first (pause/deactivate/freeze/active-balance); if those
      * pass, consults the ACE PolicyEngine and returns {TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE}
-     * (200) when the engine would reject. Never reverts: the engine `check` is wrapped in
+     * (7) when the engine would reject. Never reverts: the engine `check` is wrapped in
      * try/catch, so this stays a valid (non-reverting) ERC-1404 view.
      */
     function detectTransferRestriction(

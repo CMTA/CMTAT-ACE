@@ -92,7 +92,7 @@ Treat the following as privileged governance actions:
 
 In the **Lite** variant the ERC-1404 view is PolicyEngine-aware: after the module checks
 (pause/deactivate/freeze/active-balance) pass, `detectTransferRestriction` /
-`detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`200`**
+`detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`7`**
 (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`, message `"PolicyEngine:transferRejected"`) when the
 engine would reject the transfer. Module-level codes take precedence, and the view never reverts.
 

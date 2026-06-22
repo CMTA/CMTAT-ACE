@@ -10,7 +10,7 @@ const PARAM_AMOUNT = ethers.keccak256(ethers.toUtf8Bytes('amount'));
 const TRANSFER_PARAMS = [PARAM_SPENDER, PARAM_FROM, PARAM_TO, PARAM_AMOUNT];
 const ENFORCER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ENFORCER_ROLE'));
 
-const POLICY_ENGINE_CODE = 200n;
+const POLICY_ENGINE_CODE = 7n;
 const NO_RESTRICTION = 0n;
 
 async function deployTransferValidationPolicy(policyEngineAddress, owner, ruleAddresses) {
@@ -29,10 +29,10 @@ async function deployTransferValidationPolicy(policyEngineAddress, owner, ruleAd
 /**
  * FEEDBACK_22.md finding 1 (M-1): make the ERC-1404 `detectTransferRestriction` view
  * PolicyEngine-aware. When the module checks pass but the PolicyEngine would reject the transfer,
- * the code 200 (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`) is returned. Module-level codes still
+ * the code 7 (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`) is returned. Module-level codes still
  * take precedence, and the view never reverts.
  */
-describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
+describe('ERC-1404 PolicyEngine-aware restriction code (7)', function () {
   beforeEach(async function () {
     Object.assign(this, await loadFixture(fixture));
 
@@ -69,7 +69,7 @@ describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
       .addPolicy(this.cmtatAddress, this.transferFromSelector, policyAddress, TRANSFER_PARAMS);
   });
 
-  it('exposes the code as a public constant (200)', async function () {
+  it('exposes the code as a public constant (7)', async function () {
     expect(await this.cmtat.TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE()).to.equal(POLICY_ENGINE_CODE);
   });
 
@@ -79,7 +79,7 @@ describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
     ).to.equal(NO_RESTRICTION);
   });
 
-  it('returns 200 when the PolicyEngine rejects the transfer', async function () {
+  it('returns 7 when the PolicyEngine rejects the transfer', async function () {
     expect(
       await this.cmtat.detectTransferRestriction(
         this.address1.address,
@@ -89,13 +89,13 @@ describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
     ).to.equal(POLICY_ENGINE_CODE);
   });
 
-  it('maps code 200 to a human-readable message', async function () {
+  it('maps code 7 to a human-readable message', async function () {
     expect(await this.cmtat.messageForTransferRestriction(POLICY_ENGINE_CODE)).to.equal(
       'PolicyEngine:transferRejected',
     );
   });
 
-  it('returns 200 for transferFrom when the PolicyEngine rejects', async function () {
+  it('returns 7 for transferFrom when the PolicyEngine rejects', async function () {
     expect(
       await this.cmtat.detectTransferRestrictionFrom(
         this.address1.address, // spender
@@ -107,7 +107,7 @@ describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
   });
 
   it('the view never reverts and matches the actual transfer outcome', async function () {
-    // Restricted recipient → detect says 200 AND the real transfer reverts.
+    // Restricted recipient → detect says 7 AND the real transfer reverts.
     expect(
       await this.cmtat.detectTransferRestriction(
         this.address1.address,
@@ -118,7 +118,7 @@ describe('ERC-1404 PolicyEngine-aware restriction code (200)', function () {
   });
 
   it('module-level restrictions take precedence over the engine code', async function () {
-    // Freeze the sender: the module returns its own (frozen) code, not 200.
+    // Freeze the sender: the module returns its own (frozen) code, not 7.
     await this.cmtat.connect(this.admin).grantRole(ENFORCER_ROLE, this.admin.address);
     await this.cmtat
       .connect(this.admin)
