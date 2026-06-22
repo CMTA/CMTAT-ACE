@@ -44,6 +44,7 @@ module.exports = {
       '@chainlink/policy-management/policies/PausePolicy.sol',
       '@chainlink/policy-management/policies/RoleBasedAccessControlPolicy.sol',
       '@chainlink/policy-management/policies/SecureMintPolicy.sol',
+      '@chainlink/policy-management/policies/VolumePolicy.sol',
       '@chainlink/policy-management/extractors/ERC20TransferExtractor.sol',
       'CMTAT/mocks/SnapshotEngineMock.sol',
       'CMTAT/mocks/DocumentEngineMock.sol',

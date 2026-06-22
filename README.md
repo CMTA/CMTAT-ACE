@@ -141,6 +141,32 @@ All CMTAT functional modules are preserved in both variants:
 2. The `ERC20TransferFromExtractor` extracts the `spender` address from `transferFrom()` calls, so policies can restrict which spenders are allowed to move tokens regardless of existing approvals.
 3. In the Lite variant, `approve()` is gated by `whenNotPaused` as a convenience (matching upstream CMTAT behavior), but this is not a security-critical check.
 
+#### ⚠️ SecureMintPolicy and cross-chain (Proof-of-Reserve) tokens
+
+`SecureMintPolicy` enforces `mintAmount + totalSupply() <= reserves`, where `totalSupply()` is the
+**per-chain** supply of the token contract it is attached to. This is correct for a single-chain
+token, but is a footgun for a **cross-chain / bridgeable** token (`ERC20CrossChainModule` /
+`crosschainMint`):
+
+- A `crosschainMint` on chain B mints tokens that were **burned on chain A** — global supply does
+  not increase, only chain B's local supply does.
+- If the Proof-of-Reserve feed reports the **global** reserves backing the **global** supply, but
+  the policy compares them against chain B's **local** `totalSupply()`, then as chain B's local
+  supply approaches the global reserve value, **legitimate cross-chain mints will be rejected**
+  (`"mint would exceed available reserves"`) even though the bridged tokens are fully backed.
+- Conversely, applying a per-chain reserve value against each chain independently can **permit
+  over-minting** of the global supply.
+
+Guidance for issuers:
+
+- The Proof-of-Reserve must validate the **whole multi-chain supply against the whole reserve**,
+  not a single chain in isolation. Use a PoR feed that reports global reserves **and** a supply
+  accounting that aggregates supply across all chains (e.g. a cross-chain aggregator / CCIP-based
+  PoR), or do not gate `crosschainMint` with a per-chain `SecureMintPolicy`.
+- The demo intentionally wires `SecureMintPolicy` to `mint()` only (genuine new issuance), **not**
+  to `crosschainMint()`. Do not attach a naive per-chain `SecureMintPolicy` to `crosschainMint`
+  unless your PoR design accounts for cross-chain supply as described above.
+
 ### Removed from both variants
 
 - `ERC2771Module` — gasless transaction forwarding is not supported (ACE does not currently support ERC-2771)
