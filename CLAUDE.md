@@ -15,6 +15,10 @@
   - event assertion(s) when state changes emit events.
 - Run relevant tests locally before finalizing changes. If a full suite cannot be run, clearly state what was run and what was skipped.
 
+## Commit Message Policy
+
+- After each implemented feature or fix, provide a one-line GitHub commit message for all changes since the last commit.
+
 ## Codebase Summary
 
 - This repository integrates **CMTA CMTAT** token modules with **Chainlink ACE PolicyEngine**.
