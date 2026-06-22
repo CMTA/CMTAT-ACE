@@ -116,4 +116,27 @@ describe('Preflight: policy coverage (H-2 invariant)', function () {
       expect(report.ok).to.equal(false);
     });
   });
+
+  context('Standard PausePolicy coverage', function () {
+    it('warns when no PausePolicy is attached to any selector', async function () {
+      const [, admin] = await ethers.getSigners();
+      const policyEngine = await deployPolicyEngine(true, admin.address);
+      const cmtat = await deployCCTStandalone(admin.address, await policyEngine.getAddress());
+
+      const report = await preflightPolicyCoverage(cmtat, policyEngine);
+      expect(report.ok).to.equal(true); // not bricked, just unpausable
+      expect(report.warnings.join(' ')).to.match(/no PausePolicy is attached/i);
+    });
+
+    it('does not warn about pause when PausePolicy is wired on the movement selectors', async function () {
+      const { cmtat, policyEngine } = await loadFixture(standardFixture);
+      const report = await preflightPolicyCoverage(cmtat, policyEngine);
+      expect(report.warnings.join(' ')).to.not.match(/PausePolicy/i);
+      // transfer is guarded by a PausePolicy in the standard fixture
+      const transfer = report.items.find(
+        (i) => i.selector === selectorOf('transfer(address,uint256)'),
+      );
+      expect(transfer.hasPausePolicy).to.equal(true);
+    });
+  });
 });

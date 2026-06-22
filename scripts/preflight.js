@@ -106,6 +106,22 @@ async function readAttachment(policyEngine, tokenAddress) {
   return last.fragment.name === 'TargetAttached';
 }
 
+/** Returns true if `addr` is a Chainlink ACE PausePolicy (detected via `typeAndVersion`). */
+async function isPausePolicy(policyEngine, addr) {
+  if (addr === ZERO) return false;
+  try {
+    const policy = new ethers.Contract(
+      addr,
+      ['function typeAndVersion() view returns (string)'],
+      policyEngine.runner,
+    );
+    const tv = await policy.typeAndVersion();
+    return tv.startsWith('PausePolicy');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Run the preflight check.
  * @param token ethers.Contract attached with the token's real artifact ABI.
@@ -175,12 +191,23 @@ async function preflightPolicyCoverage(token, policyEngine) {
 
   // 3) Per-selector coverage report
   const bricked = da.effective === false || attached === false;
+  let anyPausePolicy = false;
+  const pauselessMovement = [];
   for (const op of OPERATIONS) {
     if (!token.interface.hasFunction(op.sig)) continue;
     const selector = selectorOf(op.sig);
     const policies = await policyEngine.getPolicies(tokenAddress, selector);
     const extractor = await policyEngine.getExtractor(selector);
     const engineHitting = variant === 'standard' ? true : op.movement;
+
+    let hasPausePolicy = false;
+    for (const p of policies) {
+      if (await isPausePolicy(policyEngine, p)) {
+        hasPausePolicy = true;
+        anyPausePolicy = true;
+        break;
+      }
+    }
 
     let status;
     if (!engineHitting) {
@@ -195,8 +222,10 @@ async function preflightPolicyCoverage(token, policyEngine) {
       name: op.sig,
       selector,
       engineHitting,
+      movement: op.movement,
       policies: [...policies],
       extractor,
+      hasPausePolicy,
       status,
     });
 
@@ -210,6 +239,25 @@ async function preflightPolicyCoverage(token, policyEngine) {
     if (status === 'GUARDED' && extractor === ZERO) {
       report.warnings.push(
         `${op.sig}: has policies but no extractor is set — any policy that needs parameters will revert at run().`,
+      );
+    }
+    if (variant === 'standard' && op.movement && !hasPausePolicy) {
+      pauselessMovement.push(op.sig);
+    }
+  }
+
+  // The Standard variant has no native pause() on the token; pausing relies on a PausePolicy.
+  if (variant === 'standard') {
+    if (!anyPausePolicy) {
+      report.warnings.push(
+        'No PausePolicy is attached to any protected selector — the Standard variant has no native ' +
+          'pause(), so the token currently CANNOT be paused. Attach a PausePolicy to the selectors you ' +
+          'want pausable (at minimum transfer/transferFrom/mint/burn).',
+      );
+    } else if (pauselessMovement.length > 0) {
+      report.warnings.push(
+        'PausePolicy is not attached to these movement selectors, so they cannot be paused: ' +
+          `${pauselessMovement.join(', ')}.`,
       );
     }
   }

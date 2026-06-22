@@ -27,10 +27,10 @@ async function deployTransferValidationPolicy(policyEngineAddress, owner, ruleAd
 }
 
 /**
- * FEEDBACK_22.md finding 1 (M-1): make the ERC-1404 `detectTransferRestriction` view
- * PolicyEngine-aware. When the module checks pass but the PolicyEngine would reject the transfer,
- * the code 7 (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`) is returned. Module-level codes still
- * take precedence, and the view never reverts.
+ * The ERC-1404 `detectTransferRestriction` view is PolicyEngine-aware: when the module checks pass
+ * but the PolicyEngine would reject the transfer, the code 7
+ * (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`) is returned. Module-level codes still take
+ * precedence, and the view never reverts.
  */
 describe('ERC-1404 PolicyEngine-aware restriction code (7)', function () {
   beforeEach(async function () {
