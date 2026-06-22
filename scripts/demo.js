@@ -13,6 +13,7 @@
  *   9. ERC20TransferFromExtractor – set for transferFrom()
  *  10. MaxAmountRule + RestrictedAddressRule (mock IRule contracts)
  *  11. TransferValidationPolicy (proxy) – added to transfer() and transferFrom()
+ *  12. CrossChainMintBurnExtractor – screens crosschainMint/crosschainBurn with the same rules
  *
  * Documents are managed in-contract via DocumentERC1643Module (DOCUMENT_ROLE);
  * there is no external document or snapshot engine in this integration.
@@ -382,6 +383,57 @@ async function main() {
   );
 
   /* ============================================================
+   * 12e. Screen cross-chain mint/burn with the same rules (FEEDBACK.md H-1)
+   * ============================================================ */
+  console.log('\n--- Step 12e: Screen cross-chain mint/burn ---');
+  const crosschainMintSelector = cmtat.interface.getFunction(
+    'crosschainMint(address,uint256)',
+  ).selector;
+  const crosschainBurnSelector = cmtat.interface.getFunction(
+    'crosschainBurn(address,uint256)',
+  ).selector;
+
+  // Extractor that maps crosschainMint/Burn into (from, to, amount) so the SAME rules that screen
+  // transfers also screen cross-chain issuance (recipient) and redemption (holder).
+  const CrossChainExtractorFactory = await ethers.getContractFactory('CrossChainMintBurnExtractor');
+  const crossChainExtractor = await CrossChainExtractorFactory.deploy();
+  await crossChainExtractor.waitForDeployment();
+  const crossChainExtractorAddress = await crossChainExtractor.getAddress();
+  console.log('CrossChainMintBurnExtractor deployed to:', crossChainExtractorAddress);
+
+  await policyEngine
+    .connect(deployer)
+    .setExtractor(crosschainMintSelector, crossChainExtractorAddress);
+  await policyEngine
+    .connect(deployer)
+    .setExtractor(crosschainBurnSelector, crossChainExtractorAddress);
+
+  for (const sel of [crosschainMintSelector, crosschainBurnSelector]) {
+    await policyEngine
+      .connect(deployer)
+      .addPolicy(cmtatAddress, sel, transferPolicyAddress, [
+        PARAM_FROM,
+        PARAM_TO,
+        PARAM_AMOUNT_TRANSFER,
+      ]);
+  }
+  console.log('TransferValidationPolicy now also screens crosschainMint / crosschainBurn');
+
+  // Screen mint() and burnFrom() too: the MintBurnExtractor (already set on mint for SecureMint)
+  // now also emits from/to/amount, so the same rules screen issuance and operator redemption.
+  await policyEngine.connect(deployer).setExtractor(selectors.burnFrom, extractorAddress);
+  for (const sel of [selectors.mint, selectors.burnFrom]) {
+    await policyEngine
+      .connect(deployer)
+      .addPolicy(cmtatAddress, sel, transferPolicyAddress, [
+        PARAM_FROM,
+        PARAM_TO,
+        PARAM_AMOUNT_TRANSFER,
+      ]);
+  }
+  console.log('TransferValidationPolicy now also screens mint / burnFrom');
+
+  /* ============================================================
    * 13. Grant operation allowances on RBAC policy
    * ============================================================ */
   console.log('\n--- Step 13: Grant RBAC operation allowances ---');
@@ -507,7 +559,9 @@ async function main() {
   console.log('  - PausePolicy protects ALL listed external functions (initially unpaused)');
   console.log('  - RBAC policy protects ALL listed external functions');
   console.log('  - SecureMint policy protects mint() (reserve-backed minting)');
-  console.log('  - TransferValidationPolicy protects transfer() and transferFrom()');
+  console.log(
+    '  - TransferValidationPolicy protects transfer(), transferFrom(), mint(), burnFrom(), crosschainMint(), crosschainBurn()',
+  );
   console.log('    → MaxAmountRule: max', maxTransferAmount.toString(), 'raw units per transfer');
   console.log('    → RestrictedAddressRule: no addresses initially restricted');
   console.log(
