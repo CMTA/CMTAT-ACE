@@ -90,6 +90,12 @@ Treat the following as privileged governance actions:
 | Transfer check   | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier      | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
 | ERC-1404 support | Via `ValidationModuleERC1404`                         | Not applicable (no module-level checks)            | Via `PolicyValidationModuleERC1404`                             |
 
+In the **Lite** variant the ERC-1404 view is PolicyEngine-aware: after the module checks
+(pause/deactivate/freeze/active-balance) pass, `detectTransferRestriction` /
+`detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`200`**
+(`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`, message `"PolicyEngine:transferRejected"`) when the
+engine would reject the transfer. Module-level codes take precedence, and the view never reverts.
+
 ### Initialization
 
 The `Engine` struct parameter is replaced with a single `address policyEngine_`:
