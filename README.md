@@ -14,6 +14,7 @@ The goal is to let issuers update compliance behavior through policy configurati
 
 - [Deployment versions](#deployment-versions)
 - [Changes from CMTAT](#changes-from-cmtat)
+- [Compliance Policies](#compliance-policies)
 - [TransferValidationPolicy](#transfervalidationpolicy)
 - [ERC-165 Interface Support](#erc-165-interface-support)
 - [Library](#library)
@@ -141,7 +142,7 @@ All CMTAT functional modules are preserved in both variants:
 2. The `ERC20TransferFromExtractor` extracts the `spender` address from `transferFrom()` calls, so policies can restrict which spenders are allowed to move tokens regardless of existing approvals.
 3. In the Lite variant, `approve()` is gated by `whenNotPaused` as a convenience (matching upstream CMTAT behavior), but this is not a security-critical check.
 
-#### ⚠️ SecureMintPolicy and cross-chain (Proof-of-Reserve) tokens
+#### SecureMintPolicy and cross-chain (Proof-of-Reserve) tokens
 
 `SecureMintPolicy` enforces `mintAmount + totalSupply() <= reserves`, where `totalSupply()` is the
 **per-chain** supply of the token contract it is attached to. This is correct for a single-chain
@@ -178,6 +179,62 @@ Guidance for issuers:
 - `PolicyValidationModuleERC1404` (Lite) — ERC-1404 transfer restriction codes with PolicyEngine awareness
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
 - `ERC20TransferFromExtractor` — Extractor that produces 4 parameters (`spender`, `from`, `to`, `amount`) for `transfer()` and `transferFrom()`
+
+## Compliance Policies
+
+Compliance behavior is expressed as **policies** attached to the PolicyEngine per
+`(token, function-selector)` pair. When a protected function runs, the engine evaluates the
+policies registered for that selector, feeding each one the parameters produced by the
+**extractor** configured for that selector. A policy either lets evaluation continue, short-circuits
+to "allow", or reverts to reject the call.
+
+This repository ships one custom policy (`TransferValidationPolicy`) and reuses the policy library
+from `@chainlink/ace`. The most useful policies for a token issuer are summarized below; each row
+links to the integration test that demonstrates it against a ComplianceToken.
+
+### Policies used and tested in this repo
+
+| Policy                                  | What it enforces                                                                   | `run` parameters (via extractor)                 | Example use case                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`TransferValidationPolicy`** (custom) | Runs an array of CMTAT `IRule` contracts; rejects on any non-zero restriction code | `[from,to,amount]` or `[spender,from,to,amount]` | Reuse existing CMTAT transfer-restriction rules (sanctions/KYC/max-amount) as ACE policies — see [TransferValidationPolicy](#transfervalidationpolicy). Tests: `test/custom/transferValidationPolicy.test.js`, `crosschainScreening.test.js`, `mintBurnScreening.test.js` |
+| **`PausePolicy`**                       | Rejects protected calls while paused                                               | none                                             | Emergency pause of mint/burn/transfer without a pause role on the token (Standard variant). Tests: `test/common/ace/PausePolicyCommon.js`                                                                                                                                 |
+| **`RoleBasedAccessControlPolicy`**      | Caller must hold the role mapped to the selector                                   | none (uses caller + selector)                    | Externalized role management for admin/lifecycle operations (Standard variant). Tests: `test/common/ace/RBACPolicyCommon.js`                                                                                                                                              |
+| **`SecureMintPolicy`**                  | `mintAmount + totalSupply() <= reserves` from a Chainlink PoR feed                 | `[amount]`                                       | Reserve-backed (Proof-of-Reserve) minting. Tests: `test/custom/secureMintPolicy.test.js`. See the [cross-chain PoR caveat](#securemintpolicy-and-cross-chain-proof-of-reserve-tokens)                                                                                     |
+| **`MaxPolicy`**                         | Per-call hard cap (non-accumulating)                                               | `[amount]`                                       | Maximum amount per single transfer/mint. Tests: `test/custom/maxPolicy.test.js`                                                                                                                                                                                           |
+| **`VolumePolicy`**                      | Per-call `min <= amount <= max`                                                    | `[amount]`                                       | Minimum and maximum ticket size per operation. Tests: `test/custom/volumePolicy.test.js`                                                                                                                                                                                  |
+| **`VolumeRatePolicy`**                  | Per-account cumulative cap within a rolling time window                            | `[amount, account]`                              | Rate-limit how much each holder can move per day/hour. Tests: `test/custom/volumeRatePolicy.test.js`                                                                                                                                                                      |
+| **`IntervalPolicy`**                    | Execution allowed only within a time window of a repeating cycle                   | none                                             | Trading-hours / settlement-window restriction. Tests: `test/custom/intervalPolicy.test.js`                                                                                                                                                                                |
+| **`OnlyOwnerPolicy`**                   | Caller must be the policy's owner                                                  | none (uses caller)                               | Funnel a sensitive function (e.g. `mint`) through a single governance key, layered on top of CMTAT roles. Tests: `test/custom/onlyOwnerPolicy.test.js`                                                                                                                    |
+
+### Other policies available from `@chainlink/ace`
+
+These are part of the installed `@chainlink/ace` policy library and can be wired the same way, but
+are not currently configured or tested in this repository:
+
+| Policy                                                                                         | What it enforces                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BypassPolicy`**                                                                             | If an extracted address is on a bypass list, returns **`Allowed`** (short-circuits evaluation to allow). The only bundled policy that returns a terminal allow — required if you operate with `defaultAllow = false` (see below) |
+| **`AllowPolicy`**                                                                              | Allow-list: rejects unless the extracted address is on the list                                                                                                                                                                  |
+| **`RejectPolicy`**                                                                             | Block-list: rejects if the extracted address is on the list                                                                                                                                                                      |
+| **`OnlyAuthorizedSenderPolicy`**                                                               | Rejects unless the caller is on an authorized-sender list                                                                                                                                                                        |
+| **`OnlySubjectOwnerPolicy`**                                                                   | Caller must be the `Ownable` owner of the token (subject); fits the Standard variant's `OwnableUpgradeable`                                                                                                                      |
+| **`CertifiedActionValidatorPolicy` / `…DONValidatorPolicy` / `…ERC20TransferValidatorPolicy`** | Validate off-chain "certified actions" (e.g. DON-signed approvals) before allowing an operation — advanced, for attestation-gated flows                                                                                          |
+
+### How policies combine (important)
+
+- **Per-selector:** a policy attached to `transfer` does **not** apply to `mint`, `forcedTransfer`,
+  or `crosschainMint`. Attach screening to every movement selector you care about. See
+  [Policy-Protected Functions](#policy-protected-functions-current-integration) and the
+  `MintBurnExtractor` / `CrossChainMintBurnExtractor` extractors.
+- **Allow-by-default model:** nearly all of the policies above return `Continue` on success and only
+  **revert** to reject; none of them return a terminal `Allowed` except `BypassPolicy`. With the
+  PolicyEngine's `defaultAllow = true`, a call is allowed unless some policy reverts. With
+  `defaultAllow = false`, a call is rejected **unless** some policy returns `Allowed` — so a
+  fail-closed deployment requires `BypassPolicy` (or a custom terminal-allow policy) on every
+  protected selector, otherwise operations are bricked. Use the
+  [policy preflight check](#policy-preflight-check) to verify this before going live.
+- **Ordering:** policies execute in attachment order; the first `Allowed` short-circuits, any revert
+  rejects. Put fail-closed/restrictive checks before any bypass.
 
 ## TransferValidationPolicy
 
