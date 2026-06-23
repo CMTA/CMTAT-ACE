@@ -36,6 +36,6 @@ describe('RestrictedAddressRule (example rule)', function () {
     const rule = await this.RuleFactory.deploy([]);
     await expect(
       rule.connect(this.address1).setRestricted(this.address2.address, true),
-    ).to.be.revertedWith('only owner');
+    ).to.be.revertedWithCustomError(rule, 'OnlyOwner');
   });
 });

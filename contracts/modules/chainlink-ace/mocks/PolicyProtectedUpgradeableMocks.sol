@@ -5,6 +5,9 @@ import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngi
 import {ValidationModulePolicyEngine} from "../../lite/ValidationModulePolicyEngine.sol";
 
 contract MockPolicyEngine is IPolicyEngine {
+    /// @notice Thrown by {detach} when configured to fail (test of revert handling).
+    error DetachFailed();
+
     Payload public lastPayload;
     uint256 public attachCalls;
     uint256 public detachCalls;
@@ -24,9 +27,7 @@ contract MockPolicyEngine is IPolicyEngine {
 
     function detach() external override {
         detachCalls++;
-        if (detachShouldRevert) {
-            revert("MockPolicyEngine: detach failed");
-        }
+        require(!detachShouldRevert, DetachFailed());
     }
 
     function run(Payload calldata payload) external override {

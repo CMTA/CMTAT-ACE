@@ -84,11 +84,14 @@ contract RestrictedAddressRule is IRule {
     /// @notice Emitted whenever an account's restricted status is set (incl. initial list at deploy).
     event RestrictionUpdated(address indexed account, bool restricted);
 
+    /// @notice Thrown when a non-owner calls an owner-restricted function.
+    error OnlyOwner();
+
     mapping(address => bool) public restricted;
     address public immutable owner;
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "only owner");
+        require(msg.sender == owner, OnlyOwner());
         _;
     }
 
