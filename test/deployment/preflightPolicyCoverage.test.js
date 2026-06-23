@@ -10,10 +10,9 @@ const {
 const { preflightPolicyCoverage, selectorOf } = require('../../scripts/preflight');
 
 /**
- * Invariant tests for FEEDBACK.md H-2: a fail-closed PolicyEngine (defaultAllow=false)
- * bricks every policy-routed operation in this integration, because the shipped policies
- * only return `Continue` (never `Allowed`). The preflight checker must flag this, and the
- * flag must match real on-chain behavior.
+ * Invariant tests: a fail-closed PolicyEngine (defaultAllow=false) bricks every policy-routed
+ * operation in this integration, because the shipped policies only return `Continue` (never
+ * `Allowed`). The preflight checker must flag this, and the flag must match real on-chain behavior.
  */
 describe('Preflight: policy coverage (H-2 invariant)', function () {
   const standardFixture = createStandardFixture(deployCCTStandalone);

@@ -81,6 +81,9 @@ contract RestrictedAddressRule is IRule {
     uint8 constant FROM_RESTRICTED = 14;
     uint8 constant TO_RESTRICTED = 15;
 
+    /// @notice Emitted whenever an account's restricted status is set (incl. initial list at deploy).
+    event RestrictionUpdated(address indexed account, bool restricted);
+
     mapping(address => bool) public restricted;
     address public immutable owner;
 
@@ -93,11 +96,13 @@ contract RestrictedAddressRule is IRule {
         owner = msg.sender;
         for (uint256 i = 0; i < restricted_.length; ++i) {
             restricted[restricted_[i]] = true;
+            emit RestrictionUpdated(restricted_[i], true);
         }
     }
 
     function setRestricted(address account, bool status) external onlyOwner {
         restricted[account] = status;
+        emit RestrictionUpdated(account, status);
     }
 
     function detectTransferRestriction(

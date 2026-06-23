@@ -23,9 +23,9 @@ async function deployTransferValidationPolicy(policyEngineAddress, ownerAddress,
 }
 
 /**
- * FEEDBACK.md H-1 (cross-chain): screen cross-chain mint/burn with the same IRule rules used for
- * transfers, via CrossChainMintBurnExtractor. Without this, a bridge could crosschainMint to a
- * sanctioned recipient despite a "sanctions policy" being present on transfer.
+ * Screen cross-chain mint/burn with the same IRule rules used for transfers, via
+ * CrossChainMintBurnExtractor. Without this, a bridge could crosschainMint to a sanctioned
+ * recipient despite a "sanctions policy" being present on transfer.
  */
 describe('Cross-chain mint/burn screening (H-1)', function () {
   beforeEach(async function () {

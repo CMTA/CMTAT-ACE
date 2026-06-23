@@ -24,8 +24,8 @@ async function deployTransferValidationPolicy(policyEngineAddress, ownerAddress,
 }
 
 /**
- * FEEDBACK.md H-1 (mint / burnFrom): screen issuance and operator redemption with the same IRule
- * rules used for transfers, via the extended MintBurnExtractor (which now also emits from/to/amount).
+ * Screen issuance and operator redemption (mint / burnFrom) with the same IRule rules used for
+ * transfers, via the extended MintBurnExtractor (which now also emits from/to/amount).
  */
 describe('Mint / burnFrom screening (H-1)', function () {
   beforeEach(async function () {
