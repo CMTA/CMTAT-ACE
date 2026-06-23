@@ -445,8 +445,11 @@ Notes:
 - **Lite** uses CMTAT's account freeze, so `canSend`/`canReceive` return `false` for a frozen
   account.
 - **Standard** has no on-chain account allowlist/freeze on the token (send/receive eligibility is
-  decided per transfer by the PolicyEngine inside `canTransfer`), so `canSend`/`canReceive` report
-  no token-level account restriction. The authoritative gate is `canTransfer`.
+  decided per transfer by the PolicyEngine inside `canTransfer`), so `canSend`/`canReceive`
+  **always return `true`**: there is no standalone per-account state to report, because ACE policies
+  are evaluated per transfer (on `from`/`to`/`amount`), not per account. Do **not** use Standard's
+  `canSend`/`canReceive` as a KYC/eligibility oracle; use `canTransfer(from, to, amount)`, which is
+  the authoritative check and consults the PolicyEngine.
 
 Conformance is covered by `test/custom/erc7943Compliance.test.js`.
 
