@@ -84,6 +84,7 @@ fund can enforce eligibility, transfer limits, and trading-hours windows.)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
 - [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
+- [License](#license)
 
 ## Deployment versions
 
@@ -847,3 +848,24 @@ Publish a short integration guide that includes:
 - Common failure cases and the revert reasons integrators may see.
 - How admin/policy changes are approved and announced.
 - Who to contact for support and incident escalation.
+
+## License
+
+This repository is licensed under the **Mozilla Public License 2.0 (MPL-2.0)** (see
+[`LICENSE`](./LICENSE)), except for a few files that carry a different per-file
+`SPDX-License-Identifier`.
+
+> **Note (mixed licensing, review before production use).** The following files are licensed under
+> **BUSL-1.1 (Business Source License 1.1)**, inherited from the Chainlink ACE code they derive
+> from, rather than MPL-2.0:
+>
+> - `contracts/modules/chainlink-ace/custom/MintBurnExtractor.sol`
+> - `contracts/modules/chainlink-ace/custom/ERC20TransferFromExtractor.sol`
+> - `contracts/modules/chainlink-ace/mocks/PolicyProtectedUpgradeableMocks.sol`
+>
+> The **Chainlink ACE** dependency (`@chainlink/ace`, the `PolicyEngine` and the bundled policies)
+> is also BUSL-1.1. BUSL-1.1 is a _source-available_ license, not an OSI open-source license: it can
+> restrict commercial/production use until the licensor's change date and terms. Confirm the
+> BUSL-1.1 grant permits your intended deployment (or relicense/replace those files) before shipping
+> to production. The `SPDX-License-Identifier` at the top of each file is the authoritative license
+> for that file.
