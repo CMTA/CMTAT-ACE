@@ -90,10 +90,19 @@ describe('MaxAmountRule (example rule)', function () {
     });
   });
 
-  describe('transferred (no-op hooks)', function () {
-    it('the 3-arg and 4-arg overloads execute without reverting', async function () {
-      await expect(this.rule[TRANSFERRED_3](this.a, this.b, 1n)).to.not.be.reverted;
-      await expect(this.rule[TRANSFERRED_4](this.spender, this.a, this.b, 1n)).to.not.be.reverted;
+  describe('transferred (enforcement hook)', function () {
+    it('does not revert when the amount is within max', async function () {
+      await expect(this.rule[TRANSFERRED_3](this.a, this.b, MAX)).to.not.be.reverted;
+      await expect(this.rule[TRANSFERRED_4](this.spender, this.a, this.b, MAX)).to.not.be.reverted;
+    });
+
+    it('reverts with MaxAmountRule_InvalidTransfer when the amount exceeds max', async function () {
+      await expect(this.rule[TRANSFERRED_3](this.a, this.b, MAX + 1n))
+        .to.be.revertedWithCustomError(this.rule, 'MaxAmountRule_InvalidTransfer')
+        .withArgs(this.a, this.b, MAX + 1n, AMOUNT_TOO_HIGH);
+      await expect(this.rule[TRANSFERRED_4](this.spender, this.a, this.b, MAX + 1n))
+        .to.be.revertedWithCustomError(this.rule, 'MaxAmountRule_InvalidTransfer')
+        .withArgs(this.a, this.b, MAX + 1n, AMOUNT_TOO_HIGH);
     });
   });
 
@@ -239,7 +248,7 @@ describe('RestrictedAddressRule (example rule)', function () {
       this.rule = await this.RuleFactory.deploy([]);
     });
 
-    it('transferred overloads execute without reverting', async function () {
+    it('transferred overloads do not revert when neither party is restricted', async function () {
       await expect(this.rule[TRANSFERRED_3](this.address1.address, this.address2.address, 1n)).to
         .not.be.reverted;
       await expect(
@@ -273,6 +282,37 @@ describe('RestrictedAddressRule (example rule)', function () {
         'Recipient is restricted',
       );
       expect(await this.rule.messageForTransferRestriction(TRANSFER_OK)).to.equal('Unknown code');
+    });
+  });
+
+  describe('transferred (enforcement hook)', function () {
+    beforeEach(async function () {
+      // address1 = restricted sender, address2 = restricted recipient, address3 = clean
+      this.rule = await this.RuleFactory.deploy([this.address1.address, this.address2.address]);
+    });
+
+    it('reverts with FROM_RESTRICTED when the sender is restricted', async function () {
+      await expect(this.rule[TRANSFERRED_3](this.address1.address, this.address3.address, 1n))
+        .to.be.revertedWithCustomError(this.rule, 'RestrictedAddressRule_InvalidTransfer')
+        .withArgs(this.address1.address, this.address3.address, 1n, FROM_RESTRICTED);
+    });
+
+    it('reverts with TO_RESTRICTED when the recipient is restricted (4-arg overload)', async function () {
+      await expect(
+        this.rule[TRANSFERRED_4](
+          this.address3.address,
+          this.address3.address,
+          this.address2.address,
+          1n,
+        ),
+      )
+        .to.be.revertedWithCustomError(this.rule, 'RestrictedAddressRule_InvalidTransfer')
+        .withArgs(this.address3.address, this.address2.address, 1n, TO_RESTRICTED);
+    });
+
+    it('does not revert when neither party is restricted', async function () {
+      await expect(this.rule[TRANSFERRED_3](this.address3.address, this.admin.address, 1n)).to.not
+        .be.reverted;
     });
   });
 });
