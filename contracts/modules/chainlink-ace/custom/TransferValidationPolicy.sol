@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Policy} from "@chainlink/policy-management/core/Policy.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
-import {IRule} from "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
+import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol";
 
 /**
  * @title TransferValidationPolicy
