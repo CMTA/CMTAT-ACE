@@ -344,6 +344,15 @@ contract MyCustomRule is IRule {
 }
 ```
 
+### Using the official CMTA Rules library
+
+You do not have to write rules from scratch: the ready-made rules from CMTA's [Rules](https://github.com/CMTA/Rules) library (allowlist/whitelist, blacklist, sanctions, conditional transfer, etc.) implement the same `IRule` interface and can be reused with this integration in two ways:
+
+- **Through `TransferValidationPolicy`** — pass the deployed CMTA rule addresses in the policy's rule array (at `initialize` or via `setRules`). The policy runs each `IRule` and rejects on any non-zero restriction code, so no rule code changes are needed. This is the recommended path and is what the mock rules demonstrate.
+- **By extending `RuleEngine` with the `IPolicy` interface** — wrap CMTA's [RuleEngine](https://github.com/CMTA/RuleEngine) (which already aggregates and orchestrates a set of `IRule` contracts) in a Chainlink ACE `Policy` so the whole RuleEngine becomes a single ACE policy. Use this when you want to keep the RuleEngine's rule-management and orchestration logic rather than re-listing individual rules on `TransferValidationPolicy`.
+
+Both approaches let an issuer reuse the audited CMTA rule set while still gating transfers through the Chainlink ACE PolicyEngine.
+
 ## ERC-165 Interface Support
 
 This integration includes ERC-165 interface discovery for both the protected token side and policy side:
@@ -530,7 +539,7 @@ bun run slither
 ```
 
 ```bash
-slither . --checklist > doc/audits/tools/slither-report.md
+slither . --checklist > doc/audits/tools/v0.2.0/slither-report.md
 ```
 
 `bun run slither` generates timestamped reports in the `reports/` directory:
@@ -538,7 +547,7 @@ slither . --checklist > doc/audits/tools/slither-report.md
 - **JSON** — `reports/slither-report-<timestamp>.json`
 - **Markdown** — `reports/slither-report-<timestamp>.md`
 
-The direct `slither ... --checklist` command above writes a checklist-style report to `doc/audits/tools/slither-report.md`.
+The direct `slither ... --checklist` command above writes a checklist-style report to `doc/audits/tools/v0.2.0/slither-report.md`.
 
 When done, deactivate the virtual environment:
 
@@ -546,23 +555,24 @@ When done, deactivate the virtual environment:
 deactivate
 ```
 
-| Version | Report                                                    | Assessment                                                                  |
-| ------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
-| current | [slither-report.md](./doc/audits/tools/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/slither-report-feedback.md) |
+| Version | Report                                                                | Assessment                                                                              |
+| ------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither-report.md)      | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither-report-feedback.md)      |
+| v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md)     |
 
-Report scope: repo-focused filtered checklist run.
+Report scope: repo-focused filtered checklist run (v0.2.0).
 
-0 High · 9 Medium · 10 Low · 27 Informational
+0 High · 11 Medium · 8 Low · 22 Informational
 
-| ID  | Finding               | Instances | Assessment                                                                                        |
-| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------- |
-| M-1 | `reentrancy-no-eth`   | 3         | Contextual; expected external policy-engine calls and hook flow. Manual review required.          |
-| M-2 | `uninitialized-local` | 6         | Likely analyzer limitation in extractor decode paths; treated as likely false positive.           |
-| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                      |
-| L-2 | `reentrancy-events`   | 2         | Informational reentrancy/event-order signal; no confirmed exploitable issue from checklist alone. |
-| I-1 | `assembly`            | 2         | Expected in storage-slot patterns; informational.                                                 |
-| I-2 | `dead-code`           | 2         | Cleanup candidate; not a direct security issue.                                                   |
-| I-3 | `naming-convention`   | 23        | Style-only informational findings.                                                                |
+| ID  | Finding               | Instances | Assessment                                                                                                          |
+| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| M-1 | `uninitialized-local` | 11        | False positive — extractors assign locals per selector branch; intentional zero-defaults for mint (`from`) / burn (`to`). |
+| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                                        |
+| I-1 | `assembly`            | 1         | Expected — ERC-7201 namespaced-storage slot pointer; informational.                                                 |
+| I-2 | `dead-code`           | 1         | False positive.                                                                                                     |
+| I-3 | `naming-convention`   | 20        | Style-only informational findings.                                                                                  |
+
+Changes vs v0.1.0: `reentrancy-no-eth` (Medium, 3) and `reentrancy-events` (Low, 2) are no longer reported; `uninitialized-local` rose 6 → 11 (covers the added `CrossChainMintBurnExtractor` and extended `MintBurnExtractor`).
 
 ### Aderyn
 
@@ -601,6 +611,7 @@ Writes coverage files to _doc/coverage_ using **solidity-coverage** hardhat plug
 
 ```bash
 bunx hardhat coverage
+npx hardhat coverage
 ```
 
 ## Policy-Protected Functions (Current Integration)
