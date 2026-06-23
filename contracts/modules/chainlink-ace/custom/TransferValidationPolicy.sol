@@ -24,6 +24,8 @@ import {IRule} from "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
  */
 contract TransferValidationPolicy is Policy {
     error InvalidParametersLength(uint256 length);
+    /// @notice Thrown when a zero address is supplied as a rule.
+    error ZeroRuleAddress();
 
     string public constant override typeAndVersion = "TransferValidationPolicy 1.0.0";
     event RulesUpdated(uint256 previousCount, uint256 newCount);
@@ -52,7 +54,7 @@ contract TransferValidationPolicy is Policy {
             address[] memory ruleAddrs = abi.decode(parameters, (address[]));
             TransferValidationStorage storage $ = _getStorage();
             for (uint256 i = 0; i < ruleAddrs.length; ++i) {
-                require(ruleAddrs[i] != address(0), "Rule address cannot be zero");
+                require(ruleAddrs[i] != address(0), ZeroRuleAddress());
                 $.rules.push(IRule(ruleAddrs[i]));
             }
         }
@@ -67,7 +69,7 @@ contract TransferValidationPolicy is Policy {
         uint256 previousCount = $.rules.length;
         delete $.rules;
         for (uint256 i = 0; i < rules_.length; ++i) {
-            require(address(rules_[i]) != address(0), "Rule address cannot be zero");
+            require(address(rules_[i]) != address(0), ZeroRuleAddress());
             $.rules.push(rules_[i]);
         }
         emit RulesUpdated(previousCount, rules_.length);

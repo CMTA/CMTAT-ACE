@@ -437,6 +437,36 @@ describe('TransferValidationPolicy', function () {
       expect(rules[0]).to.equal(await rule1.getAddress());
       expect(rules[1]).to.equal(await rule2.getAddress());
     });
+
+    it('reverts with ZeroRuleAddress when setRules is given a zero address', async function () {
+      const rule = await ethers.deployContract('MaxAmountRule', [100n]);
+      this.transferPolicy = await deployTransferValidationPolicy(
+        this.policyEngineAddress,
+        this.admin.address,
+        [],
+      );
+
+      await expect(
+        this.transferPolicy
+          .connect(this.admin)
+          .setRules([await rule.getAddress(), ethers.ZeroAddress]),
+      ).to.be.revertedWithCustomError(this.transferPolicy, 'ZeroRuleAddress');
+    });
+
+    it('reverts with ZeroRuleAddress when the initial rule list contains a zero address', async function () {
+      // A valid instance only to source the error ABI for the matcher.
+      const good = await deployTransferValidationPolicy(
+        this.policyEngineAddress,
+        this.admin.address,
+        [],
+      );
+
+      await expect(
+        deployTransferValidationPolicy(this.policyEngineAddress, this.admin.address, [
+          ethers.ZeroAddress,
+        ]),
+      ).to.be.revertedWithCustomError(good, 'ZeroRuleAddress');
+    });
   });
 
   describe('Direct run() parameter layouts', function () {
