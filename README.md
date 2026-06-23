@@ -2,69 +2,36 @@
 
 ## Introduction
 
-**This project turns a CMTAT security token into a token whose compliance rules live in swappable
-on-chain policies that Chainlink ACE evaluates on every operation.** It lets
-a token issuer change _who can do what, and under which conditions_ (KYC/allowlists, sanctions
-screening, transfer and volume limits, trading-hours windows, pause, reserve-backed minting) by
-reconfiguring policies, **without redeploying or changing the token's business logic**.
+**This project turns a CMTAT security token into a token whose compliance rules live in swappable on-chain policies that Chainlink ACE evaluates on every operation.** It lets a token issuer change _who can do what, and under which conditions_ (KYC/allowlists, sanctions screening, transfer and volume limits, trading-hours windows, pause, reserve-backed minting) by reconfiguring policies, **without redeploying or changing the token's business logic**.
 
 ### The problem it solves
 
-Regulated tokens (**security tokens, real-world assets (RWA), and stablecoins**) must enforce
-compliance rules (eligibility, limits, freezes, pauses) that **change over time** as regulation,
-jurisdictions, or counterparties evolve.
-Baking those rules into the token means a contract upgrade or redeploy for every change, which is
-slow and risky. This integration moves the rules out of the token and into a policy engine, so
-compliance becomes a **configuration** concern instead of a code concern.
+Regulated tokens (**security tokens, real-world assets (RWA), and stablecoins**) must enforce compliance rules (eligibility, limits, freezes, pauses) that **change over time** as regulation, jurisdictions, or counterparties evolve. Baking those rules into the token means a contract upgrade or redeploy for every change, which is slow and risky. This integration moves the rules out of the token and into a policy engine, so compliance becomes a **configuration** concern instead of a code concern.
 
 ### The two building blocks
 
-- **CMTAT (CMTA Token)** — an open security-token framework from the
-  [Capital Markets and Technology Association](https://www.cmta.ch/). It provides the ERC-20 token
-  plus compliance modules: conditional transfers, account freeze / enforcement (ERC-7943), forced
-  transfer & recovery, pause, in-contract documents, cross-chain mint/burn, and lifecycle controls.
-- **Chainlink ACE (Automated Compliance Engine)** — a `PolicyEngine` that, for a protected function
-  call, runs a configurable chain of **policies** (small contracts that approve or reject based on
-  the call's parameters) and returns a decision. Policies are added, removed, and reordered by
-  governance at runtime.
+- **CMTAT (CMTA Token)** — an open security-token framework from the [Capital Markets and Technology Association](https://www.cmta.ch/). It provides the ERC-20 token plus compliance modules: conditional transfers, account freeze / enforcement (ERC-7943), forced transfer & recovery, pause, in-contract documents, cross-chain mint/burn, and lifecycle controls.
+- **Chainlink ACE (Automated Compliance Engine)** — a `PolicyEngine` that, for a protected function call, runs a configurable chain of **policies** (small contracts that approve or reject based on the call's parameters) and returns a decision. Policies are added, removed, and reordered by governance at runtime.
 
 ### How it works
 
-1. A token function (e.g. `transfer`, `mint`) is **protected**: before it takes effect, the token
-   asks the PolicyEngine to evaluate the call.
+1. A token function (e.g. `transfer`, `mint`) is **protected**: before it takes effect, the token asks the PolicyEngine to evaluate the call.
 2. An **extractor** decodes the call's calldata into named parameters (`from`, `to`, `amount`, …).
-3. The PolicyEngine runs the **policies** attached to that function's selector (pause, role-based
-   access, sanctions/allowlist screening, volume/rate limits, reserve checks, and so on). If any
-   policy rejects, the call reverts; otherwise it proceeds.
-4. To change compliance behavior, governance attaches/detaches/reorders policies; **no token
-   redeploy is needed**.
+3. The PolicyEngine runs the **policies** attached to that function's selector (pause, role-based access, sanctions/allowlist screening, volume/rate limits, reserve checks, and so on). If any policy rejects, the call reverts; otherwise it proceeds.
+4. To change compliance behavior, governance attaches/detaches/reorders policies; **no token redeploy is needed**.
 
 ### What you get
 
-Two ready-to-deploy variants (standalone and upgradeable proxies), so an issuer can choose _how
-much_ of compliance to externalize:
+Two ready-to-deploy variants (standalone and upgradeable proxies), so an issuer can choose _how much_ of compliance to externalize:
 
-- **Lite** — keeps CMTAT's native role-based access control and uses ACE only for **transfer
-  validation** (it replaces CMTAT's RuleEngine). Closest to a standard CMTAT token.
-- **Standard** — **policy-authoritative**: ACE gates _all_ state-changing operations (mint, burn,
-  transfer, enforcement, admin) instead of local `onlyRole` checks; access control itself becomes a
-  policy concern.
+- **Lite** — keeps CMTAT's native role-based access control and uses ACE only for **transfer validation** (it replaces CMTAT's RuleEngine). Closest to a standard CMTAT token.
+- **Standard** — **policy-authoritative**: ACE gates _all_ state-changing operations (mint, burn, transfer, enforcement, admin) instead of local `onlyRole` checks; access control itself becomes a policy concern.
 
-Compliance itself is expressed with **policies from the Chainlink ACE policy library** (for example
-pause, role-based access control, volume / rate / interval limits, and reserve-backed Proof-of-
-Reserve minting) that the issuer attaches to the token and configures. On top of those, this
-repo adds the glue needed to use them with CMTAT: a custom `TransferValidationPolicy` that reuses
-CMTAT's existing `IRule` transfer rules (KYC/sanctions/allowlist) as ACE policies, the **extractors**
-that map each token function's calldata to policy parameters, a complete deployment **demo**, and a
-deployment **preflight** check that catches common misconfigurations before going live.
+Compliance itself is expressed with **policies from the Chainlink ACE policy library** (for example pause, role-based access control, volume / rate / interval limits, and reserve-backed Proof-of-Reserve minting) that the issuer attaches to the token and configures. On top of those, this repo adds the glue needed to use them with CMTAT: a custom `TransferValidationPolicy` that reuses CMTAT's existing `IRule` transfer rules (KYC/sanctions/allowlist) as ACE policies, the **extractors** that map each token function's calldata to policy parameters, a complete deployment **demo**, and a deployment **preflight** check that catches common misconfigurations before going live.
 
 ### Who it's for
 
-Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and their integrators)
-who want CMTAT's token feature set with compliance that can evolve through governance-controlled
-policy configuration rather than contract upgrades. (For example, a stablecoin can gate issuance
-with the reserve-backed `SecureMintPolicy` and screen holders with sanctions policies, while an RWA
-fund can enforce eligibility, transfer limits, and trading-hours windows.)
+Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and their integrators) who want CMTAT's token feature set with compliance that can evolve through governance-controlled policy configuration rather than contract upgrades. (For example, a stablecoin can gate issuance with the reserve-backed `SecureMintPolicy` and screen holders with sanctions policies, while an RWA fund can enforce eligibility, transfer limits, and trading-hours windows.)
 
 ## Table of Contents
 
@@ -84,7 +51,6 @@ fund can enforce eligibility, transfer limits, and trading-hours windows.)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
 - [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
-- [License](#license)
 
 ## Deployment versions
 
@@ -119,9 +85,7 @@ Keeps CMTAT's `AccessControlUpgradeable` (role-based) for module authorization a
 
 In the **Standard** variant, critical operations are authorized through ACE `runPolicy` checks instead of local `onlyRole(...)` checks. This includes core actions such as `mint`, burn functions, forced transfer/enforcement actions, and sensitive admin/configuration operations.
 
-This means `PolicyEngine` configuration is security-critical infrastructure. A bad config change can unintentionally allow or block sensitive actions.
-It also introduces a direct runtime dependency on Chainlink ACE contracts (PolicyEngine, attached policies, extractor/mapper configuration): if ACE contracts are unavailable, misconfigured, or incorrectly upgraded, authorization and compliance checks in the token are directly affected.
-For `runPolicy` context handling, cleanup is best-effort on success only: context is cleared after the guarded function completes successfully. If the guarded call reverts, cleanup is not reached, and previously stored context remains in storage.
+This means `PolicyEngine` configuration is security-critical infrastructure. A bad config change can unintentionally allow or block sensitive actions. It also introduces a direct runtime dependency on Chainlink ACE contracts (PolicyEngine, attached policies, extractor/mapper configuration): if ACE contracts are unavailable, misconfigured, or incorrectly upgraded, authorization and compliance checks in the token are directly affected. For `runPolicy` context handling, cleanup is best-effort on success only: context is cleared after the guarded function completes successfully. If the guarded call reverts, cleanup is not reached, and previously stored context remains in storage.
 
 Treat the following as privileged governance actions:
 
@@ -147,11 +111,7 @@ Treat the following as privileged governance actions:
 | Transfer check   | `_canTransferGenericByModuleAndRevert()` + RuleEngine | PolicyEngine `run()` via `runPolicy` modifier      | `_canTransferGenericByModuleAndRevert()` + PolicyEngine `run()` |
 | ERC-1404 support | Via `ValidationModuleERC1404`                         | Not applicable (no module-level checks)            | Via `PolicyValidationModuleERC1404`                             |
 
-In the **Lite** variant the ERC-1404 view is PolicyEngine-aware: after the module checks
-(pause/deactivate/freeze/active-balance) pass, `detectTransferRestriction` /
-`detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`7`**
-(`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`, message `"PolicyEngine:transferRejected"`) when the
-engine would reject the transfer. Module-level codes take precedence, and the view never reverts.
+In the **Lite** variant the ERC-1404 view is PolicyEngine-aware: after the module checks (pause/deactivate/freeze/active-balance) pass, `detectTransferRestriction` / `detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`7`** (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`, message `"PolicyEngine:transferRejected"`) when the engine would reject the transfer. Module-level codes take precedence, and the view never reverts.
 
 ### Initialization
 
@@ -165,9 +125,7 @@ constructor(forwarder, admin, ..., ICMTATConstructor.Engine memory engines_)
 constructor(admin, ..., address policyEngine_)
 ```
 
-Document management is handled in-contract via CMTAT's `DocumentERC1643Module` (no external
-document engine), and the snapshot engine has been removed from this integration, so neither a
-`documentEngine_` nor a `snapshotEngine_` parameter is taken.
+Document management is handled in-contract via CMTAT's `DocumentERC1643Module` (no external document engine), and the snapshot engine has been removed from this integration, so neither a `documentEngine_` nor a `snapshotEngine_` parameter is taken.
 
 ERC-2771 (gasless transaction forwarding) has been removed from all deployment contracts. The standalone contracts no longer take a `forwarderIrrevocable` parameter, and the upgradeable contracts have parameterless constructors.
 
@@ -182,9 +140,7 @@ All CMTAT functional modules are preserved in both variants:
 - ExtraInformationModule
 - ERC20CrossChainModule, CCIPModule
 
-> The external `DocumentEngineModule` and the `SnapshotEngineModule` from CMTAT are **not**
-> used in this integration: documents are managed in-contract via `DocumentERC1643Module`, and
-> snapshot support has been removed.
+> The external `DocumentEngineModule` and the `SnapshotEngineModule` from CMTAT are **not** used in this integration: documents are managed in-contract via `DocumentERC1643Module`, and snapshot support has been removed.
 
 ### Removed from Standard
 
@@ -207,29 +163,16 @@ All CMTAT functional modules are preserved in both variants:
 
 #### SecureMintPolicy and cross-chain (Proof-of-Reserve) tokens
 
-`SecureMintPolicy` enforces `mintAmount + totalSupply() <= reserves`, where `totalSupply()` is the
-**per-chain** supply of the token contract it is attached to. This is correct for a single-chain
-token, but is a footgun for a **cross-chain / bridgeable** token (`ERC20CrossChainModule` /
-`crosschainMint`):
+`SecureMintPolicy` enforces `mintAmount + totalSupply() <= reserves`, where `totalSupply()` is the **per-chain** supply of the token contract it is attached to. This is correct for a single-chain token, but is a footgun for a **cross-chain / bridgeable** token (`ERC20CrossChainModule` / `crosschainMint`):
 
-- A `crosschainMint` on chain B mints tokens that were **burned on chain A**, so global supply does
-  not increase, only chain B's local supply does.
-- If the Proof-of-Reserve feed reports the **global** reserves backing the **global** supply, but
-  the policy compares them against chain B's **local** `totalSupply()`, then as chain B's local
-  supply approaches the global reserve value, **legitimate cross-chain mints will be rejected**
-  (`"mint would exceed available reserves"`) even though the bridged tokens are fully backed.
-- Conversely, applying a per-chain reserve value against each chain independently can **permit
-  over-minting** of the global supply.
+- A `crosschainMint` on chain B mints tokens that were **burned on chain A**, so global supply does not increase, only chain B's local supply does.
+- If the Proof-of-Reserve feed reports the **global** reserves backing the **global** supply, but the policy compares them against chain B's **local** `totalSupply()`, then as chain B's local supply approaches the global reserve value, **legitimate cross-chain mints will be rejected** (`"mint would exceed available reserves"`) even though the bridged tokens are fully backed.
+- Conversely, applying a per-chain reserve value against each chain independently can **permit over-minting** of the global supply.
 
 Guidance for issuers:
 
-- The Proof-of-Reserve must validate the **whole multi-chain supply against the whole reserve**,
-  not a single chain in isolation. Use a PoR feed that reports global reserves **and** a supply
-  accounting that aggregates supply across all chains (e.g. a cross-chain aggregator / CCIP-based
-  PoR), or do not gate `crosschainMint` with a per-chain `SecureMintPolicy`.
-- The demo intentionally wires `SecureMintPolicy` to `mint()` only (genuine new issuance), **not**
-  to `crosschainMint()`. Do not attach a naive per-chain `SecureMintPolicy` to `crosschainMint`
-  unless your PoR design accounts for cross-chain supply as described above.
+- The Proof-of-Reserve must validate the **whole multi-chain supply against the whole reserve**, not a single chain in isolation. Use a PoR feed that reports global reserves **and** a supply accounting that aggregates supply across all chains (e.g. a cross-chain aggregator / CCIP-based PoR), or do not gate `crosschainMint` with a per-chain `SecureMintPolicy`.
+- The demo intentionally wires `SecureMintPolicy` to `mint()` only (genuine new issuance), **not** to `crosschainMint()`. Do not attach a naive per-chain `SecureMintPolicy` to `crosschainMint` unless your PoR design accounts for cross-chain supply as described above.
 
 ### Removed from both variants
 
@@ -245,15 +188,9 @@ Guidance for issuers:
 
 ## Compliance Policies
 
-Compliance behavior is expressed as **policies** attached to the PolicyEngine per
-`(token, function-selector)` pair. When a protected function runs, the engine evaluates the
-policies registered for that selector, feeding each one the parameters produced by the
-**extractor** configured for that selector. A policy either lets evaluation continue, short-circuits
-to "allow", or reverts to reject the call.
+Compliance behavior is expressed as **policies** attached to the PolicyEngine per `(token, function-selector)` pair. When a protected function runs, the engine evaluates the policies registered for that selector, feeding each one the parameters produced by the **extractor** configured for that selector. A policy either lets evaluation continue, short-circuits to "allow", or reverts to reject the call.
 
-This repository ships one custom policy (`TransferValidationPolicy`) and reuses the policy library
-from `@chainlink/ace`. The most useful policies for a token issuer are summarized below; each row
-links to the integration test that demonstrates it against a ComplianceToken.
+This repository ships one custom policy (`TransferValidationPolicy`) and reuses the policy library from `@chainlink/ace`. The most useful policies for a token issuer are summarized below; each row links to the integration test that demonstrates it against a ComplianceToken.
 
 ### Policies used and tested in this repo
 
@@ -271,8 +208,7 @@ links to the integration test that demonstrates it against a ComplianceToken.
 
 ### Other policies available from `@chainlink/ace`
 
-These are part of the installed `@chainlink/ace` policy library and can be wired the same way, but
-are not currently configured or tested in this repository:
+These are part of the installed `@chainlink/ace` policy library and can be wired the same way, but are not currently configured or tested in this repository:
 
 | Policy                                                                                         | What it enforces                                                                                                                                                                                                                |
 | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -285,19 +221,9 @@ are not currently configured or tested in this repository:
 
 ### How policies combine (important)
 
-- **Per-selector:** a policy attached to `transfer` does **not** apply to `mint`, `forcedTransfer`,
-  or `crosschainMint`. Attach screening to every movement selector you care about. See
-  [Policy-Protected Functions](#policy-protected-functions-current-integration) and the
-  `MintBurnExtractor` / `CrossChainMintBurnExtractor` extractors.
-- **Allow-by-default model:** nearly all of the policies above return `Continue` on success and only
-  **revert** to reject; none of them return a terminal `Allowed` except `BypassPolicy`. With the
-  PolicyEngine's `defaultAllow = true`, a call is allowed unless some policy reverts. With
-  `defaultAllow = false`, a call is rejected **unless** some policy returns `Allowed`, so a
-  fail-closed deployment requires `BypassPolicy` (or a custom terminal-allow policy) on every
-  protected selector, otherwise operations are bricked. Use the
-  [policy preflight check](#policy-preflight-check) to verify this before going live.
-- **Ordering:** policies execute in attachment order; the first `Allowed` short-circuits, any revert
-  rejects. Put fail-closed/restrictive checks before any bypass.
+- **Per-selector:** a policy attached to `transfer` does **not** apply to `mint`, `forcedTransfer`, or `crosschainMint`. Attach screening to every movement selector you care about. See [Policy-Protected Functions](#policy-protected-functions-current-integration) and the `MintBurnExtractor` / `CrossChainMintBurnExtractor` extractors.
+- **Allow-by-default model:** nearly all of the policies above return `Continue` on success and only **revert** to reject; none of them return a terminal `Allowed` except `BypassPolicy`. With the PolicyEngine's `defaultAllow = true`, a call is allowed unless some policy reverts. With `defaultAllow = false`, a call is rejected **unless** some policy returns `Allowed`, so a fail-closed deployment requires `BypassPolicy` (or a custom terminal-allow policy) on every protected selector, otherwise operations are bricked. Use the [policy preflight check](#policy-preflight-check) to verify this before going live.
+- **Ordering:** policies execute in attachment order; the first `Allowed` short-circuits, any revert rejects. Put fail-closed/restrictive checks before any bypass.
 
 ## TransferValidationPolicy
 
@@ -430,26 +356,15 @@ This allows integrators and tooling to programmatically verify interface compati
 
 ### ERC-7943 (uRWA) support
 
-Both variants advertise the ERC-7943 (uRWA) **fungible** interface id `0x3edbb4c4` via
-`supportsInterface`, and implement its check/enforcement surface:
+Both variants advertise the ERC-7943 (uRWA) **fungible** interface id `0x3edbb4c4` via `supportsInterface`, and implement its check/enforcement surface:
 
-- `forcedTransfer`, `setFrozenTokens`, `getFrozenTokens` — enforcement (from CMTAT's
-  `ERC20EnforcementModule`).
-- `canTransfer(from,to,amount)`, `canSend(account)`, `canReceive(account)` — non-reverting view
-  checks. `canTransfer` combines the unfrozen-balance check, `canSend`/`canReceive`, and the
-  PolicyEngine's permissioned rules (queried via the read-only `check`, mapping a revert to
-  `false`).
+- `forcedTransfer`, `setFrozenTokens`, `getFrozenTokens` — enforcement (from CMTAT's `ERC20EnforcementModule`).
+- `canTransfer(from,to,amount)`, `canSend(account)`, `canReceive(account)` — non-reverting view checks. `canTransfer` combines the unfrozen-balance check, `canSend`/`canReceive`, and the PolicyEngine's permissioned rules (queried via the read-only `check`, mapping a revert to `false`).
 
 Notes:
 
-- **Lite** uses CMTAT's account freeze, so `canSend`/`canReceive` return `false` for a frozen
-  account.
-- **Standard** has no on-chain account allowlist/freeze on the token (send/receive eligibility is
-  decided per transfer by the PolicyEngine inside `canTransfer`), so `canSend`/`canReceive`
-  **always return `true`**: there is no standalone per-account state to report, because ACE policies
-  are evaluated per transfer (on `from`/`to`/`amount`), not per account. Do **not** use Standard's
-  `canSend`/`canReceive` as a KYC/eligibility oracle; use `canTransfer(from, to, amount)`, which is
-  the authoritative check and consults the PolicyEngine.
+- **Lite** uses CMTAT's account freeze, so `canSend`/`canReceive` return `false` for a frozen account.
+- **Standard** has no on-chain account allowlist/freeze on the token (send/receive eligibility is decided per transfer by the PolicyEngine inside `canTransfer`), so `canSend`/`canReceive` report no token-level account restriction. The authoritative gate is `canTransfer`.
 
 Conformance is covered by `test/custom/erc7943Compliance.test.js`.
 
@@ -577,17 +492,9 @@ bunx hardhat run scripts/demo.js
 
 ## Policy preflight check
 
-`scripts/preflight.js` verifies that a deployed token will **not** have its state-changing
-operations bricked by the PolicyEngine configuration, and prints per-selector policy coverage.
+`scripts/preflight.js` verifies that a deployed token will **not** have its state-changing operations bricked by the PolicyEngine configuration, and prints per-selector policy coverage.
 
-> **Important:** This integration is designed for **`defaultAllow = true`**. The bundled policies
-> (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`,
-> never `Allowed`, so the engine always falls through to the default. With `defaultAllow = false`,
-> **every** policy-routed operation (mint/burn/transfer/…) reverts (even selectors that have
-> policies attached), and the token is effectively frozen. The token must also be **attached** to
-> the engine. The preflight reconstructs the effective `defaultAllow` (global + per-target) and
-> attachment state from on-chain events and **exits non-zero** if the token would be bricked, so
-> it can gate a deployment pipeline.
+> **Important:** This integration is designed for **`defaultAllow = true`**. The bundled policies (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`, never `Allowed`, so the engine always falls through to the default. With `defaultAllow = false`, **every** policy-routed operation (mint/burn/transfer/…) reverts (even selectors that have policies attached), and the token is effectively frozen. The token must also be **attached** to the engine. The preflight reconstructs the effective `defaultAllow` (global + per-target) and attachment state from on-chain events and **exits non-zero** if the token would be bricked, so it can gate a deployment pipeline.
 
 ```shell
 POLICY_ENGINE=0x... TOKEN=0x... \
@@ -595,10 +502,7 @@ POLICY_ENGINE=0x... TOKEN=0x... \
   bunx hardhat run scripts/preflight.js --network <network>
 ```
 
-`TOKEN_CONTRACT` defaults to `ComplianceTokenCMTATStandalone`; set it to the Lite artifact when
-checking a Lite deployment. The invariant tests in
-`test/deployment/preflightPolicyCoverage.test.js` assert the preflight verdict matches real
-on-chain behavior.
+`TOKEN_CONTRACT` defaults to `ComplianceTokenCMTATStandalone`; set it to the Lite artifact when checking a Lite deployment. The invariant tests in `test/deployment/preflightPolicyCoverage.test.js` assert the preflight verdict matches real on-chain behavior.
 
 ## Audit Reports Summary
 
@@ -701,8 +605,7 @@ bunx hardhat coverage
 
 ## Policy-Protected Functions (Current Integration)
 
-This project now documents the policy-protected function selectors explicitly.
-The list below reflects the selectors wired in deployment/test flows (`scripts/demo.js`, `test/deploymentUtils.js`).
+This project now documents the policy-protected function selectors explicitly. The list below reflects the selectors wired in deployment/test flows (`scripts/demo.js`, `test/deploymentUtils.js`).
 
 ### Core transfer selectors (Standard + Lite)
 
@@ -854,21 +757,12 @@ Publish a short integration guide that includes:
 
 ## License
 
-This repository is licensed under the **Mozilla Public License 2.0 (MPL-2.0)** (see
-[`LICENSE`](./LICENSE)), except for a few files that carry a different per-file
-`SPDX-License-Identifier`.
+This repository is licensed under the **Mozilla Public License 2.0 (MPL-2.0)** — see [`LICENSE`](./LICENSE) — except for a few files that carry a different per-file `SPDX-License-Identifier`.
 
-> **Note (mixed licensing, review before production use).** The following files are licensed under
-> **BUSL-1.1 (Business Source License 1.1)**, inherited from the Chainlink ACE code they derive
-> from, rather than MPL-2.0:
+> **Note — mixed licensing, review before production use.** The following files are licensed under **BUSL-1.1 (Business Source License 1.1)**, inherited from the Chainlink ACE code they derive from, rather than MPL-2.0:
 >
 > - `contracts/modules/chainlink-ace/custom/MintBurnExtractor.sol`
 > - `contracts/modules/chainlink-ace/custom/ERC20TransferFromExtractor.sol`
 > - `contracts/modules/chainlink-ace/mocks/PolicyProtectedUpgradeableMocks.sol`
 >
-> The **Chainlink ACE** dependency (`@chainlink/ace`, the `PolicyEngine` and the bundled policies)
-> is also BUSL-1.1. BUSL-1.1 is a _source-available_ license, not an OSI open-source license: it can
-> restrict commercial/production use until the licensor's change date and terms. Confirm the
-> BUSL-1.1 grant permits your intended deployment (or relicense/replace those files) before shipping
-> to production. The `SPDX-License-Identifier` at the top of each file is the authoritative license
-> for that file.
+> The **Chainlink ACE** dependency (`@chainlink/ace` — the `PolicyEngine` and the bundled policies) is also BUSL-1.1. BUSL-1.1 is a _source-available_ license, not an OSI open-source license: it can restrict commercial/production use until the licensor's change date and terms. Confirm the BUSL-1.1 grant permits your intended deployment (or relicense/replace those files) before shipping to production. The `SPDX-License-Identifier` at the top of each file is the authoritative license for that file.
