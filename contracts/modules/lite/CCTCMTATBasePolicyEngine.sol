@@ -93,17 +93,6 @@ abstract contract CCTCMTATBasePolicyEngine is
         __ERC20_init_unchained(ERC20Attributes_.name, ERC20Attributes_.symbol);
     }
 
-    /*
-     * @dev CMTAT wrapper modules
-     */
-    function __CMTAT_modules_init_unchained(
-        address admin,
-        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
-        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_
-    ) internal virtual onlyInitializing {
-        __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
-    }
-
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
