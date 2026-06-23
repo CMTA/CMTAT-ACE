@@ -94,6 +94,14 @@ contract TransferValidationPolicy is Policy {
      * @dev Supports both 3-param (transfer) and 4-param (transferFrom) layouts.
      *      With 4 parameters, uses detectTransferRestrictionFrom to also validate
      *      the spender.
+     *
+     *      Rules are checked with the view methods `detectTransferRestriction*` /
+     *      `messageForTransferRestriction` rather than the `IRule.transferred` hook:
+     *      `run` is `view` (the engine STATICCALLs it on both the `check()` preview and
+     *      the state-flow pre-check), whereas `transferred` is state-mutating in the
+     *      interface, so it cannot be called here and conceptually belongs in `postRun`.
+     *      `messageForTransferRestriction` only runs on the rejection branch (right before
+     *      reverting), so it adds no gas to passing transfers.
      */
     function run(
         address /* caller */,
