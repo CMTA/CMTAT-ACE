@@ -2,13 +2,69 @@
 
 ## Introduction
 
-This repository combines two components:
+**This project turns a CMTAT security token into a token whose compliance rules live in swappable
+on-chain policies that Chainlink ACE evaluates on every operation.** It lets
+a token issuer change _who can do what, and under which conditions_ (KYC/allowlists, sanctions
+screening, transfer and volume limits, trading-hours windows, pause, reserve-backed minting) by
+reconfiguring policies, **without redeploying or changing the token's business logic**.
 
-- **CMTAT (CMTA Token)**: an open security-token standard from the [Capital Markets and Technology Association (CMTA)](https://www.cmta.ch/), with compliance-oriented modules such as conditional transfer controls, account freeze/enforcement, token pause, document and snapshot engines, and token lifecycle controls.
-- **Chainlink ACE (Automated Compliance Engine)**: a policy engine that evaluates configurable compliance and authorization policies at runtime for protected contract functions.
+### The problem it solves
 
-In this integration, CMTAT provides the token feature set and module structure, while ACE provides dynamic policy enforcement.  
-The goal is to let issuers update compliance behavior through policy configuration without changing core token business logic.
+Regulated tokens (**security tokens, real-world assets (RWA), and stablecoins**) must enforce
+compliance rules (eligibility, limits, freezes, pauses) that **change over time** as regulation,
+jurisdictions, or counterparties evolve.
+Baking those rules into the token means a contract upgrade or redeploy for every change, which is
+slow and risky. This integration moves the rules out of the token and into a policy engine, so
+compliance becomes a **configuration** concern instead of a code concern.
+
+### The two building blocks
+
+- **CMTAT (CMTA Token)** — an open security-token framework from the
+  [Capital Markets and Technology Association](https://www.cmta.ch/). It provides the ERC-20 token
+  plus compliance modules: conditional transfers, account freeze / enforcement (ERC-7943), forced
+  transfer & recovery, pause, in-contract documents, cross-chain mint/burn, and lifecycle controls.
+- **Chainlink ACE (Automated Compliance Engine)** — a `PolicyEngine` that, for a protected function
+  call, runs a configurable chain of **policies** (small contracts that approve or reject based on
+  the call's parameters) and returns a decision. Policies are added, removed, and reordered by
+  governance at runtime.
+
+### How it works
+
+1. A token function (e.g. `transfer`, `mint`) is **protected**: before it takes effect, the token
+   asks the PolicyEngine to evaluate the call.
+2. An **extractor** decodes the call's calldata into named parameters (`from`, `to`, `amount`, …).
+3. The PolicyEngine runs the **policies** attached to that function's selector (pause, role-based
+   access, sanctions/allowlist screening, volume/rate limits, reserve checks, and so on). If any
+   policy rejects, the call reverts; otherwise it proceeds.
+4. To change compliance behavior, governance attaches/detaches/reorders policies; **no token
+   redeploy is needed**.
+
+### What you get
+
+Two ready-to-deploy variants (standalone and upgradeable proxies), so an issuer can choose _how
+much_ of compliance to externalize:
+
+- **Lite** — keeps CMTAT's native role-based access control and uses ACE only for **transfer
+  validation** (it replaces CMTAT's RuleEngine). Closest to a standard CMTAT token.
+- **Standard** — **policy-authoritative**: ACE gates _all_ state-changing operations (mint, burn,
+  transfer, enforcement, admin) instead of local `onlyRole` checks; access control itself becomes a
+  policy concern.
+
+Compliance itself is expressed with **policies from the Chainlink ACE policy library** (for example
+pause, role-based access control, volume / rate / interval limits, and reserve-backed Proof-of-
+Reserve minting) that the issuer attaches to the token and configures. On top of those, this
+repo adds the glue needed to use them with CMTAT: a custom `TransferValidationPolicy` that reuses
+CMTAT's existing `IRule` transfer rules (KYC/sanctions/allowlist) as ACE policies, the **extractors**
+that map each token function's calldata to policy parameters, a complete deployment **demo**, and a
+deployment **preflight** check that catches common misconfigurations before going live.
+
+### Who it's for
+
+Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and their integrators)
+who want CMTAT's token feature set with compliance that can evolve through governance-controlled
+policy configuration rather than contract upgrades. (For example, a stablecoin can gate issuance
+with the reserve-backed `SecureMintPolicy` and screen holders with sanctions policies, while an RWA
+fund can enforce eligibility, transfer limits, and trading-hours windows.)
 
 ## Table of Contents
 
@@ -120,7 +176,7 @@ All CMTAT functional modules are preserved in both variants:
 
 - ERC20MintModule, ERC20BurnModule
 - ERC20EnforcementModule (freeze/enforcement)
-- PauseModule (Standard: `pause()`/`unpause()`/`deactivateContract()` are not exposed on the token — pausing is enforced externally via a PausePolicy on the PolicyEngine which rejects operations when paused; Lite: native `onlyRole(PAUSER_ROLE)`)
+- PauseModule (Standard: `pause()`/`unpause()`/`deactivateContract()` are not exposed on the token; pausing is enforced externally via a PausePolicy on the PolicyEngine which rejects operations when paused; Lite: native `onlyRole(PAUSER_ROLE)`)
 - DocumentERC1643Module (in-contract ERC-1643 document management, `DOCUMENT_ROLE`)
 - ExtraInformationModule
 - ERC20CrossChainModule, CCIPModule
@@ -142,7 +198,7 @@ All CMTAT functional modules are preserved in both variants:
 
 #### Why `approve()` is not policy-protected
 
-`approve()` is intentionally not gated by `runPolicy` in either variant. An approval by itself does not move tokens — it only sets an allowance. The actual token movement happens via `transferFrom()`, which **is** policy-protected. Protecting `approve()` would add gas overhead without security benefit, since:
+`approve()` is intentionally not gated by `runPolicy` in either variant. An approval by itself does not move tokens; it only sets an allowance. The actual token movement happens via `transferFrom()`, which **is** policy-protected. Protecting `approve()` would add gas overhead without security benefit, since:
 
 1. A malicious or excessive approval has no effect until `transferFrom()` is called, at which point the PolicyEngine validates the transfer.
 2. The `ERC20TransferFromExtractor` extracts the `spender` address from `transferFrom()` calls, so policies can restrict which spenders are allowed to move tokens regardless of existing approvals.
@@ -155,7 +211,7 @@ All CMTAT functional modules are preserved in both variants:
 token, but is a footgun for a **cross-chain / bridgeable** token (`ERC20CrossChainModule` /
 `crosschainMint`):
 
-- A `crosschainMint` on chain B mints tokens that were **burned on chain A** — global supply does
+- A `crosschainMint` on chain B mints tokens that were **burned on chain A**, so global supply does
   not increase, only chain B's local supply does.
 - If the Proof-of-Reserve feed reports the **global** reserves backing the **global** supply, but
   the policy compares them against chain B's **local** `totalSupply()`, then as chain B's local
@@ -200,31 +256,31 @@ links to the integration test that demonstrates it against a ComplianceToken.
 
 ### Policies used and tested in this repo
 
-| Policy                                  | What it enforces                                                                   | `run` parameters (via extractor)                 | Example use case                                                                                                                                                                                                                                                          |
-| --------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`TransferValidationPolicy`** (custom) | Runs an array of CMTAT `IRule` contracts; rejects on any non-zero restriction code | `[from,to,amount]` or `[spender,from,to,amount]` | Reuse existing CMTAT transfer-restriction rules (sanctions/KYC/max-amount) as ACE policies — see [TransferValidationPolicy](#transfervalidationpolicy). Tests: `test/custom/transferValidationPolicy.test.js`, `crosschainScreening.test.js`, `mintBurnScreening.test.js` |
-| **`PausePolicy`**                       | Rejects protected calls while paused                                               | none                                             | Emergency pause of mint/burn/transfer without a pause role on the token (Standard variant). Tests: `test/common/ace/PausePolicyCommon.js`                                                                                                                                 |
-| **`RoleBasedAccessControlPolicy`**      | Caller must hold the role mapped to the selector                                   | none (uses caller + selector)                    | Externalized role management for admin/lifecycle operations (Standard variant). Tests: `test/common/ace/RBACPolicyCommon.js`                                                                                                                                              |
-| **`SecureMintPolicy`**                  | `mintAmount + totalSupply() <= reserves` from a Chainlink PoR feed                 | `[amount]`                                       | Reserve-backed (Proof-of-Reserve) minting. Tests: `test/custom/secureMintPolicy.test.js`. See the [cross-chain PoR caveat](#securemintpolicy-and-cross-chain-proof-of-reserve-tokens)                                                                                     |
-| **`MaxPolicy`**                         | Per-call hard cap (non-accumulating)                                               | `[amount]`                                       | Maximum amount per single transfer/mint. Tests: `test/custom/maxPolicy.test.js`                                                                                                                                                                                           |
-| **`VolumePolicy`**                      | Per-call `min <= amount <= max`                                                    | `[amount]`                                       | Minimum and maximum ticket size per operation. Tests: `test/custom/volumePolicy.test.js`                                                                                                                                                                                  |
-| **`VolumeRatePolicy`**                  | Per-account cumulative cap within a rolling time window                            | `[amount, account]`                              | Rate-limit how much each holder can move per day/hour. Tests: `test/custom/volumeRatePolicy.test.js`                                                                                                                                                                      |
-| **`IntervalPolicy`**                    | Execution allowed only within a time window of a repeating cycle                   | none                                             | Trading-hours / settlement-window restriction. Tests: `test/custom/intervalPolicy.test.js`                                                                                                                                                                                |
-| **`OnlyOwnerPolicy`**                   | Caller must be the policy's owner                                                  | none (uses caller)                               | Funnel a sensitive function (e.g. `mint`) through a single governance key, layered on top of CMTAT roles. Tests: `test/custom/onlyOwnerPolicy.test.js`                                                                                                                    |
+| Policy                                  | What it enforces                                                                   | `run` parameters (via extractor)                 | Example use case                                                                                                                                                                                                                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`TransferValidationPolicy`** (custom) | Runs an array of CMTAT `IRule` contracts; rejects on any non-zero restriction code | `[from,to,amount]` or `[spender,from,to,amount]` | Reuse existing CMTAT transfer-restriction rules (sanctions/KYC/max-amount) as ACE policies; see [TransferValidationPolicy](#transfervalidationpolicy). Tests: `test/custom/transferValidationPolicy.test.js`, `crosschainScreening.test.js`, `mintBurnScreening.test.js` |
+| **`PausePolicy`**                       | Rejects protected calls while paused                                               | none                                             | Emergency pause of mint/burn/transfer without a pause role on the token (Standard variant). Tests: `test/common/ace/PausePolicyCommon.js`                                                                                                                                |
+| **`RoleBasedAccessControlPolicy`**      | Caller must hold the role mapped to the selector                                   | none (uses caller + selector)                    | Externalized role management for admin/lifecycle operations (Standard variant). Tests: `test/common/ace/RBACPolicyCommon.js`                                                                                                                                             |
+| **`SecureMintPolicy`**                  | `mintAmount + totalSupply() <= reserves` from a Chainlink PoR feed                 | `[amount]`                                       | Reserve-backed (Proof-of-Reserve) minting. Tests: `test/custom/secureMintPolicy.test.js`. See the [cross-chain PoR caveat](#securemintpolicy-and-cross-chain-proof-of-reserve-tokens)                                                                                    |
+| **`MaxPolicy`**                         | Per-call hard cap (non-accumulating)                                               | `[amount]`                                       | Maximum amount per single transfer/mint. Tests: `test/custom/maxPolicy.test.js`                                                                                                                                                                                          |
+| **`VolumePolicy`**                      | Per-call `min <= amount <= max`                                                    | `[amount]`                                       | Minimum and maximum ticket size per operation. Tests: `test/custom/volumePolicy.test.js`                                                                                                                                                                                 |
+| **`VolumeRatePolicy`**                  | Per-account cumulative cap within a rolling time window                            | `[amount, account]`                              | Rate-limit how much each holder can move per day/hour. Tests: `test/custom/volumeRatePolicy.test.js`                                                                                                                                                                     |
+| **`IntervalPolicy`**                    | Execution allowed only within a time window of a repeating cycle                   | none                                             | Trading-hours / settlement-window restriction. Tests: `test/custom/intervalPolicy.test.js`                                                                                                                                                                               |
+| **`OnlyOwnerPolicy`**                   | Caller must be the policy's owner                                                  | none (uses caller)                               | Funnel a sensitive function (e.g. `mint`) through a single governance key, layered on top of CMTAT roles. Tests: `test/custom/onlyOwnerPolicy.test.js`                                                                                                                   |
 
 ### Other policies available from `@chainlink/ace`
 
 These are part of the installed `@chainlink/ace` policy library and can be wired the same way, but
 are not currently configured or tested in this repository:
 
-| Policy                                                                                         | What it enforces                                                                                                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`BypassPolicy`**                                                                             | If an extracted address is on a bypass list, returns **`Allowed`** (short-circuits evaluation to allow). The only bundled policy that returns a terminal allow — required if you operate with `defaultAllow = false` (see below) |
-| **`AllowPolicy`**                                                                              | Allow-list: rejects unless the extracted address is on the list                                                                                                                                                                  |
-| **`RejectPolicy`**                                                                             | Block-list: rejects if the extracted address is on the list                                                                                                                                                                      |
-| **`OnlyAuthorizedSenderPolicy`**                                                               | Rejects unless the caller is on an authorized-sender list                                                                                                                                                                        |
-| **`OnlySubjectOwnerPolicy`**                                                                   | Caller must be the `Ownable` owner of the token (subject); fits the Standard variant's `OwnableUpgradeable`                                                                                                                      |
-| **`CertifiedActionValidatorPolicy` / `…DONValidatorPolicy` / `…ERC20TransferValidatorPolicy`** | Validate off-chain "certified actions" (e.g. DON-signed approvals) before allowing an operation — advanced, for attestation-gated flows                                                                                          |
+| Policy                                                                                         | What it enforces                                                                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BypassPolicy`**                                                                             | If an extracted address is on a bypass list, returns **`Allowed`** (short-circuits evaluation to allow). The only bundled policy that returns a terminal allow; required if you operate with `defaultAllow = false` (see below) |
+| **`AllowPolicy`**                                                                              | Allow-list: rejects unless the extracted address is on the list                                                                                                                                                                 |
+| **`RejectPolicy`**                                                                             | Block-list: rejects if the extracted address is on the list                                                                                                                                                                     |
+| **`OnlyAuthorizedSenderPolicy`**                                                               | Rejects unless the caller is on an authorized-sender list                                                                                                                                                                       |
+| **`OnlySubjectOwnerPolicy`**                                                                   | Caller must be the `Ownable` owner of the token (subject); fits the Standard variant's `OwnableUpgradeable`                                                                                                                     |
+| **`CertifiedActionValidatorPolicy` / `…DONValidatorPolicy` / `…ERC20TransferValidatorPolicy`** | Validate off-chain "certified actions" (e.g. DON-signed approvals) before allowing an operation; advanced, for attestation-gated flows                                                                                          |
 
 ### How policies combine (important)
 
@@ -235,7 +291,7 @@ are not currently configured or tested in this repository:
 - **Allow-by-default model:** nearly all of the policies above return `Continue` on success and only
   **revert** to reject; none of them return a terminal `Allowed` except `BypassPolicy`. With the
   PolicyEngine's `defaultAllow = true`, a call is allowed unless some policy reverts. With
-  `defaultAllow = false`, a call is rejected **unless** some policy returns `Allowed` — so a
+  `defaultAllow = false`, a call is rejected **unless** some policy returns `Allowed`, so a
   fail-closed deployment requires `BypassPolicy` (or a custom terminal-allow policy) on every
   protected selector, otherwise operations are bricked. Use the
   [policy preflight check](#policy-preflight-check) to verify this before going live.
@@ -523,8 +579,8 @@ operations bricked by the PolicyEngine configuration, and prints per-selector po
 > **Important:** This integration is designed for **`defaultAllow = true`**. The bundled policies
 > (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`,
 > never `Allowed`, so the engine always falls through to the default. With `defaultAllow = false`,
-> **every** policy-routed operation (mint/burn/transfer/…) reverts — even selectors that have
-> policies attached — and the token is effectively frozen. The token must also be **attached** to
+> **every** policy-routed operation (mint/burn/transfer/…) reverts (even selectors that have
+> policies attached), and the token is effectively frozen. The token must also be **attached** to
 > the engine. The preflight reconstructs the effective `defaultAllow` (global + per-target) and
 > attachment state from on-chain events and **exits non-zero** if the token would be bricked, so
 > it can gate a deployment pipeline.
@@ -616,20 +672,20 @@ Report scope: 17 Solidity files, 959 nSLOC.
 
 2 High · 10 Low
 
-| ID   | Finding                                   | Instances | Assessment                                                                                          |
-| ---- | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------- |
-| H-1  | Arbitrary `from` passed to `transferFrom` | 1         | Accepted in context — policy-gated flow; not treated as exploitable in this integration design.     |
-| H-2  | Contract locks Ether without withdraw     | 2         | Accepted false positive — token deployments are not intended as ETH custody contracts.              |
-| L-1  | Centralization Risk                       | 11        | Accepted by design — privileged governance/control is intentional.                                  |
-| L-2  | Unsafe ERC20 Operation                    | 7         | Accepted false positive — primarily selector/module-flow usage, not unsafe token transfer wrappers. |
-| L-3  | Unspecific Solidity Pragma                | 17        | Accepted by design — version ranges are intentionally used in this codebase.                        |
-| L-4  | Literal Instead of Constant               | 2         | Informational — optional quality improvement.                                                       |
-| L-5  | PUSH0 Opcode                              | 17        | Environment-dependent informational finding in this setup.                                          |
-| L-6  | Empty Block                               | 22        | Accepted by design — authorization hook pattern.                                                    |
-| L-7  | Loop Contains `require`/`revert`          | 4         | Accepted by design — atomic validation and explicit failure signaling.                              |
-| L-8  | Unused State Variable                     | 1         | False positive — `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`.                 |
-| L-9  | Costly operations inside loop             | 2         | Accepted — expected tradeoff in policy/rule iteration paths.                                        |
-| L-10 | Unused Import                             | 9         | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons).                    |
+| ID   | Finding                                   | Instances | Assessment                                                                                         |
+| ---- | ----------------------------------------- | --------- | -------------------------------------------------------------------------------------------------- |
+| H-1  | Arbitrary `from` passed to `transferFrom` | 1         | Accepted in context: policy-gated flow; not treated as exploitable in this integration design.     |
+| H-2  | Contract locks Ether without withdraw     | 2         | Accepted false positive: token deployments are not intended as ETH custody contracts.              |
+| L-1  | Centralization Risk                       | 11        | Accepted by design: privileged governance/control is intentional.                                  |
+| L-2  | Unsafe ERC20 Operation                    | 7         | Accepted false positive: primarily selector/module-flow usage, not unsafe token transfer wrappers. |
+| L-3  | Unspecific Solidity Pragma                | 17        | Accepted by design: version ranges are intentionally used in this codebase.                        |
+| L-4  | Literal Instead of Constant               | 2         | Informational: optional quality improvement.                                                       |
+| L-5  | PUSH0 Opcode                              | 17        | Environment-dependent informational finding in this setup.                                         |
+| L-6  | Empty Block                               | 22        | Accepted by design: authorization hook pattern.                                                    |
+| L-7  | Loop Contains `require`/`revert`          | 4         | Accepted by design: atomic validation and explicit failure signaling.                              |
+| L-8  | Unused State Variable                     | 1         | False positive: `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`.                 |
+| L-9  | Costly operations inside loop             | 2         | Accepted: expected tradeoff in policy/rule iteration paths.                                        |
+| L-10 | Unused Import                             | 9         | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons).                   |
 
 ## Coverage
 
