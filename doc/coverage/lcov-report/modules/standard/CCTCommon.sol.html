@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for modules/standard/CCTCommon.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">modules/standard/</a> CCTCommon.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>35/35</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">89.29% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>50/56</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>32/32</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>35/35</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">211×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MPL-2.0
+&nbsp;
+pragma solidity ^0.8.20;
+&nbsp;
+/* ==== OpenZeppelin === */
+import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+&nbsp;
+/* ==== CMTAT === */
+import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
+/* = Base = */
+/* = Core = */
+import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
+import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BaseModule} from "CMTAT/modules/wrapper/core/ERC20BaseModule.sol";
+/* = Option &amp; Extension = */
+import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossChainModule.sol";
+import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
+import {ExtraInformationModule} from "CMTAT/modules/wrapper/extensions/ExtraInformationModule.sol";
+import {
+    ERC20EnforcementModule,
+    ERC20EnforcementModuleInternal
+} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
+import {CMTATBaseDocument} from "CMTAT/modules/1_CMTATBaseDocument.sol";
+import {DocumentERC1643Module} from "CMTAT/modules/wrapper/extensions/DocumentERC1643Module.sol";
+/* = Interface = */
+import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
+/* ==== Chainlink ACE === */
+import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
+&nbsp;
+abstract contract CCTCommon is
+    OwnableUpgradeable,
+    ERC20CrossChainModule,
+    PolicyProtectedBaseUpgradeable,
+    CMTATBaseCommon,
+    CMTATBaseDocument,
+    CCIPModule
+{
+    function initialize(
+        address admin,
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
+        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
+        address policyEngine
+    ) public virtual initializer {
+        _initialize(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
+    }
+&nbsp;
+    function _initialize(
+        address admin,
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
+        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
+        address policyEngine
+    ) internal virtual <span class="missing-if-branch" title="else path not taken" >E</span>onlyInitializing {
+        __CMTAT_init(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
+    }
+&nbsp;
+    /**
+     * @dev calls the different initialize functions from the different modules
+     */
+    function __CMTAT_init(
+        address admin,
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
+        ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes_,
+        address policyEngine
+    ) internal virtual <span class="missing-if-branch" title="else path not taken" >E</span>onlyInitializing {
+        __Ownable_init_unchained(admin);
+        /* OpenZeppelin library */
+        // OZ init_unchained functions are called firstly due to inheritance
+        __Context_init_unchained();
+&nbsp;
+        // AccessControlUpgradeable inherits from ERC165Upgradeable
+        __ERC165_init_unchained();
+&nbsp;
+        // Openzeppelin
+        __CMTAT_openzeppelin_init_unchained(ERC20Attributes_);
+&nbsp;
+        __PolicyProtectedBase_init_unchained(policyEngine);
+&nbsp;
+        /* Wrapper modules */
+        __CMTAT_modules_init_unchained(ERC20Attributes_, ExtraInformationAttributes_);
+    }
+&nbsp;
+    /*
+     * @dev OpenZeppelin
+     */
+    function __CMTAT_openzeppelin_init_unchained(
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_
+    ) internal virtual <span class="missing-if-branch" title="else path not taken" >E</span>onlyInitializing {
+        // Note that the Openzeppelin functions name() and symbol() are overriden in ERC20BaseModule
+        __ERC20_init_unchained(ERC20Attributes_.name, ERC20Attributes_.symbol);
+    }
+&nbsp;
+    /*
+     * @dev CMTAT wrapper modules
+     */
+    function __CMTAT_modules_init_unchained(
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
+        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_
+    ) internal virtual <span class="missing-if-branch" title="else path not taken" >E</span>onlyInitializing {
+        __CMTAT_commonModules_init_unchained(ERC20Attributes_, extraInformationAttributes_);
+    }
+&nbsp;
+    function __CMTAT_commonModules_init_unchained(
+        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
+        ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationModuleAttributes_
+    ) internal virtual <span class="missing-if-branch" title="else path not taken" >E</span>onlyInitializing {
+        // Core
+        __ERC20BaseModule_init_unchained(
+            ERC20Attributes_.decimalsIrrevocable,
+            ERC20Attributes_.name,
+            ERC20Attributes_.symbol
+        );
+        /* Extensions */
+        __ExtraInformationModule_init_unchained(
+            ExtraInformationModuleAttributes_.tokenId,
+            ExtraInformationModuleAttributes_.terms,
+            ExtraInformationModuleAttributes_.information
+        );
+    }
+&nbsp;
+    /*//////////////////////////////////////////////////////////////
+                        PUBLIC/EXTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /* ============  State Functions ============ */
+    function transfer(
+        address to,
+        uint256 value
+    ) public virtual override(ERC20Upgradeable, CMTATBaseCommon) runPolicy returns (bool) {
+        return CMTATBaseCommon.transfer(to, value);
+    }
+    /*
+     * @inheritdoc ERC20BaseModule
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override(ERC20Upgradeable, CMTATBaseCommon) <span class="missing-if-branch" title="else path not taken" >E</span>runPolicy returns (bool) {
+        return CMTATBaseCommon.transferFrom(from, to, value);
+    }
+&nbsp;
+    function _authorizeAttachPolicyEngine(address) internal virtual override onlyOwner {}
+&nbsp;
+    /* ============ View functions ============ */
+&nbsp;
+    /**
+     * @inheritdoc CMTATBaseCommon
+     */
+    function decimals() public view virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (uint8) {
+        return CMTATBaseCommon.decimals();
+    }
+&nbsp;
+    /**
+     * @inheritdoc CMTATBaseCommon
+     */
+    function name() public view virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (string memory) {
+        return CMTATBaseCommon.name();
+    }
+&nbsp;
+    /**
+     * @inheritdoc CMTATBaseCommon
+     */
+    function symbol() public view virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (string memory) {
+        return CMTATBaseCommon.symbol();
+    }
+&nbsp;
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view virtual override(IERC165, ERC20CrossChainModule, PolicyProtectedBaseUpgradeable) returns (bool) {
+        return
+            _interfaceId == type(IERC7943Fungible).interfaceId ||
+            ERC20CrossChainModule.supportsInterface(_interfaceId) ||
+            PolicyProtectedBaseUpgradeable.supportsInterface(_interfaceId);
+    }
+&nbsp;
+    /* ============ ERC-7943 (uRWA) check surface ============ */
+    /**
+     * @notice Account-level send eligibility (ERC-7943 `canSend`).
+     * @dev In the Standard (policy-authoritative) variant there is no on-chain account allowlist or
+     * account freeze on the token itself: send/receive eligibility is decided per-transfer by the
+     * PolicyEngine inside {canTransfer}. This therefore reports no token-level account restriction.
+     * MUST NOT revert and MUST NOT encode quantitative rules.
+     */
+    function canSend(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Account-level receive eligibility (ERC-7943 `canReceive`). See {canSend}.
+     */
+    function canReceive(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Transfer-level authorization check (ERC-7943 `canTransfer`).
+     * @dev Combines the unfrozen-balance check, the account-level {canSend}/{canReceive} checks, and
+     * the PolicyEngine's permissioned rules (queried via the read-only `check`). MUST NOT revert.
+     */
+    function canTransfer(address from, address to, uint256 value) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transfer.selector, from, abi.encode(to, value));
+    }
+&nbsp;
+    /**
+     * @notice Spender-aware transfer-level authorization check (mirrors {canTransfer} for `transferFrom`).
+     */
+    function canTransferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transferFrom.selector, spender, abi.encode(from, to, value));
+    }
+&nbsp;
+    /**
+     * @dev Read-only PolicyEngine evaluation. `check` reverts on rejection (preserving the reason);
+     * here we only need a boolean, so a revert is mapped to `false`.
+     * @dev The PolicyEngine is assumed to be set (non-zero): in the Standard variant it is validated
+     * non-zero at initialization and on every `attachPolicyEngine` (via `_validatePolicyEngine`), and
+     * detaching is not allowed, so any caller of this function always runs with an engine attached.
+     * A variant that permits a zero engine must perform the zero-address check before calling this.
+     */
+    function _canTransferWithPolicyEngine(
+        bytes4 selector,
+        address sender,
+        bytes memory data
+    ) internal view virtual returns (bool) {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        try
+            policyEngine_.check(
+                IPolicyEngine.Payload({selector: selector, sender: sender, data: data, context: getContext()})
+            )
+        {
+            return true;
+        } catch {
+            return false;
+        }
+    }
+&nbsp;
+    /* ==== Mint and Burn Operations ==== */
+    /**
+     * @dev Check if the mint is valid
+     */
+    function _mintOverride(
+        address account,
+        uint256 value
+    ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
+        CMTATBaseCommon._mintOverride(account, value);
+    }
+&nbsp;
+    /**
+     * @dev Check if the burn is valid
+     */
+    function _burnOverride(
+        address account,
+        uint256 value
+    ) internal virtual override(CMTATBaseCommon, ERC20BurnModuleInternal) {
+        CMTATBaseCommon._burnOverride(account, value);
+    }
+&nbsp;
+    /**
+     * @dev Check if a minter transfer is valid
+     */
+    function _minterTransferOverride(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
+        CMTATBaseCommon._minterTransferOverride(from, to, value);
+    }
+&nbsp;
+    /* ==== Access Control Functions ==== */
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `DEFAULT_ADMIN_ROLE`.
+     */
+    function _authorizeERC20AttributeManagement() internal virtual override(ERC20BaseModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `MINTER_ROLE`.
+     */
+    function _authorizeMint() internal virtual override(ERC20MintModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - The caller must have the `BURNER_ROLE`.
+     */
+    function _authorizeBurn() internal virtual override(ERC20BurnModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `DOCUMENT_ROLE`.
+     */
+    function _authorizeDocumentManagement() internal virtual override(DocumentERC1643Module) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `EXTRA_INFORMATION_ROLE`.
+     */
+    function _authorizeExtraInfoManagement() internal virtual override(ExtraInformationModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `ERC20ENFORCER_ROLE`.
+     */
+    function _authorizeERC20Enforcer() internal virtual override(ERC20EnforcementModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `DEFAULT_ADMIN_ROLE`.
+     */
+    function _authorizeForcedTransfer() internal virtual override(ERC20EnforcementModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `DEFAULT_ADMIN_ROLE`.
+     */
+    function _authorizeCCIPSetAdmin() internal virtual override(CCIPModule) runPolicy {}
+&nbsp;
+    /**
+     * @dev
+     * A cross-chain bridge could call the OpenZeppelin function `renounceRole` to lose their privileges (CROSS_CHAIN_ROLE)
+     * While it is not intended,this has no other effect than depriving the bridge of burn/mint tokens
+     * An attacker could use this to disrupt minting/burning if they can get the bridge to execute calls.
+     * However, in this case, the bridge should still be considered compromised and not used again.
+     * @custom:access-control
+     * - the caller must have the `CROSS_CHAIN_ROLE`.
+     */
+    function _checkTokenBridge(address caller) internal virtual override(ERC20CrossChainModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `BURNER_FROM_ROLE`.
+     * - We don't allow token holder to burn their own tokens if they don't have this role.
+     */
+    function _authorizeBurnFrom() internal virtual override(ERC20CrossChainModule) runPolicy {}
+&nbsp;
+    /**
+     * @custom:access-control
+     * - the caller must have the `BURNER_ROLE`.
+     * - We don't allow token holder to burn their own tokens if they don't have this role.
+     */
+    function _authorizeSelfBurn() internal virtual override(ERC20CrossChainModule) runPolicy {}
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jun 24 2026 12:41:09 GMT+0200 (Central European Summer Time)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>
