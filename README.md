@@ -211,7 +211,7 @@ Guidance for issuers:
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
 - `ERC20TransferFromExtractor` — Extractor that produces 4 parameters (`spender`, `from`, `to`, `amount`) for `transfer()` and `transferFrom()`
 - `CrossChainMintBurnExtractor` — Extractor that maps `crosschainMint` / `crosschainBurn` into the `[from, to, amount]` layout so the same `IRule` rules can screen cross-chain issuance/redemption
-- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version
+- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version. The `version()` view follows the ERC-3643 and ERC-8303 (Contract Version) convention; see [`doc/ERCSpecification/erc-8303.md`](./doc/ERCSpecification/erc-8303.md)
 
 ## Compliance Policies
 
