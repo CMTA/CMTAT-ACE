@@ -113,6 +113,10 @@ Treat the following as privileged governance actions:
 
 In the **Lite** variant the ERC-1404 view is PolicyEngine-aware: after the module checks (pause/deactivate/freeze/active-balance) pass, `detectTransferRestriction` / `detectTransferRestrictionFrom` consult the PolicyEngine and return restriction code **`7`** (`TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE`, message `"PolicyEngine:transferRejected"`) when the engine would reject the transfer. Module-level codes take precedence, and the view never reverts.
 
+#### Detaching the PolicyEngine (Lite only)
+
+The PolicyEngine can be detached on the **Lite** variant but not on the **Standard** variant. On Lite, an admin (`DEFAULT_ADMIN_ROLE`) may call `attachPolicyEngine(address(0))`: access control is CMTAT role-based and the engine is used for transfer validation only, so detaching simply disables ACE policy validation while CMTAT's native validation (pause, enforcement, allowlist, ...) stays in force. On **Standard**, detaching is rejected (`attachPolicyEngine(address(0))` reverts): authorization is policy-authoritative (every privileged operation is `runPolicy`-gated), so a zero engine would brick the token. This is enforced in `_validatePolicyEngine`, which keeps the non-zero requirement on Standard and relaxes it on Lite.
+
 ### Initialization
 
 The `Engine` struct parameter is replaced with a single `address policyEngine_`:
