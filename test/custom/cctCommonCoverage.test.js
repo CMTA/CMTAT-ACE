@@ -1,7 +1,13 @@
 const { ethers, upgrades } = require('hardhat');
 const { expect } = require('chai');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
-const { fixture, deployPolicyEngine, deployCCTStandalone } = require('../deploymentUtils');
+const {
+  fixture,
+  deployPolicyEngine,
+  deployCCTStandalone,
+  TERMS,
+  DEPLOYMENT_DECIMAL,
+} = require('../deploymentUtils');
 
 const PARAM_SPENDER = ethers.keccak256(ethers.toUtf8Bytes('spender'));
 const PARAM_FROM = ethers.keccak256(ethers.toUtf8Bytes('from'));
@@ -120,6 +126,79 @@ describe('CCTCommon Standard coverage', function () {
       ).to.not.be.reverted;
       expect(await cmtat.balanceOf(address1.address)).to.equal(10n);
       expect(await cmtat.balanceOf(address2.address)).to.equal(20n);
+    });
+  });
+
+  /**
+   * The Standard variant's canSend/canReceive always return true on the base token, so the
+   * `!canSend(from)` / `!canReceive(to)` short-circuit branches in canTransfer/canTransferFrom
+   * are only reachable once those virtual hooks are overridden. CanSendReceiveOverrideMock makes
+   * them toggleable so both branches can be covered.
+   */
+  describe('canSend / canReceive short-circuit branches', function () {
+    beforeEach(async function () {
+      Object.assign(this, await loadFixture(fixture));
+      this.pe = await deployPolicyEngine(true, this.admin.address);
+      this.cmtat = await ethers.deployContract('CanSendReceiveOverrideMock', [
+        this.admin.address,
+        ['CMTA Token', 'CMTAT', DEPLOYMENT_DECIMAL],
+        ['CMTAT_ISIN', TERMS, 'CMTAT_info'],
+        await this.pe.getAddress(),
+      ]);
+      await this.cmtat.connect(this.admin).mint(this.admin.address, 1000n);
+    });
+
+    it('canTransfer is false when canSend(from) is false', async function () {
+      await this.cmtat.connect(this.admin).setSendAllowed(false);
+      expect(
+        await this.cmtat.canTransfer(this.admin.address, this.address1.address, 100n),
+      ).to.equal(false);
+    });
+
+    it('canTransfer is false when canReceive(to) is false', async function () {
+      await this.cmtat.connect(this.admin).setReceiveAllowed(false);
+      expect(
+        await this.cmtat.canTransfer(this.admin.address, this.address1.address, 100n),
+      ).to.equal(false);
+    });
+
+    it('canTransferFrom is false when canSend(from) is false', async function () {
+      await this.cmtat.connect(this.admin).setSendAllowed(false);
+      expect(
+        await this.cmtat.canTransferFrom(
+          this.address1.address,
+          this.admin.address,
+          this.address2.address,
+          100n,
+        ),
+      ).to.equal(false);
+    });
+
+    it('canTransferFrom is false when canReceive(to) is false', async function () {
+      await this.cmtat.connect(this.admin).setReceiveAllowed(false);
+      expect(
+        await this.cmtat.canTransferFrom(
+          this.address1.address,
+          this.admin.address,
+          this.address2.address,
+          100n,
+        ),
+      ).to.equal(false);
+    });
+
+    it('both are true again once the hooks are re-enabled (positive control)', async function () {
+      // sanity: with hooks allowing and engine defaultAllow=true, the checks pass
+      expect(
+        await this.cmtat.canTransfer(this.admin.address, this.address1.address, 100n),
+      ).to.equal(true);
+      expect(
+        await this.cmtat.canTransferFrom(
+          this.address1.address,
+          this.admin.address,
+          this.address2.address,
+          100n,
+        ),
+      ).to.equal(true);
     });
   });
 });
