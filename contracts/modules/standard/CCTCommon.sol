@@ -227,8 +227,11 @@ abstract contract CCTCommon is
 
     /**
      * @dev Read-only PolicyEngine evaluation. `check` reverts on rejection (preserving the reason);
-     * here we only need a boolean, so a revert is mapped to `false`. Returns `true` when no engine
-     * is attached (no policy enforcement).
+     * here we only need a boolean, so a revert is mapped to `false`.
+     * @dev The PolicyEngine is assumed to be set (non-zero): in the Standard variant it is validated
+     * non-zero at initialization and on every `attachPolicyEngine` (via `_validatePolicyEngine`), and
+     * detaching is not allowed, so any caller of this function always runs with an engine attached.
+     * A variant that permits a zero engine must perform the zero-address check before calling this.
      */
     function _canTransferWithPolicyEngine(
         bytes4 selector,
@@ -236,9 +239,6 @@ abstract contract CCTCommon is
         bytes memory data
     ) internal view virtual returns (bool) {
         IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
-        if (address(policyEngine_) == address(0)) {
-            return true;
-        }
         try
             policyEngine_.check(
                 IPolicyEngine.Payload({selector: selector, sender: sender, data: data, context: getContext()})

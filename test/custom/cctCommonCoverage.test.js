@@ -33,10 +33,9 @@ async function deployTransferValidationPolicy(policyEngineAddress, owner, ruleAd
  *  - canTransferFrom (the spender-aware uRWA view)
  *  - _minterTransferOverride (reached via the minter batchTransfer)
  *
- * Note: `_canTransferWithPolicyEngine`'s `getPolicyEngine() == address(0)` early-return is
- * unreachable defensive code — the policy engine is validated non-zero at init and on
- * `attachPolicyEngine`, so it can never be zero on a deployed token. Its main (engine-attached)
- * path is already covered via `canTransfer`/`canTransferFrom`.
+ * Note: `_canTransferWithPolicyEngine` assumes a non-zero engine (Standard validates it non-zero at
+ * init and on `attachPolicyEngine`, and forbids detaching), so it no longer carries a zero-address
+ * early-return. Its engine-attached path is covered via `canTransfer`/`canTransferFrom`.
  */
 describe('CCTCommon Standard coverage', function () {
   describe('canTransferFrom', function () {
