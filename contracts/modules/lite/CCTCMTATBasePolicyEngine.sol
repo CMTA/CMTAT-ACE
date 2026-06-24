@@ -131,6 +131,22 @@ abstract contract CCTCMTATBasePolicyEngine is
 
     function _authorizeAttachPolicyEngine(address) internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
+    /**
+     * @notice Permit detaching the PolicyEngine (setting it to the zero address).
+     * @dev The Lite variant keeps CMTAT role-based access control and uses the PolicyEngine only for
+     * transfer validation, so the engine is optional. Relaxing the base non-zero requirement lets an
+     * admin detach it: ACE policy validation is then disabled while CMTAT's native validation (pause,
+     * enforcement, allowlist, ...) stays in force, and the transfer path already treats a zero engine
+     * as "no policy enforcement" (see {ValidationModulePolicyEngine}).
+     *
+     * The Standard variant deliberately does NOT override this: its access control is
+     * policy-authoritative (every privileged operation is `runPolicy`-gated), so a zero engine would
+     * brick the token, and the base non-zero requirement must hold.
+     */
+    // Empty on purpose: overriding the base with no body drops its `require(engine != 0)` check,
+    // which is what allows the engine to be detached (set to the zero address) on Lite.
+    function _validatePolicyEngine(address) internal virtual override(PolicyProtectedBaseUpgradeable) {}
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
