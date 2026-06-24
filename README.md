@@ -102,6 +102,27 @@ Treat the following as privileged governance actions:
 | Authorization   | `onlyRole(MINTER_ROLE)`, etc.            | `runPolicy` modifier via PolicyEngine                 | `onlyRole()` for modules, PolicyEngine for transfers |
 | Role management | `grantRole()` / `revokeRole()`           | Managed externally via `RoleBasedAccessControlPolicy` | CMTAT roles preserved                                |
 
+#### Roles and permissions (Lite)
+
+The **Lite** variant keeps CMTAT's native `AccessControlUpgradeable` roles. The table below lists each role and what it authorizes (verified against the module authorization hooks). All roles are managed by `DEFAULT_ADMIN_ROLE` via `grantRole` / `revokeRole`.
+
+| Role                     | Authorizes                                                                                                                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_ADMIN_ROLE`     | Grant/revoke all roles; attach/detach the PolicyEngine (`attachPolicyEngine`, incl. `address(0)`); `deactivateContract`; `forcedTransfer`; ERC-20 attribute management (name/symbol/decimals); set the CCIP admin |
+| `MINTER_ROLE`            | `mint`                                                                                                                                                                                                            |
+| `BURNER_ROLE`            | `burn`                                                                                                                                                                                                            |
+| `BURNER_FROM_ROLE`       | Cross-chain burn from a holder (`crosschainBurn`)                                                                                                                                                                 |
+| `BURNER_SELF_ROLE`       | Cross-chain self-burn                                                                                                                                                                                             |
+| `CROSS_CHAIN_ROLE`       | Act as the token bridge for cross-chain mint/burn (`_checkTokenBridge`)                                                                                                                                           |
+| `PAUSER_ROLE`            | `pause` / `unpause`                                                                                                                                                                                               |
+| `ENFORCER_ROLE`          | Freeze/unfreeze addresses (address-level enforcement)                                                                                                                                                             |
+| `ERC20ENFORCER_ROLE`     | Token-level freeze: `setFrozenTokens`, `freezePartialTokens`, `unfreezePartialTokens`                                                                                                                             |
+| `DOCUMENT_ROLE`          | Manage ERC-1643 documents (`setDocument` / `removeDocument`)                                                                                                                                                      |
+| `EXTRA_INFORMATION_ROLE` | Set tokenId / terms / information                                                                                                                                                                                 |
+| `PROXY_UPGRADE_ROLE`     | Authorize UUPS upgrades (UUPS variant only)                                                                                                                                                                       |
+
+The **Standard** variant does not use these roles for module access: it is `OwnableUpgradeable` (single `owner`) and routes authorization through the PolicyEngine, where role-like permissions are configured externally via `RoleBasedAccessControlPolicy` rather than `grantRole`.
+
 ### Validation & Compliance
 
 | Aspect           | CMTAT                                                 | Standard                                           | Lite                                                            |
@@ -559,22 +580,22 @@ When done, deactivate the virtual environment:
 deactivate
 ```
 
-| Version | Report                                                                | Assessment                                                                              |
-| ------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither-report.md)      | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither-report-feedback.md)      |
-| v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md)     |
+| Version | Report                                                                 | Assessment                                                                         |
+| ------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither-report-feedback.md) |
+| v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md) |
 
 Report scope: repo-focused filtered checklist run (v0.2.0).
 
 0 High · 11 Medium · 8 Low · 22 Informational
 
-| ID  | Finding               | Instances | Assessment                                                                                                          |
-| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| ID  | Finding               | Instances | Assessment                                                                                                                |
+| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
 | M-1 | `uninitialized-local` | 11        | False positive — extractors assign locals per selector branch; intentional zero-defaults for mint (`from`) / burn (`to`). |
-| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                                        |
-| I-1 | `assembly`            | 1         | Expected — ERC-7201 namespaced-storage slot pointer; informational.                                                 |
-| I-2 | `dead-code`           | 1         | False positive.                                                                                                     |
-| I-3 | `naming-convention`   | 20        | Style-only informational findings.                                                                                  |
+| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                                              |
+| I-1 | `assembly`            | 1         | Expected — ERC-7201 namespaced-storage slot pointer; informational.                                                       |
+| I-2 | `dead-code`           | 1         | False positive.                                                                                                           |
+| I-3 | `naming-convention`   | 20        | Style-only informational findings.                                                                                        |
 
 Changes vs v0.1.0: `reentrancy-no-eth` (Medium, 3) and `reentrancy-events` (Low, 2) are no longer reported; `uninitialized-local` rose 6 → 11 (covers the added `CrossChainMintBurnExtractor` and extended `MintBurnExtractor`).
 
