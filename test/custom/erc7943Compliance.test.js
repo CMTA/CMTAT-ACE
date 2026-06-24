@@ -12,6 +12,8 @@ const {
 const URWA_ID = '0x3edbb4c4';
 const ERC165_ID = '0x01ffc9a7';
 const INVALID_ID = '0xffffffff';
+// type(IPolicyProtected).interfaceId — advertised by the ACE PolicyProtectedBaseUpgradeable base.
+const POLICY_PROTECTED_ID = '0x79906df0';
 
 const PARAM_SPENDER = ethers.keccak256(ethers.toUtf8Bytes('spender'));
 const PARAM_FROM = ethers.keccak256(ethers.toUtf8Bytes('from'));
@@ -41,21 +43,25 @@ async function deployTransferValidationPolicy(policyEngineAddress, owner, ruleAd
  */
 describe('ERC-7943 (uRWA) conformance', function () {
   describe('ERC-165 interface id', function () {
-    it('Standard advertises uRWA + ERC-165 and rejects an invalid id', async function () {
+    it('Standard advertises uRWA + ERC-165 + IPolicyProtected and rejects an invalid id', async function () {
       const { admin } = await loadFixture(fixture);
       const pe = await deployPolicyEngine(true, admin.address);
       const cmtat = await deployCCTStandalone(admin.address, await pe.getAddress());
       expect(await cmtat.supportsInterface(URWA_ID)).to.equal(true);
       expect(await cmtat.supportsInterface(ERC165_ID)).to.equal(true);
+      // Forces the PolicyProtectedBaseUpgradeable.supportsInterface() operand of the `||` chain.
+      expect(await cmtat.supportsInterface(POLICY_PROTECTED_ID)).to.equal(true);
       expect(await cmtat.supportsInterface(INVALID_ID)).to.equal(false);
     });
 
-    it('Lite advertises uRWA + ERC-165 and rejects an invalid id', async function () {
+    it('Lite advertises uRWA + ERC-165 + IPolicyProtected and rejects an invalid id', async function () {
       const { admin } = await loadFixture(fixture);
       const pe = await deployPolicyEngine(true, admin.address);
       const cmtat = await deployCCTLiteStandalone(admin.address, await pe.getAddress());
       expect(await cmtat.supportsInterface(URWA_ID)).to.equal(true);
       expect(await cmtat.supportsInterface(ERC165_ID)).to.equal(true);
+      // Forces the PolicyProtectedBaseUpgradeable.supportsInterface() operand of the `||` chain.
+      expect(await cmtat.supportsInterface(POLICY_PROTECTED_ID)).to.equal(true);
       expect(await cmtat.supportsInterface(INVALID_ID)).to.equal(false);
     });
   });
