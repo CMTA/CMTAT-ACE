@@ -2,16 +2,16 @@
 
 ## Introduction
 
-**This project turns a CMTAT security token into a token whose compliance rules live in swappable on-chain policies that Chainlink ACE evaluates on every operation.** It lets a token issuer change _who can do what, and under which conditions_ (KYC/allowlists, sanctions screening, transfer and volume limits, trading-hours windows, pause, reserve-backed minting) by reconfiguring policies, **without redeploying or changing the token's business logic**.
+This project integrates a **CMTAT** security token with **Chainlink ACE** so that the token's compliance rules are defined in on-chain policies, which the policy engine evaluates on each protected operation. An issuer can adjust who can transact and under which conditions (KYC/allowlists, sanctions screening, transfer and volume limits, trading-hours windows, pause, reserve-backed minting) by reconfiguring those policies, rather than redeploying or modifying the token's business logic.
 
 ### The problem it solves
 
-Regulated tokens (**security tokens, real-world assets (RWA), and stablecoins**) must enforce compliance rules (eligibility, limits, freezes, pauses) that **change over time** as regulation, jurisdictions, or counterparties evolve. Baking those rules into the token means a contract upgrade or redeploy for every change, which is slow and risky. This integration moves the rules out of the token and into a policy engine, so compliance becomes a **configuration** concern instead of a code concern.
+Regulated tokens (security tokens, real-world assets (RWA), and stablecoins) need to enforce compliance rules such as eligibility, limits, freezes, and pauses, and those rules change over time as regulation, jurisdictions, or counterparties evolve. When the rules are embedded in the token, each change requires a contract upgrade or redeploy. This integration keeps the rules in a separate policy engine, so updating compliance is a configuration change rather than a code change.
 
 ### The two building blocks
 
 - **CMTAT (CMTA Token)** — an open security-token framework from the [Capital Markets and Technology Association](https://www.cmta.ch/). It provides the ERC-20 token plus compliance modules: conditional transfers, account freeze / enforcement (ERC-7943), forced transfer & recovery, pause, in-contract documents, cross-chain mint/burn, and lifecycle controls.
-- **Chainlink ACE (Automated Compliance Engine)** — a `PolicyEngine` that, for a protected function call, runs a configurable chain of **policies** (small contracts that approve or reject based on the call's parameters) and returns a decision. Policies are added, removed, and reordered by governance at runtime.
+- **Chainlink ACE ([Automated Compliance Engine](https://chain.link/automated-compliance-engine))** — a `PolicyEngine` that, for a protected function call, runs a configurable chain of **policies** (small contracts that approve or reject based on the call's parameters) and returns a decision. Policies are added, removed, and reordered by governance at runtime.
 
 ### How it works
 
@@ -211,7 +211,7 @@ Guidance for issuers:
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
 - `ERC20TransferFromExtractor` — Extractor that produces 4 parameters (`spender`, `from`, `to`, `amount`) for `transfer()` and `transferFrom()`
 - `CrossChainMintBurnExtractor` — Extractor that maps `crosschainMint` / `crosschainBurn` into the `[from, to, amount]` layout so the same `IRule` rules can screen cross-chain issuance/redemption
-- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version
+- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version. The `version()` view follows the ERC-3643 and ERC-8303 (Contract Version) convention; see [`doc/ERCSpecification/erc-8303.md`](./doc/ERCSpecification/erc-8303.md)
 
 ## Compliance Policies
 
