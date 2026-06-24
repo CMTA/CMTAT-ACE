@@ -210,6 +210,8 @@ Guidance for issuers:
 - `PolicyValidationModuleERC1404` (Lite) — ERC-1404 transfer restriction codes with PolicyEngine awareness
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
 - `ERC20TransferFromExtractor` — Extractor that produces 4 parameters (`spender`, `from`, `to`, `amount`) for `transfer()` and `transferFrom()`
+- `CrossChainMintBurnExtractor` — Extractor that maps `crosschainMint` / `crosschainBurn` into the `[from, to, amount]` layout so the same `IRule` rules can screen cross-chain issuance/redemption
+- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version
 
 ## Compliance Policies
 

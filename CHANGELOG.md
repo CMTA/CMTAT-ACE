@@ -46,6 +46,7 @@ Branch: `update-v3.3.0` (CMTAT v3.3.0 integration)
 - **Policy preflight check** (`scripts/preflight.js`, FEEDBACK H-2): reconstructs the effective `defaultAllow` and attachment state from on-chain events and exits non-zero if the token would be bricked, with a CLI and a PausePolicy-coverage warning.
 - **Compliance policy integration tests** for `SecureMintPolicy`, `VolumePolicy`, `MaxPolicy`, `VolumeRatePolicy`, `OnlyOwnerPolicy`, `IntervalPolicy`.
 - `RestrictedAddressRule` now emits `RestrictionUpdated` (deploy + `setRestricted`); `ZeroRuleAddress` custom error on `TransferValidationPolicy`.
+- `CCTVersionModule`: exposes the CMTAT-ACE integration release via `version()` (overrides CMTAT's `VersionModule`), reporting `0.2.0` on both variants.
 - Commit Message Policy added to `AGENTS.md` / `CLAUDE.md`.
 
 ### Changed

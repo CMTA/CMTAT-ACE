@@ -31,6 +31,8 @@ import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
 /* ==== Chainlink ACE === */
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
+import {CCTVersionModule} from "../CCTVersionModule.sol";
+import {VersionModule} from "CMTAT/modules/wrapper/core/VersionModule.sol";
 
 abstract contract CCTCommon is
     OwnableUpgradeable,
@@ -38,7 +40,8 @@ abstract contract CCTCommon is
     PolicyProtectedBaseUpgradeable,
     CMTATBaseCommon,
     CMTATBaseDocument,
-    CCIPModule
+    CCIPModule,
+    CCTVersionModule
 {
     function initialize(
         address admin,
@@ -175,6 +178,15 @@ abstract contract CCTCommon is
             _interfaceId == type(IERC7943Fungible).interfaceId ||
             ERC20CrossChainModule.supportsInterface(_interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(_interfaceId);
+    }
+
+    /**
+     * @inheritdoc CCTVersionModule
+     * @dev Resolves the diamond between CMTAT's {VersionModule} and {CCTVersionModule}; reports the
+     * CMTAT-ACE integration release version.
+     */
+    function version() public view virtual override(VersionModule, CCTVersionModule) returns (string memory version_) {
+        return CCTVersionModule.version();
     }
 
     /* ============ ERC-7943 (uRWA) check surface ============ */

@@ -10,6 +10,8 @@ import {PauseModule} from "CMTAT/modules/wrapper/core/PauseModule.sol";
 import {EnforcementModule} from "CMTAT/modules/wrapper/core/EnforcementModule.sol";
 import {IERC7943FungibleTransferError} from "CMTAT/interfaces/tokenization/draft-IERC7943.sol";
 import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
+import {CCTVersionModule} from "../CCTVersionModule.sol";
+import {VersionModule} from "CMTAT/modules/wrapper/core/VersionModule.sol";
 // Extensions
 import {
     ERC20EnforcementModule,
@@ -19,7 +21,8 @@ import {
 abstract contract CCTCMTATBasePolicyEngine is
     CMTATBaseAccessControl,
     ValidationModulePolicyEngine,
-    IERC7943FungibleTransferError
+    IERC7943FungibleTransferError,
+    CCTVersionModule
 {
     /*//////////////////////////////////////////////////////////////
                          INITIALIZER FUNCTION
@@ -177,5 +180,14 @@ abstract contract CCTCMTATBasePolicyEngine is
             interfaceId == type(IERC7943Fungible).interfaceId ||
             CMTATBaseAccessControl.supportsInterface(interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @inheritdoc CCTVersionModule
+     * @dev Resolves the diamond between CMTAT's {VersionModule} and {CCTVersionModule}; reports the
+     * CMTAT-ACE integration release version.
+     */
+    function version() public view virtual override(VersionModule, CCTVersionModule) returns (string memory version_) {
+        return CCTVersionModule.version();
     }
 }
