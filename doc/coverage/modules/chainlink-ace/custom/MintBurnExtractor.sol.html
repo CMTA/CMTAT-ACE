@@ -22,7 +22,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>6/6</span>
+        <span class='fraction'>9/9</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>11/11</span>
+        <span class='fraction'>19/19</span>
       </div>
     </div>
   </div>
@@ -94,7 +94,21 @@
 49
 50
 51
-52</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -127,22 +141,36 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-yes">21×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: BUSL-1.1
@@ -154,19 +182,21 @@ import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngi
 /**
  * @title MintBurnExtractor
  * @notice Extracts parameters from CMTAT mint and burn function calls.
- * @dev Mirrors ComplianceTokenMintBurnExtractor from @chainlink/ace but avoids
- *      the cross-package relative import of ComplianceTokenERC20 which is
- *      incompatible with Hardhat's module resolution. Selectors are inlined.
- *      Handles:
- *        - mint(address account, uint256 amount)       → 0x40c10f19
- *        - burnFrom(address account, uint256 amount)   → 0x79cc6790
- *        - burn(uint256 amount)                        → 0x42966c68
+ * @dev Emits both `account`/`amount` (used e.g. by SecureMintPolicy on mint) AND the transfer
+ *      layout `from`/`to`/`amount`, so the same IRule transfer-restriction rules used by
+ *      TransferValidationPolicy can also screen issuance/redemption (FEEDBACK.md H-1). A mint is
+ *      modelled as a transfer from address(0); a burn as a transfer to address(0):
+ *        - mint(address account, uint256 amount)     → from = 0,       to = account, amount  (0x40c10f19)
+ *        - burnFrom(address account, uint256 amount) → from = account, to = 0,       amount  (0x79cc6790)
+ *        - burn(uint256 amount)                       → from = sender,  to = 0,       amount  (0x42966c68)
  */
 contract MintBurnExtractor is IExtractor {
-    string public constant override typeAndVersion = "MintBurnExtractor 1.0.0";
+    string public constant override typeAndVersion = "MintBurnExtractor 1.1.0";
 &nbsp;
     bytes32 public constant PARAM_ACCOUNT = keccak256("account");
     bytes32 public constant PARAM_AMOUNT = keccak256("amount");
+    bytes32 public constant PARAM_FROM = keccak256("from");
+    bytes32 public constant PARAM_TO = keccak256("to");
 &nbsp;
     // mint(address,uint256)
     bytes4 private constant MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
@@ -180,19 +210,31 @@ contract MintBurnExtractor is IExtractor {
     ) external pure override returns (IPolicyEngine.Parameter[] memory) {
         address account;
         uint256 amount;
+        address from;
+        address to;
 &nbsp;
-        if (payload.selector == MINT_SELECTOR || payload.selector == BURN_FROM_SELECTOR) {
+        if (payload.selector == MINT_SELECTOR) {
             (account, amount) = abi.decode(payload.data, (address, uint256));
+            // mint: tokens flow to `account`; screen it as the recipient.
+            to = account;
+        } else if (payload.selector == BURN_FROM_SELECTOR) {
+            (account, amount) = abi.decode(payload.data, (address, uint256));
+            // burnFrom: tokens leave `account`; screen it as the holder.
+            from = account;
         } else if (payload.selector == BURN_SELECTOR) {
             account = payload.sender;
             (amount) = abi.decode(payload.data, (uint256));
+            // self-burn: tokens leave the caller.
+            from = account;
         } else {
             revert IPolicyEngine.UnsupportedSelector(payload.selector);
         }
 &nbsp;
-        IPolicyEngine.Parameter[] memory result = new IPolicyEngine.Parameter[](2);
+        IPolicyEngine.Parameter[] memory result = new IPolicyEngine.Parameter[](4);
         result[0] = IPolicyEngine.Parameter(PARAM_ACCOUNT, abi.encode(account));
         result[1] = IPolicyEngine.Parameter(PARAM_AMOUNT, abi.encode(amount));
+        result[2] = IPolicyEngine.Parameter(PARAM_FROM, abi.encode(from));
+        result[3] = IPolicyEngine.Parameter(PARAM_TO, abi.encode(to));
         return result;
     }
 }
@@ -202,7 +244,7 @@ contract MintBurnExtractor is IExtractor {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Jun 11 2026 15:44:25 GMT+0100 (British Summer Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jun 24 2026 12:41:09 GMT+0200 (Central European Summer Time)
 </div>
 </div>
 <script src="../../../prettify.js"></script>
