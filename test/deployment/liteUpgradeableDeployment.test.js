@@ -1,11 +1,6 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const {
-  loadFixture,
-  deployCCTLiteUpgradeable,
-  createLiteFixture,
-  createLiteFixtureWithSnapshot,
-} = require('../deploymentUtils');
+const { loadFixture, deployCCTLiteUpgradeable, createLiteFixture } = require('../deploymentUtils');
 
 // Reuse CMTAT common modules
 const PauseModuleCommon = require('../../submodules/CMTAT/test/common/PauseModuleCommon');
@@ -14,29 +9,31 @@ const ERC20BurnModuleCommon = require('../../submodules/CMTAT/test/common/ERC20B
 const ERC20BaseModuleCommon = require('../../submodules/CMTAT/test/common/ERC20BaseModuleCommon');
 const EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/EnforcementModuleCommon');
 const ERC20EnforcementModuleCommon = require('../../submodules/CMTAT/test/common/ERC20EnforcementModuleCommon');
-const VersionModuleCommon = require('../../submodules/CMTAT/test/common/VersionModuleCommon');
+const VersionModuleCommon = require('../common/CCTVersionModuleCommon');
 const ERC20CrossChainModuleCommon = require('../../submodules/CMTAT/test/common/ERC20CrossChainModuleCommon');
 const CCIPModuleCommon = require('../../submodules/CMTAT/test/common/CCIPModuleCommon');
 const ExtraInfoModuleCommon = require('../../submodules/CMTAT/test/common/ExtraInfoModuleCommon');
 const DocumentModuleCommon = require('../../submodules/CMTAT/test/common/DocumentModule/DocumentModuleCommon');
-const SnapshotModuleCommon = require('../common/cmtat/SnapshotModuleCommon');
-// Snapshot scheduling & global modules from CMTAT
-const SnapshotModuleCommonScheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonScheduling');
-const SnapshotModuleCommonRescheduling = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonRescheduling');
-const SnapshotModuleCommonUnschedule = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonUnschedule');
-const SnapshotModuleCommonGetNextSnapshot = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/SnapshotModuleCommonGetNextSnapshot');
-const SnapshotModuleMultiplePlannedTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleMultiplePlannedTest');
-const SnapshotModuleOnePlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleOnePlannedSnapshotTest');
-const SnapshotModuleZeroPlannedSnapshotTest = require('../../submodules/CMTAT/test/common/SnapshotModuleCommon/global/SnapshotModuleZeroPlannedSnapshot');
 
 const liteFixture = createLiteFixture(deployCCTLiteUpgradeable);
-const liteFixtureWithSnapshot = createLiteFixtureWithSnapshot(deployCCTLiteUpgradeable);
 
 describe('ComplianceTokenCMTATLiteUpgradeable', function () {
-  context('snapshotEngine = 0 (no snapshot suites)', function () {
+  context('CMTAT module suites', function () {
     beforeEach(async function () {
       Object.assign(this, await loadFixture(liteFixture));
       this.dontCheckTimestamp = true;
+      // The ACE Lite variant validates transfers through the PolicyEngine
+      // (ValidationModuleCore) and does NOT include ValidationModuleAllowance,
+      // so approvals are not gated on frozen addresses. Skip those two
+      // CMTAT edge-case tests, which do not apply to this variant.
+      if (
+        this.currentTest &&
+        ['testCannotApproveIfOwnerIsFrozen', 'testCannotApproveIfSpenderIsFrozen'].includes(
+          this.currentTest.title,
+        )
+      ) {
+        this.skip();
+      }
     });
 
     context('Re-initialization', function () {
@@ -54,8 +51,6 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
                 'CMTAT_info',
               ],
               policyEngineAddress,
-              ethers.ZeroAddress,
-              ethers.ZeroAddress,
             ),
         ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization');
       });
@@ -72,21 +67,5 @@ describe('ComplianceTokenCMTATLiteUpgradeable', function () {
     CCIPModuleCommon();
     ExtraInfoModuleCommon();
     DocumentModuleCommon();
-  });
-
-  context('snapshotEngine is set (snapshot suites)', function () {
-    beforeEach(async function () {
-      Object.assign(this, await loadFixture(liteFixtureWithSnapshot));
-      this.dontCheckTimestamp = true;
-    });
-
-    SnapshotModuleCommon(false);
-    SnapshotModuleCommonScheduling();
-    SnapshotModuleCommonRescheduling();
-    SnapshotModuleCommonUnschedule();
-    SnapshotModuleCommonGetNextSnapshot();
-    SnapshotModuleMultiplePlannedTest();
-    SnapshotModuleOnePlannedSnapshotTest();
-    SnapshotModuleZeroPlannedSnapshotTest();
   });
 });

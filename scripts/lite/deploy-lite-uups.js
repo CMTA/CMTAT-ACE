@@ -2,7 +2,7 @@
  * Script example - do not use it for production
  */
 const { ethers, upgrades } = require('hardhat');
-const { ZeroAddress, keccak256, toUtf8Bytes } = require('ethers');
+const { keccak256, toUtf8Bytes } = require('ethers');
 
 async function deployPolicyEngine(initialOwner) {
   const Factory = await ethers.getContractFactory('PolicyEngine');
@@ -30,8 +30,6 @@ async function main() {
 
   // To change - set to deployed engine addresses if needed
   const admin = isHardhatNetwork ? deployer.address : '0x1000000000000000000000000000000000000001';
-  const snapshotEngine = ZeroAddress;
-  const documentEngine = ZeroAddress;
   const ERC20Attributes = ['Security Token', 'ST', 8];
   const terms = {
     name: 'Token Terms v1',
@@ -53,14 +51,7 @@ async function main() {
   );
   const cmtat = await upgrades.deployProxy(
     Factory,
-    [
-      admin,
-      ERC20Attributes,
-      extraInformationAttributes,
-      policyEngineAddress,
-      snapshotEngine,
-      documentEngine,
-    ],
+    [admin, ERC20Attributes, extraInformationAttributes, policyEngineAddress],
     {
       initializer: 'initialize',
       unsafeAllow: ['missing-initializer', 'constructor'],

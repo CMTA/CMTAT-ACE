@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Policy} from "@chainlink/policy-management/core/Policy.sol";
 import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
-import {IRule} from "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
+import {IRule} from "../../../../submodules/RuleEngine/src/interfaces/IRule.sol";
 
 /**
  * @title TransferValidationPolicy
@@ -24,6 +24,8 @@ import {IRule} from "CMTAT/mocks/RuleEngine/interfaces/IRule.sol";
  */
 contract TransferValidationPolicy is Policy {
     error InvalidParametersLength(uint256 length);
+    /// @notice Thrown when a zero address is supplied as a rule.
+    error ZeroRuleAddress();
 
     string public constant override typeAndVersion = "TransferValidationPolicy 1.0.0";
     event RulesUpdated(uint256 previousCount, uint256 newCount);
@@ -52,7 +54,7 @@ contract TransferValidationPolicy is Policy {
             address[] memory ruleAddrs = abi.decode(parameters, (address[]));
             TransferValidationStorage storage $ = _getStorage();
             for (uint256 i = 0; i < ruleAddrs.length; ++i) {
-                require(ruleAddrs[i] != address(0), "Rule address cannot be zero");
+                require(ruleAddrs[i] != address(0), ZeroRuleAddress());
                 $.rules.push(IRule(ruleAddrs[i]));
             }
         }
@@ -67,7 +69,7 @@ contract TransferValidationPolicy is Policy {
         uint256 previousCount = $.rules.length;
         delete $.rules;
         for (uint256 i = 0; i < rules_.length; ++i) {
-            require(address(rules_[i]) != address(0), "Rule address cannot be zero");
+            require(address(rules_[i]) != address(0), ZeroRuleAddress());
             $.rules.push(rules_[i]);
         }
         emit RulesUpdated(previousCount, rules_.length);
@@ -92,6 +94,14 @@ contract TransferValidationPolicy is Policy {
      * @dev Supports both 3-param (transfer) and 4-param (transferFrom) layouts.
      *      With 4 parameters, uses detectTransferRestrictionFrom to also validate
      *      the spender.
+     *
+     *      Rules are checked with the view methods `detectTransferRestriction*` /
+     *      `messageForTransferRestriction` rather than the `IRule.transferred` hook:
+     *      `run` is `view` (the engine STATICCALLs it on both the `check()` preview and
+     *      the state-flow pre-check), whereas `transferred` is state-mutating in the
+     *      interface, so it cannot be called here and conceptually belongs in `postRun`.
+     *      `messageForTransferRestriction` only runs on the rejection branch (right before
+     *      reverting), so it adds no gas to passing transfers.
      */
     function run(
         address /* caller */,

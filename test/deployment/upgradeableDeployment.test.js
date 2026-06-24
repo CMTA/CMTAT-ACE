@@ -1,11 +1,6 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const {
-  loadFixture,
-  deployCCTUpgradeable,
-  createStandardFixture,
-  createStandardFixtureWithSnapshot,
-} = require('../deploymentUtils');
+const { loadFixture, deployCCTUpgradeable, createStandardFixture } = require('../deploymentUtils');
 
 // ACE-specific common modules
 const DeploymentCommon = require('../common/ace/DeploymentCommon');
@@ -16,10 +11,9 @@ const PolicyEngineCommon = require('../common/ace/PolicyEngineCommon');
 const CMTATModuleCommon = require('../common/cmtat/CMTATModuleCommon');
 
 const standardFixture = createStandardFixture(deployCCTUpgradeable);
-const standardFixtureWithSnapshot = createStandardFixtureWithSnapshot(deployCCTUpgradeable);
 
 describe('ComplianceTokenCMTATUpgradeable', function () {
-  context('snapshotEngine = 0 (no snapshot suites)', function () {
+  context('PolicyEngine + RBAC suites', function () {
     beforeEach(async function () {
       Object.assign(this, await loadFixture(standardFixture));
       this.dontCheckTimestamp = true;
@@ -39,8 +33,6 @@ describe('ComplianceTokenCMTATUpgradeable', function () {
                 'CMTAT_info',
               ],
               this.policyEngineAddress,
-              ethers.ZeroAddress,
-              ethers.ZeroAddress,
             ),
         ).to.be.revertedWithCustomError(this.cmtat, 'InvalidInitialization');
       });
@@ -51,14 +43,6 @@ describe('ComplianceTokenCMTATUpgradeable', function () {
     RBACPolicyCommon();
     CombinedPolicyCommon();
     PolicyEngineCommon();
-    CMTATModuleCommon(false);
-  });
-
-  context('snapshotEngine is set (snapshot suites)', function () {
-    beforeEach(async function () {
-      Object.assign(this, await loadFixture(standardFixtureWithSnapshot));
-      this.dontCheckTimestamp = true;
-    });
-    CMTATModuleCommon(true, false);
+    CMTATModuleCommon();
   });
 });

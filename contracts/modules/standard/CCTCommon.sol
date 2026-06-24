@@ -22,55 +22,43 @@ import {
     ERC20EnforcementModule,
     ERC20EnforcementModuleInternal
 } from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
-import {DocumentEngineModule, IERC1643} from "CMTAT/modules/wrapper/extensions/DocumentEngineModule.sol";
-import {SnapshotEngineModule} from "CMTAT/modules/wrapper/extensions/SnapshotEngineModule.sol";
+import {CMTATBaseDocument} from "CMTAT/modules/1_CMTATBaseDocument.sol";
+import {DocumentERC1643Module} from "CMTAT/modules/wrapper/extensions/DocumentERC1643Module.sol";
 /* = Interface = */
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
 /* ==== Chainlink ACE === */
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
+import {CCTVersionModule} from "../CCTVersionModule.sol";
+import {VersionModule} from "CMTAT/modules/wrapper/core/VersionModule.sol";
 
 abstract contract CCTCommon is
     OwnableUpgradeable,
     ERC20CrossChainModule,
     PolicyProtectedBaseUpgradeable,
     CMTATBaseCommon,
-    CCIPModule
+    CMTATBaseDocument,
+    CCIPModule,
+    CCTVersionModule
 {
     function initialize(
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) public virtual initializer {
-        _initialize(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine,
-            snapshotEngine_,
-            documentEngine_
-        );
+        _initialize(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
     }
 
     function _initialize(
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) internal virtual onlyInitializing {
-        __CMTAT_init(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine,
-            snapshotEngine_,
-            documentEngine_
-        );
+        __CMTAT_init(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine);
     }
 
     /**
@@ -80,9 +68,7 @@ abstract contract CCTCommon is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory ExtraInformationAttributes_,
-        address policyEngine,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine
     ) internal virtual onlyInitializing {
         __Ownable_init_unchained(admin);
         /* OpenZeppelin library */
@@ -99,10 +85,6 @@ abstract contract CCTCommon is
 
         /* Wrapper modules */
         __CMTAT_modules_init_unchained(ERC20Attributes_, ExtraInformationAttributes_);
-
-        /* Engine modules */
-        __SnapshotEngineModule_init_unchained(snapshotEngine_);
-        __DocumentEngineModule_init_unchained(documentEngine_);
     }
 
     /*
@@ -193,8 +175,91 @@ abstract contract CCTCommon is
         bytes4 _interfaceId
     ) public view virtual override(IERC165, ERC20CrossChainModule, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
+            _interfaceId == type(IERC7943Fungible).interfaceId ||
             ERC20CrossChainModule.supportsInterface(_interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(_interfaceId);
+    }
+
+    /**
+     * @inheritdoc CCTVersionModule
+     * @dev Resolves the diamond between CMTAT's {VersionModule} and {CCTVersionModule}; reports the
+     * CMTAT-ACE integration release version.
+     */
+    function version() public view virtual override(VersionModule, CCTVersionModule) returns (string memory version_) {
+        return CCTVersionModule.version();
+    }
+
+    /* ============ ERC-7943 (uRWA) check surface ============ */
+    /**
+     * @notice Account-level send eligibility (ERC-7943 `canSend`).
+     * @dev In the Standard (policy-authoritative) variant there is no on-chain account allowlist or
+     * account freeze on the token itself: send/receive eligibility is decided per-transfer by the
+     * PolicyEngine inside {canTransfer}. This therefore reports no token-level account restriction.
+     * MUST NOT revert and MUST NOT encode quantitative rules.
+     */
+    function canSend(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice Account-level receive eligibility (ERC-7943 `canReceive`). See {canSend}.
+     */
+    function canReceive(address /*account*/) public view virtual returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice Transfer-level authorization check (ERC-7943 `canTransfer`).
+     * @dev Combines the unfrozen-balance check, the account-level {canSend}/{canReceive} checks, and
+     * the PolicyEngine's permissioned rules (queried via the read-only `check`). MUST NOT revert.
+     */
+    function canTransfer(address from, address to, uint256 value) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transfer.selector, from, abi.encode(to, value));
+    }
+
+    /**
+     * @notice Spender-aware transfer-level authorization check (mirrors {canTransfer} for `transferFrom`).
+     */
+    function canTransferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual returns (bool) {
+        (bool unfrozenOk, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!unfrozenOk || !canSend(from) || !canReceive(to)) {
+            return false;
+        }
+        return _canTransferWithPolicyEngine(IERC20.transferFrom.selector, spender, abi.encode(from, to, value));
+    }
+
+    /**
+     * @dev Read-only PolicyEngine evaluation. `check` reverts on rejection (preserving the reason);
+     * here we only need a boolean, so a revert is mapped to `false`.
+     * @dev The PolicyEngine is assumed to be set (non-zero): in the Standard variant it is validated
+     * non-zero at initialization and on every `attachPolicyEngine` (via `_validatePolicyEngine`), and
+     * detaching is not allowed, so any caller of this function always runs with an engine attached.
+     * A variant that permits a zero engine must perform the zero-address check before calling this.
+     */
+    function _canTransferWithPolicyEngine(
+        bytes4 selector,
+        address sender,
+        bytes memory data
+    ) internal view virtual returns (bool) {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        try
+            policyEngine_.check(
+                IPolicyEngine.Payload({selector: selector, sender: sender, data: data, context: getContext()})
+            )
+        {
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /* ==== Mint and Burn Operations ==== */
@@ -253,7 +318,7 @@ abstract contract CCTCommon is
      * @custom:access-control
      * - the caller must have the `DOCUMENT_ROLE`.
      */
-    function _authorizeDocumentManagement() internal virtual override(DocumentEngineModule) runPolicy {}
+    function _authorizeDocumentManagement() internal virtual override(DocumentERC1643Module) runPolicy {}
 
     /**
      * @custom:access-control
@@ -272,12 +337,6 @@ abstract contract CCTCommon is
      * - the caller must have the `DEFAULT_ADMIN_ROLE`.
      */
     function _authorizeForcedTransfer() internal virtual override(ERC20EnforcementModule) runPolicy {}
-
-    /**
-     * @custom:access-control
-     * - the caller must have the `SNAPSHOOTER_ROLE`.
-     */
-    function _authorizeSnapshots() internal virtual override(SnapshotEngineModule) runPolicy {}
 
     /**
      * @custom:access-control
@@ -309,13 +368,4 @@ abstract contract CCTCommon is
      * - We don't allow token holder to burn their own tokens if they don't have this role.
      */
     function _authorizeSelfBurn() internal virtual override(ERC20CrossChainModule) runPolicy {}
-
-    /* ==== ERC-20 OpenZeppelin ==== */
-    function _update(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override(ERC20Upgradeable, CMTATBaseCommon) {
-        return CMTATBaseCommon._update(from, to, amount);
-    }
 }

@@ -17,6 +17,16 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
      */
     string internal constant TEXT_TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE =
         "AddrFrom:insufficientActiveBalance";
+
+    /**
+     * @notice ERC-1404 restriction code returned when the ACE PolicyEngine rejects the transfer.
+     * @dev `7` is the next code after the CMTAT `REJECTED_CODE_BASE` enum (which occupies 0..6), so
+     * it does not collide with the module-level codes. Returned by {detectTransferRestriction} /
+     * {detectTransferRestrictionFrom} when the module checks pass but the PolicyEngine
+     * (KYC/sanctions/limits/...) would reject.
+     */
+    uint8 public constant TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE = 7;
+    string internal constant TEXT_TRANSFER_REJECTED_BY_POLICY_ENGINE = "PolicyEngine:transferRejected";
     /*//////////////////////////////////////////////////////////////
                             PUBLIC/EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -32,9 +42,53 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
             uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE)
         ) {
             return TEXT_TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE;
+        } else if (restrictionCode == TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE) {
+            return TEXT_TRANSFER_REJECTED_BY_POLICY_ENGINE;
         } else {
             return PolicyValidationModuleERC1404.messageForTransferRestriction(restrictionCode);
         }
+    }
+
+    /**
+     * @notice ERC-1404 transfer-restriction code, made PolicyEngine-aware.
+     * @dev Runs the CMTAT module checks first (pause/deactivate/freeze/active-balance); if those
+     * pass, consults the ACE PolicyEngine and returns {TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE}
+     * (7) when the engine would reject. Never reverts: the engine `check` is wrapped in
+     * try/catch, so this stays a valid (non-reverting) ERC-1404 view.
+     */
+    function detectTransferRestriction(
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual override(PolicyValidationModuleERC1404) returns (uint8 code) {
+        code = PolicyValidationModuleERC1404.detectTransferRestriction(from, to, value);
+        if (code != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return code;
+        }
+        if (!_canTransferWithPolicyEngine(from, to, value)) {
+            return TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE;
+        }
+        return code;
+    }
+
+    /**
+     * @notice ERC-1404 transferFrom restriction code, made PolicyEngine-aware (spender included).
+     * @dev See {detectTransferRestriction}; uses the `transferFrom` policy path with `spender`.
+     */
+    function detectTransferRestrictionFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) public view virtual override(PolicyValidationModuleERC1404) returns (uint8 code) {
+        code = PolicyValidationModuleERC1404.detectTransferRestrictionFrom(spender, from, to, value);
+        if (code != uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_OK)) {
+            return code;
+        }
+        if (!_canTransferFromWithPolicyEngine(spender, from, to, value)) {
+            return TRANSFER_REJECTED_BY_POLICY_ENGINE_CODE;
+        }
+        return code;
     }
 
     /**

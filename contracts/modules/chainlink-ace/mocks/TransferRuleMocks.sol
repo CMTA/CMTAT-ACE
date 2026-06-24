@@ -17,6 +17,9 @@ contract MaxAmountRule is IRule {
     uint256 public immutable maxAmount;
     uint8 constant AMOUNT_TOO_HIGH = 13;
 
+    /// @notice Thrown by the `transferred` enforcement hook when the rule rejects a transfer.
+    error MaxAmountRule_InvalidTransfer(address from, address to, uint256 value, uint8 code);
+
     constructor(uint256 maxAmount_) {
         maxAmount = maxAmount_;
     }
@@ -51,14 +54,19 @@ contract MaxAmountRule is IRule {
         return canTransfer(from, to, amount);
     }
 
-    function transferred(address /* from */, address /* to */, uint256 /* value */) external pure override {}
+    /**
+     * @notice Enforcement hook invoked by the token during a transfer.
+     * @dev Reverts when the rule rejects the transfer, mirroring CMTAT RuleEngine semantics.
+     */
+    function transferred(address from, address to, uint256 value) external view override {
+        uint8 code = detectTransferRestriction(from, to, value);
+        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), MaxAmountRule_InvalidTransfer(from, to, value, code));
+    }
 
-    function transferred(
-        address /* spender */,
-        address /* from */,
-        address /* to */,
-        uint256 /* value */
-    ) external pure override {}
+    function transferred(address spender, address from, address to, uint256 value) external view override {
+        uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
+        require(code == uint8(REJECTED_CODE_BASE.TRANSFER_OK), MaxAmountRule_InvalidTransfer(from, to, value, code));
+    }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IRule).interfaceId;
@@ -81,11 +89,20 @@ contract RestrictedAddressRule is IRule {
     uint8 constant FROM_RESTRICTED = 14;
     uint8 constant TO_RESTRICTED = 15;
 
+    /// @notice Emitted whenever an account's restricted status is set (incl. initial list at deploy).
+    event RestrictionUpdated(address indexed account, bool restricted);
+
+    /// @notice Thrown when a non-owner calls an owner-restricted function.
+    error OnlyOwner();
+
+    /// @notice Thrown by the `transferred` enforcement hook when the rule rejects a transfer.
+    error RestrictedAddressRule_InvalidTransfer(address from, address to, uint256 value, uint8 code);
+
     mapping(address => bool) public restricted;
     address public immutable owner;
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "only owner");
+        require(msg.sender == owner, OnlyOwner());
         _;
     }
 
@@ -93,11 +110,13 @@ contract RestrictedAddressRule is IRule {
         owner = msg.sender;
         for (uint256 i = 0; i < restricted_.length; ++i) {
             restricted[restricted_[i]] = true;
+            emit RestrictionUpdated(restricted_[i], true);
         }
     }
 
     function setRestricted(address account, bool status) external onlyOwner {
         restricted[account] = status;
+        emit RestrictionUpdated(account, status);
     }
 
     function detectTransferRestriction(
@@ -132,14 +151,25 @@ contract RestrictedAddressRule is IRule {
         return canTransfer(from, to, amount);
     }
 
-    function transferred(address /* from */, address /* to */, uint256 /* value */) external pure override {}
+    /**
+     * @notice Enforcement hook invoked by the token during a transfer.
+     * @dev Reverts when either party is restricted, mirroring CMTAT RuleEngine semantics.
+     */
+    function transferred(address from, address to, uint256 value) external view override {
+        uint8 code = detectTransferRestriction(from, to, value);
+        require(
+            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
+            RestrictedAddressRule_InvalidTransfer(from, to, value, code)
+        );
+    }
 
-    function transferred(
-        address /* spender */,
-        address /* from */,
-        address /* to */,
-        uint256 /* value */
-    ) external pure override {}
+    function transferred(address spender, address from, address to, uint256 value) external view override {
+        uint8 code = detectTransferRestrictionFrom(spender, from, to, value);
+        require(
+            code == uint8(REJECTED_CODE_BASE.TRANSFER_OK),
+            RestrictedAddressRule_InvalidTransfer(from, to, value, code)
+        );
+    }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IRule).interfaceId;

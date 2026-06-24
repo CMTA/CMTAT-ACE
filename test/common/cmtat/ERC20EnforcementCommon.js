@@ -70,7 +70,17 @@ function ERC20EnforcementCommon() {
       await this.cmtat
         .connect(this.admin)
         ['freezePartialTokens(address,uint256)'](this.address1, 30n);
-      expect(await this.cmtat.getActiveBalanceOf(this.address1)).to.equal(70n);
+      // CMTAT only exposes getActiveBalanceOf on ERC-7551 reasoned-enforcement
+      // tokens; otherwise the active balance is balance minus frozen tokens.
+      let activeBalance;
+      if (this.cmtat.interface.hasFunction('getActiveBalanceOf')) {
+        activeBalance = await this.cmtat.getActiveBalanceOf(this.address1);
+      } else {
+        const balance = await this.cmtat.balanceOf(this.address1);
+        const frozen = await this.cmtat.getFrozenTokens(this.address1);
+        activeBalance = balance - frozen;
+      }
+      expect(activeBalance).to.equal(70n);
     });
   });
 }

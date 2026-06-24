@@ -2,15 +2,16 @@
 
 pragma solidity ^0.8.20;
 
-import {CMTATBaseCommon, CMTATBaseAccessControl} from "CMTAT/modules/1_CMTATBaseAccessControl.sol";
+import {CMTATBaseCommon, CMTATBaseAccessControl} from "CMTAT/modules/2_CMTATBaseAccessControl.sol";
 import {PolicyProtectedBaseUpgradeable} from "@chainlink/policy-management/core/PolicyProtectedBaseUpgradeable.sol";
 import {ICMTATConstructor} from "CMTAT/interfaces/technical/ICMTATConstructor.sol";
-import {ISnapshotEngine} from "CMTAT/interfaces/engine/ISnapshotEngine.sol";
-import {IERC1643} from "CMTAT/interfaces/tokenization/draft-IERC1643.sol";
 import {ValidationModulePolicyEngine} from "./ValidationModulePolicyEngine.sol";
 import {PauseModule} from "CMTAT/modules/wrapper/core/PauseModule.sol";
 import {EnforcementModule} from "CMTAT/modules/wrapper/core/EnforcementModule.sol";
 import {IERC7943FungibleTransferError} from "CMTAT/interfaces/tokenization/draft-IERC7943.sol";
+import {IERC7943Fungible} from "../../interfaces/IERC7943Fungible.sol";
+import {CCTVersionModule} from "../CCTVersionModule.sol";
+import {VersionModule} from "CMTAT/modules/wrapper/core/VersionModule.sol";
 // Extensions
 import {
     ERC20EnforcementModule,
@@ -20,7 +21,8 @@ import {
 abstract contract CCTCMTATBasePolicyEngine is
     CMTATBaseAccessControl,
     ValidationModulePolicyEngine,
-    IERC7943FungibleTransferError
+    IERC7943FungibleTransferError,
+    CCTVersionModule
 {
     /*//////////////////////////////////////////////////////////////
                          INITIALIZER FUNCTION
@@ -41,18 +43,9 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) public virtual initializer {
-        _initialize(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine_,
-            snapshotEngine_,
-            documentEngine_
-        );
+        _initialize(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine_);
     }
 
     /**
@@ -62,18 +55,9 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) internal virtual onlyInitializing {
-        __CMTAT_init(
-            admin,
-            ERC20Attributes_,
-            extraInformationAttributes_,
-            policyEngine_,
-            snapshotEngine_,
-            documentEngine_
-        );
+        __CMTAT_init(admin, ERC20Attributes_, extraInformationAttributes_, policyEngine_);
     }
 
     /**
@@ -83,9 +67,7 @@ abstract contract CCTCMTATBasePolicyEngine is
         address admin,
         ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
         ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_,
-        address policyEngine_,
-        ISnapshotEngine snapshotEngine_,
-        IERC1643 documentEngine_
+        address policyEngine_
     ) internal virtual onlyInitializing {
         /* OpenZeppelin library */
         // OZ init_unchained functions are called firstly due to inheritance
@@ -100,10 +82,6 @@ abstract contract CCTCMTATBasePolicyEngine is
         /* Wrapper modules */
         __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
 
-        /* Engine modules */
-        __SnapshotEngineModule_init_unchained(snapshotEngine_);
-        __DocumentEngineModule_init_unchained(documentEngine_);
-
         /* Chainlink-ACE policy module */
         __PolicyProtectedBase_init_unchained(policyEngine_);
     }
@@ -116,17 +94,6 @@ abstract contract CCTCMTATBasePolicyEngine is
     ) internal virtual onlyInitializing {
         // Note that the Openzeppelin functions name() and symbol() are overriden in ERC20BaseModule
         __ERC20_init_unchained(ERC20Attributes_.name, ERC20Attributes_.symbol);
-    }
-
-    /*
-     * @dev CMTAT wrapper modules
-     */
-    function __CMTAT_modules_init_unchained(
-        address admin,
-        ICMTATConstructor.ERC20Attributes memory ERC20Attributes_,
-        ICMTATConstructor.ExtraInformationAttributes memory extraInformationAttributes_
-    ) internal virtual onlyInitializing {
-        __CMTAT_commonModules_init_unchained(admin, ERC20Attributes_, extraInformationAttributes_);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -167,6 +134,22 @@ abstract contract CCTCMTATBasePolicyEngine is
 
     function _authorizeAttachPolicyEngine(address) internal virtual override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
+    /**
+     * @notice Permit detaching the PolicyEngine (setting it to the zero address).
+     * @dev The Lite variant keeps CMTAT role-based access control and uses the PolicyEngine only for
+     * transfer validation, so the engine is optional. Relaxing the base non-zero requirement lets an
+     * admin detach it: ACE policy validation is then disabled while CMTAT's native validation (pause,
+     * enforcement, allowlist, ...) stays in force, and the transfer path already treats a zero engine
+     * as "no policy enforcement" (see {ValidationModulePolicyEngine}).
+     *
+     * The Standard variant deliberately does NOT override this: its access control is
+     * policy-authoritative (every privileged operation is `runPolicy`-gated), so a zero engine would
+     * brick the token, and the base non-zero requirement must hold.
+     */
+    // Empty on purpose: overriding the base with no body drops its `require(engine != 0)` check,
+    // which is what allows the engine to be detached (set to the zero address) on Lite.
+    function _validatePolicyEngine(address) internal virtual override(PolicyProtectedBaseUpgradeable) {}
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL/PRIVATE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -194,7 +177,17 @@ abstract contract CCTCMTATBasePolicyEngine is
         bytes4 interfaceId
     ) public view virtual override(CMTATBaseAccessControl, PolicyProtectedBaseUpgradeable) returns (bool) {
         return
+            interfaceId == type(IERC7943Fungible).interfaceId ||
             CMTATBaseAccessControl.supportsInterface(interfaceId) ||
             PolicyProtectedBaseUpgradeable.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @inheritdoc CCTVersionModule
+     * @dev Resolves the diamond between CMTAT's {VersionModule} and {CCTVersionModule}; reports the
+     * CMTAT-ACE integration release version.
+     */
+    function version() public view virtual override(VersionModule, CCTVersionModule) returns (string memory version_) {
+        return CCTVersionModule.version();
     }
 }

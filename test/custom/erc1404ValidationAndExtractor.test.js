@@ -142,13 +142,22 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       };
 
       const params = await this.extractor.extract(payload);
-      expect(params.length).to.equal(2);
+      expect(params.length).to.equal(4);
       expect(params[0].name).to.equal(ethers.keccak256(ethers.toUtf8Bytes('account')));
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[0].value)[0]).to.equal(
         this.address1.address,
       );
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
         123n,
+      );
+      // mint is screened as a transfer from 0 to the recipient
+      expect(params[2].name).to.equal(ethers.keccak256(ethers.toUtf8Bytes('from')));
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[2].value)[0]).to.equal(
+        ethers.ZeroAddress,
+      );
+      expect(params[3].name).to.equal(ethers.keccak256(ethers.toUtf8Bytes('to')));
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[3].value)[0]).to.equal(
+        this.address1.address,
       );
     });
 
@@ -170,6 +179,13 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
         50n,
       );
+      // burnFrom is screened as a transfer from the holder to 0
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[2].value)[0]).to.equal(
+        this.address2.address,
+      );
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[3].value)[0]).to.equal(
+        ethers.ZeroAddress,
+      );
     });
 
     it('uses sender as account for burn(uint256)', async function () {
@@ -186,6 +202,13 @@ describe('ERC1404 validation and MintBurnExtractor coverage', function () {
       );
       expect(ethers.AbiCoder.defaultAbiCoder().decode(['uint256'], params[1].value)[0]).to.equal(
         77n,
+      );
+      // self-burn is screened as a transfer from the caller to 0
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[2].value)[0]).to.equal(
+        this.address3.address,
+      );
+      expect(ethers.AbiCoder.defaultAbiCoder().decode(['address'], params[3].value)[0]).to.equal(
+        ethers.ZeroAddress,
       );
     });
 
