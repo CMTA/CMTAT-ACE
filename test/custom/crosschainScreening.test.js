@@ -121,3 +121,51 @@ describe('Cross-chain mint/burn screening (H-1)', function () {
       .reverted;
   });
 });
+
+/**
+ * Direct unit tests for CrossChainMintBurnExtractor.extract(): exercise both selector branches and
+ * the unsupported-selector revert, which the end-to-end screening tests above do not reach.
+ */
+describe('CrossChainMintBurnExtractor.extract() (unit)', function () {
+  const coder = ethers.AbiCoder.defaultAbiCoder();
+  const ACCOUNT = '0x00000000000000000000000000000000000000A1';
+
+  function payload(selector, data) {
+    return { selector, sender: ethers.ZeroAddress, data, context: '0x' };
+  }
+
+  beforeEach(async function () {
+    this.extractor = await ethers.deployContract('CrossChainMintBurnExtractor');
+    this.mintSelector = ethers.id('crosschainMint(address,uint256)').slice(0, 10);
+    this.burnSelector = ethers.id('crosschainBurn(address,uint256)').slice(0, 10);
+  });
+
+  it('maps crosschainMint to (from = 0, to = recipient, amount)', async function () {
+    const data = coder.encode(['address', 'uint256'], [ACCOUNT, 100n]);
+    const params = await this.extractor.extract(payload(this.mintSelector, data));
+
+    expect(params[0].name).to.equal(PARAM_FROM);
+    expect(coder.decode(['address'], params[0].value)[0]).to.equal(ethers.ZeroAddress);
+    expect(params[1].name).to.equal(PARAM_TO);
+    expect(coder.decode(['address'], params[1].value)[0]).to.equal(ethers.getAddress(ACCOUNT));
+    expect(params[2].name).to.equal(PARAM_AMOUNT);
+    expect(coder.decode(['uint256'], params[2].value)[0]).to.equal(100n);
+  });
+
+  it('maps crosschainBurn to (from = holder, to = 0, amount)', async function () {
+    const data = coder.encode(['address', 'uint256'], [ACCOUNT, 50n]);
+    const params = await this.extractor.extract(payload(this.burnSelector, data));
+
+    expect(coder.decode(['address'], params[0].value)[0]).to.equal(ethers.getAddress(ACCOUNT));
+    expect(coder.decode(['address'], params[1].value)[0]).to.equal(ethers.ZeroAddress);
+    expect(coder.decode(['uint256'], params[2].value)[0]).to.equal(50n);
+  });
+
+  it('reverts UnsupportedSelector for an unknown selector', async function () {
+    const data = coder.encode(['address', 'uint256'], [ACCOUNT, 1n]);
+    const badSelector = ethers.id('foo(uint256)').slice(0, 10);
+    await expect(this.extractor.extract(payload(badSelector, data)))
+      .to.be.revertedWithCustomError(this.extractor, 'UnsupportedSelector')
+      .withArgs(badSelector);
+  });
+});
