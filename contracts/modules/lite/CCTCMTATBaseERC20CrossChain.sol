@@ -10,6 +10,7 @@ import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/co
 import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 
 abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModule, CCTCMTATBaseERC1404 {
     /* ============  State Functions ============ */
@@ -93,6 +94,51 @@ abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModu
     ) public virtual override(ERC20BurnModule) {
         clearContext();
         ERC20BurnModule.batchBurn(accounts, values);
+    }
+
+    /* ==== burnAndMint: screen each leg under its canonical selector ==== */
+    // mint(address,uint256)  — issuance leg recipient
+    bytes4 private constant _MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
+    // burn(address,uint256)  — redemption leg holder
+    bytes4 private constant _BURN_SELECTOR = bytes4(keccak256("burn(address,uint256)"));
+
+    /**
+     * @notice Atomic burn-then-mint (e.g. reissuance), screened per leg.
+     * @dev `burnAndMint` is a multiplexer: its OWN selector is not wired to the issuance/redemption
+     * policies, and {_transferred} (reached by the inner burn/mint via `_update`) would otherwise run the
+     * engine under the `burnAndMint` selector — skipping the `IRule` screening under `defaultAllow = true`
+     * (NM-7). Mirroring Chainlink ACE's per-item pattern, we explicitly run the PolicyEngine for the
+     * redemption leg under `burn(address,uint256)` and the issuance leg under `mint(address,uint256)`, each
+     * with an empty context (a multiplexer is not a single context-bearing call; see the batch overrides /
+     * NM-6), BEFORE delegating. The inner burn/mint still perform the CMTAT module checks
+     * (pause/freeze/active-balance); under `defaultAllow = true` their `burnAndMint`-selector engine run is a
+     * no-op, so the explicit leg screening is authoritative. Under `defaultAllow = false` the inner run
+     * reverts (unwired selector), i.e. `burnAndMint` fails closed — use the single-op `burn`/`mint` paths.
+     */
+    function burnAndMint(
+        address from,
+        address to,
+        uint256 amountToBurn,
+        uint256 amountToMint,
+        bytes calldata data
+    ) public virtual override(CMTATBaseCommon) {
+        clearContext();
+        _runIssuanceRedemptionPolicy(_BURN_SELECTOR, abi.encode(from, amountToBurn));
+        _runIssuanceRedemptionPolicy(_MINT_SELECTOR, abi.encode(to, amountToMint));
+        CMTATBaseCommon.burnAndMint(from, to, amountToBurn, amountToMint, data);
+    }
+
+    /**
+     * @dev Run the attached PolicyEngine for a single issuance/redemption leg under its canonical selector
+     * with an empty context. No-op when no engine is attached (Lite allows a detached engine).
+     */
+    function _runIssuanceRedemptionPolicy(bytes4 selector, bytes memory data) internal virtual {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        if (address(policyEngine_) != address(0)) {
+            policyEngine_.run(
+                IPolicyEngine.Payload({selector: selector, sender: _msgSender(), data: data, context: ""})
+            );
+        }
     }
 
     /**
