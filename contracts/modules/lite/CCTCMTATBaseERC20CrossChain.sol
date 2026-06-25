@@ -6,8 +6,8 @@ import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossCha
 import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
 import {CCTCMTATBaseERC1404} from "./CCTCMTATBaseERC1404.sol";
 import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
-import {ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
-import {ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
+import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -38,6 +38,63 @@ abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModu
     ) public virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (bool) {
         return CMTATBaseCommon.transferFrom(from, to, value);
     }
+
+    /* ==== Batch operations: run the PolicyEngine per item with EMPTY context ==== */
+    /**
+     * @dev The per-sender PolicyEngine `context` is a single-call concept (it is read and cleared once around a
+     * single operation by {_transferred}). Chainlink ACE's reference tokens screen each *batch* item with an
+     * empty context (never the ambient stored context). We mirror that here by clearing the caller's context
+     * before the batch runs, so every item's {_transferred} evaluates the engine with an empty context. This
+     * avoids the mid-batch asymmetry where the first item consumes the context and the remaining items revert
+     * under a context-dependent policy, while leaving single-operation ambient context (and its clear-once)
+     * untouched. A batch + context-dependent policy is therefore intentionally unsupported (use the single-op
+     * path for context-bearing calls).
+     */
+    function batchMint(
+        address[] calldata accounts,
+        uint256[] calldata values
+    ) public virtual override(ERC20MintModule) {
+        clearContext();
+        ERC20MintModule.batchMint(accounts, values);
+    }
+
+    /**
+     * @inheritdoc ERC20MintModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchTransfer(
+        address[] calldata tos,
+        uint256[] calldata values
+    ) public virtual override(ERC20MintModule) returns (bool success_) {
+        clearContext();
+        return ERC20MintModule.batchTransfer(tos, values);
+    }
+
+    /**
+     * @inheritdoc ERC20BurnModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchBurn(
+        address[] calldata accounts,
+        uint256[] calldata values,
+        bytes memory data
+    ) public virtual override(ERC20BurnModule) {
+        clearContext();
+        ERC20BurnModule.batchBurn(accounts, values, data);
+    }
+
+    /**
+     * @inheritdoc ERC20BurnModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchBurn(
+        address[] calldata accounts,
+        uint256[] calldata values
+    ) public virtual override(ERC20BurnModule) {
+        clearContext();
+        ERC20BurnModule.batchBurn(accounts, values);
+    }
+
     /**
      * @dev Check if the mint is valid
      * @dev Delegates to CMTAT's {CMTATBaseCommon._mintOverride} (which runs `_checkTransferred` then the

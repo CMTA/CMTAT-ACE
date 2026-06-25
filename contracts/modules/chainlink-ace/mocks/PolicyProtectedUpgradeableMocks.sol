@@ -12,6 +12,10 @@ contract MockPolicyEngine is IPolicyEngine {
     uint256 public attachCalls;
     uint256 public detachCalls;
     bool public detachShouldRevert;
+    /// @notice Number of {run} calls, and the context seen on the FIRST one — used to verify that batch
+    /// operations screen every item (including the first) with an empty context.
+    uint256 public runCount;
+    bytes public firstRunContext;
 
     function setDetachShouldRevert(bool value) external {
         detachShouldRevert = value;
@@ -31,6 +35,10 @@ contract MockPolicyEngine is IPolicyEngine {
     }
 
     function run(Payload calldata payload) external override {
+        if (runCount == 0) {
+            firstRunContext = payload.context;
+        }
+        runCount++;
         lastPayload = payload;
     }
 
