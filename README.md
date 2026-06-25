@@ -268,12 +268,42 @@ It supports two extractor layouts:
 | `ERC20TransferExtractor`     | `[from, to, amount]`          | Calls `detectTransferRestriction(from, to, amount)`              |
 | `ERC20TransferFromExtractor` | `[spender, from, to, amount]` | Calls `detectTransferRestrictionFrom(spender, from, to, amount)` |
 
+### `run` vs `postRun`: view validation and stateful enforcement
+
+CMTAT's native flow calls only `IRule.transferred(...)` on each rule during a transfer (enforcement **and** any
+state update happen there); `detectTransferRestriction*` is the read-only preview. ACE cannot fuse the two,
+because the engine reuses the policy's `run()` for **both** the read-only preview (`check()`, which is
+STATICCALLed by `canTransfer` / ERC-1404 `detectTransferRestriction` / off-chain simulations) and the state-flow
+pre-check. A STATICCALL forbids state writes, so `run()` must be `view`. `TransferValidationPolicy` therefore
+splits the work:
+
+| Hook | When the PolicyEngine calls it | What it does |
+| ---- | ------------------------------ | ------------ |
+| **`run`** (`view`) | on every `check()` **and** every `run()` (state) | validates with the view `detectTransferRestriction*`; reverts `PolicyRejected` if any rule returns a non-zero code |
+| **`postRun`** (state) | **only** after a successful `run` on the **state** path (`run(payload)`); **never** on `check()` | calls each rule's state-mutating **`transferred(...)`** hook — this advances **stateful** rules (rolling-window volume caps, per-period counters, conditional rules) and applies their on-chain enforcement |
+
+Consequences:
+
+- **The view check in `run` is required, not redundant.** Without it, `canTransfer` / `detectTransferRestriction`
+  would only run a no-op preview and report a transfer as allowed even when it would revert — breaking the
+  ERC-7943 / ERC-1404 view contract and any wallet/AMM/custodian that simulates via `check()`.
+- **Stateful rules are enforced via `postRun`/`transferred`**, exactly mirroring CMTAT's write path
+  (`RuleEngine.transferred` → `rule.transferred` per rule). `postRun` runs once per **executed** transfer, never
+  on a preview, so a `canTransfer` simulation has no side effects.
+- For correct behavior a rule's `detectTransferRestriction*` and `transferred` should be **consistent** (the CMTA
+  Rules library rules are): `run` then provides an accurate preview/early veto and `postRun` the authoritative
+  state-path enforcement. The integration applies **both**, so it is never weaker than CMTAT and works whether a
+  rule's logic lives in `detect*`, in `transferred`, or in both.
+
 ### Mock rules
 
-Two mock `IRule` implementations are provided in `contracts/modules/chainlink-ace/mocks/TransferRuleMocks.sol` for testing and demonstration:
+Mock `IRule` implementations are provided in `contracts/modules/chainlink-ace/mocks/TransferRuleMocks.sol` for
+testing and demonstration:
 
-- **`MaxAmountRule`** — Rejects transfers where the amount exceeds a configurable maximum (restriction code `13`)
-- **`RestrictedAddressRule`** — Rejects transfers involving addresses on a configurable restricted list (codes `14`/`15` for sender/recipient)
+- **`MaxAmountRule`** — Rejects transfers where the amount exceeds a configurable maximum (restriction code `13`). Stateless.
+- **`RestrictedAddressRule`** — Rejects transfers involving addresses on a configurable restricted list (codes `14`/`15` for sender/recipient). Stateless.
+- **`CumulativeCapRule`** — **Stateful**: caps the cumulative amount each sender may send; the `sent[from]` counter is advanced by `transferred` (state path) and read by `detect*`. Demonstrates that stateful enforcement requires `postRun`/`transferred` (the NM-2 path).
+- **`TransferredEnforcedCapRule`** — **Stateful**: `detect*` is permissive (always OK) and enforcement lives **solely** in `transferred`, exactly as CMTAT's RuleEngine does — proving `postRun`/`transferred` is an authoritative enforcer, not just a state-updater.
 
 ### Setup
 
