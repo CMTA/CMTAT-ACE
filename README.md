@@ -50,6 +50,7 @@ Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and th
 - [Policy preflight check](#policy-preflight-check)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
+- [Security Considerations](#security-considerations)
 - [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
 
 ## Deployment versions
@@ -672,6 +673,43 @@ This project now documents the policy-protected function selectors explicitly. T
 | `crosschainBurn(address,uint256)`         | `0x2b8c49e3` |
 
 Note: exact policy chains per selector (PausePolicy, RBAC, TransferValidationPolicy, etc.) can vary by deployment configuration.
+
+## Security Considerations
+
+### Standard variant is policy-authoritative: selector coverage is part of the deployment's security
+
+In the **Standard** variant, the token delegates **all** authorization to the ACE PolicyEngine: every privileged
+operation is gated by `runPolicy`, which evaluates the policies wired for the function's **selector** (`msg.sig`).
+There is intentionally **no on-token role check** — the engine is the single, authoritative gate. (The **Lite**
+variant is different: it keeps CMTAT's native `onlyRole(...)` access control and uses the engine only for transfer
+validation, so its authorization does not depend on per-selector wiring.)
+
+A direct consequence for the Standard variant is that **its safety is a property of the deployment configuration,
+not of the contract alone**. Two settings interact:
+
+- **Selector coverage.** Authorization only applies to selectors that have a policy wired. The same privileged
+  logic is reachable through several entrypoints with **different** selectors — overloads
+  (`mint(address,uint256)` vs `mint(address,uint256,bytes)`), batch variants (`batchMint`, `batchBurn`), and
+  multiplexers such as `burnAndMint(...)` (whose inner `burn`/`mint` run under the **`burnAndMint`** selector).
+  Every such privileged selector must be wired, not only the canonical ones.
+- **`defaultPolicyAllow`** — the engine's behavior for a selector that has **no** policy wired:
+  - `defaultPolicyAllow = true` (allow-by-default): an **unwired** selector is **allowed**. This is convenient,
+    but it means any privileged selector that was not wired (e.g. an overlooked overload or `burnAndMint`) is
+    callable without authorization. Under this setting you **must** wire a policy for *every* privileged selector.
+  - `defaultPolicyAllow = false` (fail-closed): an **unwired** selector **reverts**. Forgetting to wire a selector
+    becomes a safe failure (DoS) instead of an open door. Note the trade-off: the policies shipped here
+    (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`, never
+    `Allowed` — so under fail-closed you must also attach a **terminal allow** policy (or a policy that returns
+    `Allowed`) on each selector you intend to permit, otherwise even correctly-wired operations revert.
+
+**Recommendation.** For the Standard variant, choose **one** of:
+1. Wire an access-control policy for **every** privileged selector — derived from the full token ABI, including
+   the overloads/batch/multiplexer selectors above — and keep `defaultPolicyAllow = true`; **or**
+2. Deploy with `defaultPolicyAllow = false` (fail-closed) plus an explicit terminal allow policy on each permitted
+   selector.
+
+Use the [policy preflight check](#policy-preflight-check) before going live to confirm coverage, and treat any
+unwired privileged selector as a deployment blocker.
 
 ## FAQ for Issuers Using CMTAT with ACE Policies
 
