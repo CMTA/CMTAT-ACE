@@ -127,15 +127,19 @@ describe('Preflight: policy coverage (H-2 invariant)', function () {
       expect(report.warnings.join(' ')).to.match(/no PausePolicy is attached/i);
     });
 
-    it('does not warn about pause when PausePolicy is wired on the movement selectors', async function () {
+    it('does not warn that pause is entirely missing when PausePolicy is wired on the canonical movement selectors', async function () {
       const { cmtat, policyEngine } = await loadFixture(standardFixture);
       const report = await preflightPolicyCoverage(cmtat, policyEngine);
-      expect(report.warnings.join(' ')).to.not.match(/PausePolicy/i);
+      // PausePolicy IS wired on the canonical movement selectors → the "no PausePolicy at all" warning is gone.
+      expect(report.warnings.join(' ')).to.not.match(/no PausePolicy is attached/i);
       // transfer is guarded by a PausePolicy in the standard fixture
       const transfer = report.items.find(
         (i) => i.selector === selectorOf('transfer(address,uint256)'),
       );
       expect(transfer.hasPausePolicy).to.equal(true);
+      // NOTE: the ABI-derived coverage (VULN-3 fix) now correctly flags the privileged overloads/multiplexers
+      // (e.g. mint(address,uint256,bytes), batchMint, burnAndMint) that the standard fixture leaves unwired —
+      // those pause/screening warnings are expected and are asserted in preflightAbiCompleteness.test.js.
     });
   });
 });
