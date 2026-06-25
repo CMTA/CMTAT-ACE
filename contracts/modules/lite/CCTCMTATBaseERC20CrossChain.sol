@@ -6,8 +6,8 @@ import {ERC20CrossChainModule} from "CMTAT/modules/wrapper/options/ERC20CrossCha
 import {CCIPModule} from "CMTAT/modules/wrapper/options/CCIPModule.sol";
 import {CCTCMTATBaseERC1404} from "./CCTCMTATBaseERC1404.sol";
 import {CMTATBaseCommon} from "CMTAT/modules/0_CMTATBaseCommon.sol";
-import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
-import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
+import {ERC20MintModuleInternal} from "CMTAT/modules/wrapper/core/ERC20MintModule.sol";
+import {ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -40,36 +40,40 @@ abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModu
     }
     /**
      * @dev Check if the mint is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._mintOverride} (which runs `_checkTransferred` then the
+     * internal mint) rather than re-implementing it. Resolves the diamond between {CMTATBaseCommon} and
+     * {ERC20MintModuleInternal}; mirrors the Standard variant ({CCTCommon}).
      */
     function _mintOverride(
         address account,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
-        _checkTransferred(address(0), address(0), account, value);
-        ERC20MintModuleInternal._mintOverride(account, value);
+        CMTATBaseCommon._mintOverride(account, value);
     }
 
     /**
      * @dev Check if the burn is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._burnOverride}; see {_mintOverride}.
      */
     function _burnOverride(
         address account,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20BurnModuleInternal) {
-        _checkTransferred(address(0), account, address(0), value);
-        ERC20BurnModuleInternal._burnOverride(account, value);
+        CMTATBaseCommon._burnOverride(account, value);
     }
 
     /**
      * @dev Check if a minter transfer is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._minterTransferOverride}; see {_mintOverride}. This keeps the
+     * `_checkTransferred` spender as `_msgSender()` (the CMTAT default), so the operator-frozen check applies on
+     * minter transfers, matching CMTAT and the Standard variant.
      */
     function _minterTransferOverride(
         address from,
         address to,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
-        _checkTransferred(address(0), from, to, value);
-        ERC20MintModuleInternal._minterTransferOverride(from, to, value);
+        CMTATBaseCommon._minterTransferOverride(from, to, value);
     }
 
     /**
