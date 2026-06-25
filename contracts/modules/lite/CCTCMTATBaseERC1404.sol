@@ -5,11 +5,7 @@ pragma solidity ^0.8.20;
 import {CCTCMTATBasePolicyEngine} from "./CCTCMTATBasePolicyEngine.sol";
 import {PolicyValidationModuleERC1404, IERC1404, IERC1404Extend} from "./PolicyValidationModuleERC1404.sol";
 import {ValidationModuleCore} from "CMTAT/modules/wrapper/core/ValidationModuleCore.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {
-    ERC20EnforcementModule,
-    ERC20EnforcementModuleInternal
-} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
+import {ERC20EnforcementModuleInternal} from "CMTAT/modules/wrapper/extensions/ERC20EnforcementModule.sol";
 
 abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidationModuleERC1404 {
     /**
@@ -122,12 +118,13 @@ abstract contract CCTCMTATBaseERC1404 is CCTCMTATBasePolicyEngine, PolicyValidat
         address to,
         uint256 value
     ) internal view virtual override(PolicyValidationModuleERC1404) returns (uint8 code) {
-        uint256 frozenTokensLocal = ERC20EnforcementModule.getFrozenTokens(from);
-        if (frozenTokensLocal > 0) {
-            uint256 activeBalance = ERC20Upgradeable.balanceOf(from) - frozenTokensLocal;
-            if (value > activeBalance) {
-                return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE);
-            }
+        // Reuse CMTAT's clamped, non-reverting active-balance check rather than recomputing
+        // `balanceOf(from) - frozenTokens`, which underflows (panic) when frozenTokens > balance —
+        // a state ERC-7943 `setFrozenTokens` explicitly allows. `_checkActiveBalance` handles the
+        // frozen >= balance and value == 0 edges safely and is what the Standard variant uses.
+        (bool isValid, ) = ERC20EnforcementModuleInternal._checkActiveBalance(from, value);
+        if (!isValid) {
+            return uint8(IERC1404Extend.REJECTED_CODE_BASE.TRANSFER_REJECTED_FROM_INSUFFICIENT_ACTIVE_BALANCE);
         }
         return PolicyValidationModuleERC1404._detectTransferRestriction(from, to, value);
     }
