@@ -13,7 +13,7 @@ import {VersionModule} from "CMTAT/modules/wrapper/core/VersionModule.sol";
  */
 abstract contract CCTVersionModule is VersionModule {
     /// @dev Current CMTAT-ACE integration release version.
-    string private constant CCT_VERSION = "0.2.0";
+    string private constant CCT_VERSION = "0.3.0";
 
     /**
      * @inheritdoc VersionModule

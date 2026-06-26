@@ -305,6 +305,29 @@ function createStandardFixture(deployTokenFn) {
       await rbacPolicy.connect(admin).grantOperationAllowanceToRole(sel, role);
     }
 
+    // Also gate the privileged OVERLOADS and MULTIPLEXERS that share the same privileged logic but route
+    // under their OWN selector — mint(address,uint256,bytes), burn(address,uint256,bytes), batchMint,
+    // batchTransfer, batchBurn (both overloads), burnAndMint. Without this they would be unwired and thus
+    // callable by anyone under defaultAllow=true (NM-3/VULN-1). Each is gated to the same role as its base
+    // operation. (`burnAndMint` is gated to MINTER_ROLE — it is a mint-centric reissuance; the operator must
+    // still be a privileged role, which closes the unprivileged bypass.)
+    const overloadAllowances = [
+      ['mint(address,uint256,bytes)', MINTER_ROLE],
+      ['burn(address,uint256,bytes)', BURNER_ROLE],
+      ['batchMint(address[],uint256[])', MINTER_ROLE],
+      ['batchTransfer(address[],uint256[])', MINTER_ROLE],
+      ['batchBurn(address[],uint256[])', BURNER_ROLE],
+      ['batchBurn(address[],uint256[],bytes)', BURNER_ROLE],
+      ['burnAndMint(address,address,uint256,uint256,bytes)', MINTER_ROLE],
+    ];
+    for (const [sig, role] of overloadAllowances) {
+      if (!cmtat.interface.hasFunction(sig)) continue;
+      const sel = cmtat.interface.getFunction(sig).selector;
+      await policyEngine.connect(admin).addPolicy(cmtatAddress, sel, pausePolicyAddress, []);
+      await policyEngine.connect(admin).addPolicy(cmtatAddress, sel, rbacPolicyAddress, []);
+      await rbacPolicy.connect(admin).grantOperationAllowanceToRole(sel, role);
+    }
+
     // Grant roles to admin
     const adminRoles = [MINTER_ROLE, BURNER_ROLE, ENFORCER_ROLE, ERC20ENFORCER_ROLE, DOCUMENT_ROLE];
     for (const role of adminRoles) {

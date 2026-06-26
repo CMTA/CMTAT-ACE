@@ -8,7 +8,7 @@ const {
   deployCCTLiteStandalone,
 } = require('../deploymentUtils');
 
-const CCT_VERSION = '0.2.0';
+const CCT_VERSION = '0.3.0';
 
 /**
  * CCTVersionModule overrides CMTAT's VersionModule so `version()` reports the CMTAT-ACE integration

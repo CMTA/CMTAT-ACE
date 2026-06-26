@@ -37,12 +37,19 @@ const { ethers } = require('hardhat');
 const ZERO = ethers.ZeroAddress;
 
 /**
- * Catalogue of token operations that may be routed through the PolicyEngine.
+ * Documented BASELINE catalogue of policy-routed operations (canonical signatures only).
+ *
+ * NOTE: this list is for documentation/reference. The live coverage check **derives the actual
+ * selector set from the token ABI** via {deriveOperations} so that overloads and multiplexers cannot be
+ * silently omitted (VULN-3): the same privileged logic is reachable through several entrypoints with
+ * DIFFERENT selectors — e.g. `mint(address,uint256)` vs `mint(address,uint256,bytes)`, `batchMint`,
+ * `batchBurn`, and `burnAndMint(...)` (whose inner burn/mint run under the `burnAndMint` selector). A
+ * hand-maintained list omitting those gives false "fully covered" assurance.
+ *
  * `movement: true`  → moves value; routed through the engine in BOTH variants
  *                     (Lite routes these via `_transferred`; Standard via `runPolicy`).
  * `movement: false` → admin/config; routed through the engine only in the Standard
- *                     (policy-authoritative) variant. In Lite these are role-gated and
- *                     do NOT hit the engine.
+ *                     (policy-authoritative) variant. In Lite these are role-gated and do NOT hit the engine.
  */
 const OPERATIONS = [
   { sig: 'transfer(address,uint256)', movement: true },
@@ -62,6 +69,61 @@ const OPERATIONS = [
   { sig: 'setDocument(bytes32,string,bytes32)', movement: false },
   { sig: 'setCCIPAdmin(address)', movement: false },
 ];
+
+/**
+ * Privileged operation base-names. Any state-changing token function whose name is here is policy-routed
+ * (Standard: via `runPolicy`; Lite: movement ops via `_transferred`). This catches EVERY overload of a
+ * privileged operation, not just the canonical signature. Names NOT listed here (e.g. `approve`,
+ * `grantRole`, `initialize`, `upgradeToAndCall`, `attachPolicyEngine`, `setContext`) are not policy-routed.
+ */
+const MOVEMENT_NAMES = new Set([
+  'transfer',
+  'transferFrom',
+  'mint',
+  'burn',
+  'burnFrom',
+  'forcedTransfer',
+  'crosschainMint',
+  'crosschainBurn',
+  'batchTransfer',
+  'batchMint',
+  'batchBurn',
+  'burnAndMint',
+]);
+const ADMIN_NAMES = new Set([
+  'freezePartialTokens',
+  'unfreezePartialTokens',
+  'setAddressFrozen',
+  'setFrozenTokens',
+  'setName',
+  'setSymbol',
+  'setTokenId',
+  'setDocument',
+  'removeDocument',
+  'setTerms',
+  'setInformation',
+  'setCCIPAdmin',
+  'pause',
+  'unpause',
+  'deactivateContract',
+]);
+
+/**
+ * Derive the policy-routed operation set from the token's real ABI — every state-changing function whose
+ * base name is a privileged operation, including all overloads and multiplexers. This is the source of
+ * truth for the coverage check (closes VULN-3: no hand-maintained omission).
+ * @param token ethers.Contract attached with the token's real artifact ABI.
+ * @returns Array<{ sig, movement }> sorted by signature.
+ */
+function deriveOperations(token) {
+  const ops = [];
+  token.interface.forEachFunction((fn) => {
+    if (fn.stateMutability === 'view' || fn.stateMutability === 'pure') return;
+    if (MOVEMENT_NAMES.has(fn.name)) ops.push({ sig: fn.format('sighash'), movement: true });
+    else if (ADMIN_NAMES.has(fn.name)) ops.push({ sig: fn.format('sighash'), movement: false });
+  });
+  return ops.sort((a, b) => a.sig.localeCompare(b.sig));
+}
 
 function selectorOf(sig) {
   return ethers.id(sig).substring(0, 10);
@@ -193,7 +255,8 @@ async function preflightPolicyCoverage(token, policyEngine) {
   const bricked = da.effective === false || attached === false;
   let anyPausePolicy = false;
   const pauselessMovement = [];
-  for (const op of OPERATIONS) {
+  // Derive the policy-routed selectors from the token ABI (incl. overloads/multiplexers) — see VULN-3.
+  for (const op of deriveOperations(token)) {
     if (!token.interface.hasFunction(op.sig)) continue;
     const selector = selectorOf(op.sig);
     const policies = await policyEngine.getPolicies(tokenAddress, selector);
@@ -336,4 +399,13 @@ if (require.main === module) {
   });
 }
 
-module.exports = { preflightPolicyCoverage, printReport, selectorOf, OPERATIONS, main };
+module.exports = {
+  preflightPolicyCoverage,
+  printReport,
+  selectorOf,
+  OPERATIONS,
+  deriveOperations,
+  MOVEMENT_NAMES,
+  ADMIN_NAMES,
+  main,
+};

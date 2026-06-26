@@ -235,6 +235,16 @@ async function main() {
     setSymbol: cmtat.interface.getFunction('setSymbol').selector,
     // Documents (in-contract ERC-1643)
     setDocument: cmtat.interface.getFunction('setDocument').selector,
+    // Privileged OVERLOADS / MULTIPLEXERS — same privileged logic, DIFFERENT selector. These must be gated
+    // too, or they are callable by anyone under defaultAllow=true (NM-3/VULN-1). Run the preflight check to
+    // verify every privileged selector the token ABI exposes is covered.
+    mintWithData: cmtat.interface.getFunction('mint(address,uint256,bytes)').selector,
+    burnWithData: cmtat.interface.getFunction('burn(address,uint256,bytes)').selector,
+    batchMint: cmtat.interface.getFunction('batchMint(address[],uint256[])').selector,
+    batchTransfer: cmtat.interface.getFunction('batchTransfer(address[],uint256[])').selector,
+    batchBurn: cmtat.interface.getFunction('batchBurn(address[],uint256[])').selector,
+    burnAndMint: cmtat.interface.getFunction('burnAndMint(address,address,uint256,uint256,bytes)')
+      .selector,
   };
 
   console.log('Function selectors:');
@@ -479,6 +489,14 @@ async function main() {
       role: DOCUMENT_ROLE,
       name: 'setDocument → DOCUMENT_ROLE',
     },
+    // Overloads / multiplexers — gated to the same role as their base operation (burnAndMint is gated to
+    // MINTER_ROLE: a privileged reissuance, so the operator must still hold a role).
+    { selector: selectors.mintWithData, role: MINTER_ROLE, name: 'mint(...,bytes) → MINTER_ROLE' },
+    { selector: selectors.burnWithData, role: BURNER_ROLE, name: 'burn(...,bytes) → BURNER_ROLE' },
+    { selector: selectors.batchMint, role: MINTER_ROLE, name: 'batchMint → MINTER_ROLE' },
+    { selector: selectors.batchTransfer, role: MINTER_ROLE, name: 'batchTransfer → MINTER_ROLE' },
+    { selector: selectors.batchBurn, role: BURNER_ROLE, name: 'batchBurn → BURNER_ROLE' },
+    { selector: selectors.burnAndMint, role: MINTER_ROLE, name: 'burnAndMint → MINTER_ROLE' },
   ];
 
   for (const { selector, role, name } of roleMapping) {
