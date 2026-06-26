@@ -33,6 +33,24 @@ Compliance itself is expressed with **policies from the Chainlink ACE policy lib
 
 Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and their integrators) who want CMTAT's token feature set with compliance that can evolve through governance-controlled policy configuration rather than contract upgrades. (For example, a stablecoin can gate issuance with the reserve-backed `SecureMintPolicy` and screen holders with sanctions policies, while an RWA fund can enforce eligibility, transfer limits, and trading-hours windows.)
 
+### Example workflow: a transfer screened by a freeze policy
+
+The sequence below shows a `transfer` being evaluated by the PolicyEngine against a **freeze policy**: the token forwards the call to the engine, an extractor decodes the parameters, and the policy rejects the transfer if the sender (or recipient) is frozen — otherwise the transfer proceeds and balances are updated.
+
+![Transfer screened by a freeze policy](./doc/img/transfer-freeze-workflow.png)
+
+_Diagram source: [`doc/img/transfer-freeze-workflow.puml`](./doc/img/transfer-freeze-workflow.puml)._
+
+> **`defaultPolicyAllow = true`** (shown in the diagram) is the engine's verdict for a call once its policies have run: ACE evaluates the attached policies and, if **none of them explicitly returned `Allowed`**, it falls back to this default. The policies shipped with this integration (pause, RBAC, transfer-validation, freeze, reserve-backed mint) **reject by reverting and otherwise return `Continue`** — they never return `Allowed` — so a call is permitted exactly when **no policy reverted** and the default is `true` (allow-by-default; reject only on an explicit policy revert). With `defaultPolicyAllow = false`, the same non-reverting chain would instead be **rejected** unless a terminal allow policy is attached. See [Security Considerations](#security-considerations).
+
+### Example workflow: reserve-backed minting (SecureMintPolicy + Chainlink Proof of Reserve)
+
+`SecureMintPolicy` gates the `mint` selector against a **Chainlink Proof-of-Reserve (PoR)** feed: before issuing new tokens it reads the latest on-chain reserve value and rejects the mint if it would push `totalSupply` beyond the reserves (optionally adjusted by a configured margin), or if the feed is stale/negative. This enforces that the token can never be minted beyond what is backed by reserves — the reserve-backed issuance pattern used by stablecoins and RWAs.
+
+![Reserve-backed minting with SecureMintPolicy and Chainlink Proof of Reserve](./doc/img/securemint-por-workflow.png)
+
+_Diagram source: [`doc/img/securemint-por-workflow.puml`](./doc/img/securemint-por-workflow.puml)._
+
 ## Table of Contents
 
 - [Deployment versions](#deployment-versions)

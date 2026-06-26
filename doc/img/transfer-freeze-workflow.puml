@@ -1,0 +1,33 @@
+@startuml
+title Transfer screened by a freeze policy (CMTAT x Chainlink ACE)
+
+actor "Token holder" as Holder
+participant "ComplianceToken" as Token
+participant "PolicyEngine\n(Chainlink ACE)" as Engine
+participant "Extractor" as Extractor
+participant "Freeze policy\n(rejects frozen accounts)" as Policy
+
+Holder -> Token : transfer(to, amount)
+activate Token
+note right of Token : Standard: gated by ``runPolicy``\nLite: routed via ``_transferred``
+Token -> Engine : run(selector = transfer,\nsender = from, data = (to, amount))
+activate Engine
+Engine -> Extractor : extract(payload)
+Extractor --> Engine : { from, to, amount }
+Engine -> Policy : run(caller = from, params)
+activate Policy
+
+alt "from" (or "to") is frozen
+    Policy --> Engine : revert PolicyRejected("frozen")
+    Engine --> Token : revert
+    Token --> Holder : revert -- transfer blocked
+else not frozen
+    Policy --> Engine : Continue
+    deactivate Policy
+    Engine --> Token : allowed (defaultPolicyAllow = true)
+    deactivate Engine
+    Token -> Token : _update(from, to, amount)
+    Token --> Holder : true -- transfer succeeds
+end
+deactivate Token
+@enduml
