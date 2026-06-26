@@ -10,6 +10,7 @@ import {ERC20MintModule, ERC20MintModuleInternal} from "CMTAT/modules/wrapper/co
 import {ERC20BurnModule, ERC20BurnModuleInternal} from "CMTAT/modules/wrapper/core/ERC20BurnModule.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {IPolicyEngine} from "@chainlink/policy-management/interfaces/IPolicyEngine.sol";
 
 abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModule, CCTCMTATBaseERC1404 {
     /* ============  State Functions ============ */
@@ -38,38 +39,144 @@ abstract contract CCTCMTATBaseERC20CrossChain is ERC20CrossChainModule, CCIPModu
     ) public virtual override(ERC20Upgradeable, CMTATBaseCommon) returns (bool) {
         return CMTATBaseCommon.transferFrom(from, to, value);
     }
+
+    /* ==== Batch operations: run the PolicyEngine per item with EMPTY context ==== */
+    /**
+     * @dev The per-sender PolicyEngine `context` is a single-call concept (it is read and cleared once around a
+     * single operation by {_transferred}). Chainlink ACE's reference tokens screen each *batch* item with an
+     * empty context (never the ambient stored context). We mirror that here by clearing the caller's context
+     * before the batch runs, so every item's {_transferred} evaluates the engine with an empty context. This
+     * avoids the mid-batch asymmetry where the first item consumes the context and the remaining items revert
+     * under a context-dependent policy, while leaving single-operation ambient context (and its clear-once)
+     * untouched. A batch + context-dependent policy is therefore intentionally unsupported (use the single-op
+     * path for context-bearing calls).
+     */
+    function batchMint(
+        address[] calldata accounts,
+        uint256[] calldata values
+    ) public virtual override(ERC20MintModule) {
+        clearContext();
+        ERC20MintModule.batchMint(accounts, values);
+    }
+
+    /**
+     * @inheritdoc ERC20MintModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchTransfer(
+        address[] calldata tos,
+        uint256[] calldata values
+    ) public virtual override(ERC20MintModule) returns (bool success_) {
+        clearContext();
+        return ERC20MintModule.batchTransfer(tos, values);
+    }
+
+    /**
+     * @inheritdoc ERC20BurnModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchBurn(
+        address[] calldata accounts,
+        uint256[] calldata values,
+        bytes memory data
+    ) public virtual override(ERC20BurnModule) {
+        clearContext();
+        ERC20BurnModule.batchBurn(accounts, values, data);
+    }
+
+    /**
+     * @inheritdoc ERC20BurnModule
+     * @dev See {batchMint}: batch items are screened with an empty context.
+     */
+    function batchBurn(
+        address[] calldata accounts,
+        uint256[] calldata values
+    ) public virtual override(ERC20BurnModule) {
+        clearContext();
+        ERC20BurnModule.batchBurn(accounts, values);
+    }
+
+    /* ==== burnAndMint: screen each leg under its canonical selector ==== */
+    // mint(address,uint256)  — issuance leg recipient
+    bytes4 private constant _MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
+    // burn(address,uint256)  — redemption leg holder
+    bytes4 private constant _BURN_SELECTOR = bytes4(keccak256("burn(address,uint256)"));
+
+    /**
+     * @notice Atomic burn-then-mint (e.g. reissuance), screened per leg.
+     * @dev `burnAndMint` is a multiplexer: its OWN selector is not wired to the issuance/redemption
+     * policies, and {_transferred} (reached by the inner burn/mint via `_update`) would otherwise run the
+     * engine under the `burnAndMint` selector — skipping the `IRule` screening under `defaultAllow = true`
+     * (NM-7). Mirroring Chainlink ACE's per-item pattern, we explicitly run the PolicyEngine for the
+     * redemption leg under `burn(address,uint256)` and the issuance leg under `mint(address,uint256)`, each
+     * with an empty context (a multiplexer is not a single context-bearing call; see the batch overrides /
+     * NM-6), BEFORE delegating. The inner burn/mint still perform the CMTAT module checks
+     * (pause/freeze/active-balance); under `defaultAllow = true` their `burnAndMint`-selector engine run is a
+     * no-op, so the explicit leg screening is authoritative. Under `defaultAllow = false` the inner run
+     * reverts (unwired selector), i.e. `burnAndMint` fails closed — use the single-op `burn`/`mint` paths.
+     */
+    function burnAndMint(
+        address from,
+        address to,
+        uint256 amountToBurn,
+        uint256 amountToMint,
+        bytes calldata data
+    ) public virtual override(CMTATBaseCommon) {
+        clearContext();
+        _runIssuanceRedemptionPolicy(_BURN_SELECTOR, abi.encode(from, amountToBurn));
+        _runIssuanceRedemptionPolicy(_MINT_SELECTOR, abi.encode(to, amountToMint));
+        CMTATBaseCommon.burnAndMint(from, to, amountToBurn, amountToMint, data);
+    }
+
+    /**
+     * @dev Run the attached PolicyEngine for a single issuance/redemption leg under its canonical selector
+     * with an empty context. No-op when no engine is attached (Lite allows a detached engine).
+     */
+    function _runIssuanceRedemptionPolicy(bytes4 selector, bytes memory data) internal virtual {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        if (address(policyEngine_) != address(0)) {
+            policyEngine_.run(
+                IPolicyEngine.Payload({selector: selector, sender: _msgSender(), data: data, context: ""})
+            );
+        }
+    }
+
     /**
      * @dev Check if the mint is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._mintOverride} (which runs `_checkTransferred` then the
+     * internal mint) rather than re-implementing it. Resolves the diamond between {CMTATBaseCommon} and
+     * {ERC20MintModuleInternal}; mirrors the Standard variant ({CCTCommon}).
      */
     function _mintOverride(
         address account,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
-        _checkTransferred(address(0), address(0), account, value);
-        ERC20MintModuleInternal._mintOverride(account, value);
+        CMTATBaseCommon._mintOverride(account, value);
     }
 
     /**
      * @dev Check if the burn is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._burnOverride}; see {_mintOverride}.
      */
     function _burnOverride(
         address account,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20BurnModuleInternal) {
-        _checkTransferred(address(0), account, address(0), value);
-        ERC20BurnModuleInternal._burnOverride(account, value);
+        CMTATBaseCommon._burnOverride(account, value);
     }
 
     /**
      * @dev Check if a minter transfer is valid
+     * @dev Delegates to CMTAT's {CMTATBaseCommon._minterTransferOverride}; see {_mintOverride}. This keeps the
+     * `_checkTransferred` spender as `_msgSender()` (the CMTAT default), so the operator-frozen check applies on
+     * minter transfers, matching CMTAT and the Standard variant.
      */
     function _minterTransferOverride(
         address from,
         address to,
         uint256 value
     ) internal virtual override(CMTATBaseCommon, ERC20MintModuleInternal) {
-        _checkTransferred(address(0), from, to, value);
-        ERC20MintModuleInternal._minterTransferOverride(from, to, value);
+        CMTATBaseCommon._minterTransferOverride(from, to, value);
     }
 
     /**

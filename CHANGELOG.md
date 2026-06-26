@@ -29,7 +29,56 @@ Reference: [keepachangelog.com/en/1.1.0/](https://keepachangelog.com/en/1.1.0/)
 
 Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 
+## [0.3.0] - 2026/06/26
+
+Branch: `audit`
+
+Security-hardening release addressing the **Nethermind AuditAgent** review (`doc/audits/tools/v0.2.0/nethermind-audit-agent/`)
+and the **Claude security audit** ([`doc/audits/tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md`](doc/audits/tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md)).
+All changes are backward compatible (no storage/API break). `version()` now reports `0.3.0`.
+
+### Security
+
+- **Stateful transfer rules are now enforced (NM-2).** `TransferValidationPolicy` previously validated only with the view `detectTransferRestriction*` and never invoked the state-mutating `IRule.transferred()` hook, so stateful rules (rolling-window caps, per-period counters) were never advanced and could be bypassed by repeated transfers. A new `postRun` now calls `transferred()` per rule on the state path (never on the read-only `check()` preview), mirroring CMTAT's `RuleEngine.transferred`.
+- **`burnAndMint` is screened in the Lite variant (NM-7).** The multiplexer ran the engine under its own (unwired) selector, skipping `IRule` screening under `defaultAllow=true`. The Lite token now screens each leg under its canonical selector (`burn(address,uint256)` / `mint(address,uint256)`) with empty context, before delegating.
+- **Primary burn selector is screenable (NM-4).** `MintBurnExtractor` (`1.2.0`) now handles `burn(address,uint256)` (`0x9dc29fac`), the BURNER_ROLE operator burn — closing a screening gap and a DoS-if-wired.
+- **Standard `canSend`/`canReceive` carry a compliance signal (NM-8).** They now query the PolicyEngine (read-only `check`, revert→`false`) under dedicated `canSend(address)`/`canReceive(address)` selectors, so a wired account-level policy (e.g. ACE `OnlyAuthorizedSenderPolicy`) is reflected. Opt-in and backward compatible (unwired ⇒ `defaultAllow` decides).
+- **Privileged overloads/multiplexers are gated in the canonical wiring (NM-3 / VULN-1 deployment remediation).** The Standard variant is policy-authoritative *by design* (contract unchanged); the reference wiring in `test/deploymentUtils.js` and `scripts/demo.js` now gates `mint(address,uint256,bytes)`, `burn(address,uint256,bytes)`, `batchMint`, `batchTransfer`, `batchBurn`, and `burnAndMint` (same role as the base op), closing the unprivileged-mint/theft footgun on the as-shipped deployment.
+- **Preflight derives selectors from the token ABI (VULN-3).** `scripts/preflight.js` no longer relies on a hand-maintained catalogue; `deriveOperations()` enumerates every privileged selector (incl. overloads/multiplexers) so an unwired one is flagged before launch.
+- NM-9 (zero PolicyEngine on Standard) was verified as a **false positive** — the base `_validatePolicyEngine` enforces a non-zero engine; no change.
+
+### Changed
+
+- `TransferValidationPolicy`: added `postRun` (state-path `transferred` enforcement); `run` stays the `view` veto required for the `check()`/`canTransfer` preview.
+- `CCTCommon.canSend`/`canReceive` query the PolicyEngine; `canTransfer`/`canTransferFrom` therefore reflect account-level eligibility too.
+- Lite ERC-1404 `_detectTransferRestriction` delegates to CMTAT's clamped `ERC20EnforcementModuleInternal._checkActiveBalance` (NM-5).
+- Lite batch operations (`batchMint`/`batchBurn`/`batchTransfer`) screen each item with **empty** PolicyEngine context, matching ACE's reference tokens (NM-6).
+- Lite `_mintOverride`/`_burnOverride`/`_minterTransferOverride` delegate to `CMTATBaseCommon` instead of re-implementing it (removes duplicated logic; `_minterTransferOverride` now uses `_msgSender()` as CMTAT does).
+- `scripts/preflight.js`: coverage loop driven by the ABI-derived selector set.
+
+### Added
+
+- `deriveOperations()` in `scripts/preflight.js` (ABI-derived privileged-selector enumeration).
+- Stateful mock rules `CumulativeCapRule` and `TransferredEnforcedCapRule` (the latter enforces solely in `transferred`, the CMTAT pattern) in `TransferRuleMocks.sol`.
+- `MintBurnExtractor` `burn(address,uint256)` branch.
+
+### Fixed
+
+- **ERC-1404 `detectTransferRestriction*` no longer reverts** when frozen tokens exceed balance (NM-5): the hand-rolled `balanceOf − frozenTokens` underflow-panicked; replaced by the clamped CMTAT helper, restoring the "MUST NOT revert" contract.
+
+### Documentation
+
+- **`doc/DEPLOYMENT.md`** — new deployment guide (how the scripts work, risks, selector-coverage checklist, preflight), linked from the README.
+- README: **Security Considerations** (policy-authoritative model, `defaultPolicyAllow`) and **TransferValidationPolicy → run vs postRun** sections.
+- Developer feedback for the Nethermind AuditAgent report (`doc/audits/tools/v0.2.0/nethermind-audit-agent/audit_agent_report-feedback.md`).
+
+### Testing
+
+- New suites: `statefulRuleTransferred`, `batchContext`, `burnAndMintScreening`, `canSendReceivePolicy`, `mintBurnExtractor`, `erc1404FrozenUnderflow`, `liteMintBurnDelegation`, `preflightAbiCompleteness`, and `auditAccessControlBypass` (converted to a regression that the unprivileged bypass is now blocked). Full suite green.
+
 ## [0.2.0] - 2026/06/24
+
+Commit: `e4717f3ae0a240e6c584f833f35cb57b8eb0d8f3`
 
 Branch: `update-v3.3.0` (CMTAT v3.3.0 integration)
 

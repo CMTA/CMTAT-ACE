@@ -161,3 +161,6 @@ ignition/deployments/chain-31337
 # custom local directory
 history
 .codex
+
+# LibreOffice / OpenOffice lock files (e.g. doc/specification/.~lock.coverpage.odg#)
+.~lock.*#

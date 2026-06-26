@@ -48,6 +48,8 @@ module.exports = {
       '@chainlink/policy-management/policies/MaxPolicy.sol',
       '@chainlink/policy-management/policies/VolumeRatePolicy.sol',
       '@chainlink/policy-management/policies/OnlyOwnerPolicy.sol',
+      '@chainlink/policy-management/policies/OnlyAuthorizedSenderPolicy.sol',
+      '@chainlink/policy-management/policies/RejectPolicy.sol',
       '@chainlink/policy-management/policies/IntervalPolicy.sol',
       '@chainlink/policy-management/extractors/ERC20TransferExtractor.sol',
       'CMTAT/mocks/SnapshotEngineMock.sol',

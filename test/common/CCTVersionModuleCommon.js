@@ -5,7 +5,7 @@ const { expect } = require('chai');
 function CCTVersionModuleCommon() {
   context('Token structure', function () {
     it('testHasTheDefinedVersion', async function () {
-      expect(await this.cmtat.version()).to.equal('0.2.0');
+      expect(await this.cmtat.version()).to.equal('0.3.0');
     });
   });
 }

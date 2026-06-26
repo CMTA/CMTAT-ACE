@@ -1,0 +1,37 @@
+@startuml
+title Reserve-backed minting: SecureMintPolicy + Chainlink Proof of Reserve
+
+actor "Minter" as Minter
+participant "ComplianceToken" as Token
+participant "PolicyEngine\n(Chainlink ACE)" as Engine
+participant "MintBurnExtractor" as Extractor
+participant "SecureMintPolicy" as Policy
+participant "Chainlink\nProof-of-Reserve feed" as Feed
+
+Minter -> Token : mint(account, amount)
+activate Token
+Token -> Engine : run(selector = mint,\nsender = minter, data = (account, amount))
+activate Engine
+Engine -> Extractor : extract(payload)
+Extractor --> Engine : { account, amount }
+Engine -> Policy : run(params = { amount })
+activate Policy
+Policy -> Feed : latestRoundData()
+Feed --> Policy : reserves, updatedAt
+Policy -> Token : totalSupply()
+Token --> Policy : supply
+
+alt feed stale/negative  OR  supply + amount > reserves (+/- margin)
+    Policy --> Engine : revert PolicyRejected("exceeds reserves")
+    Engine --> Token : revert
+    Token --> Minter : revert -- mint blocked
+else within reserves
+    Policy --> Engine : Continue
+    deactivate Policy
+    Engine --> Token : allowed (defaultPolicyAllow = true)
+    deactivate Engine
+    Token -> Token : _update(0, account, amount)
+    Token --> Minter : minted -- supply <= reserves
+end
+deactivate Token
+@enduml

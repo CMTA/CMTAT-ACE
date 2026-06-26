@@ -190,22 +190,49 @@ abstract contract CCTCommon is
     }
 
     /* ============ ERC-7943 (uRWA) check surface ============ */
+    /// @dev Selector under which account-level SEND eligibility is queried from the PolicyEngine.
+    bytes4 internal constant CAN_SEND_SELECTOR = bytes4(keccak256("canSend(address)"));
+    /// @dev Selector under which account-level RECEIVE eligibility is queried from the PolicyEngine.
+    bytes4 internal constant CAN_RECEIVE_SELECTOR = bytes4(keccak256("canReceive(address)"));
+
     /**
      * @notice Account-level send eligibility (ERC-7943 `canSend`).
-     * @dev In the Standard (policy-authoritative) variant there is no on-chain account allowlist or
-     * account freeze on the token itself: send/receive eligibility is decided per-transfer by the
-     * PolicyEngine inside {canTransfer}. This therefore reports no token-level account restriction.
-     * MUST NOT revert and MUST NOT encode quantitative rules.
+     * @dev In the Standard (policy-authoritative) variant there is no on-chain account allowlist/freeze on the
+     * token itself; account eligibility lives in the PolicyEngine. This queries it via the read-only `check`
+     * under the dedicated {CAN_SEND_SELECTOR} (the queried account is the payload `sender`), so an account-level
+     * policy — e.g. an allowlist/KYC/identity policy such as ACE's `OnlyAuthorizedSenderPolicy` — is reflected.
+     * Backward compatible: if no policy is wired for that selector the engine's `defaultPolicyAllow` decides
+     * (allow-by-default ⇒ returns `true`, as before). MUST NOT revert (a rejection maps to `false`) and MUST NOT
+     * encode quantitative rules (no amount is passed). The authoritative transfer gate remains {canTransfer}.
      */
-    function canSend(address /*account*/) public view virtual returns (bool) {
-        return true;
+    function canSend(address account) public view virtual returns (bool) {
+        return _canAccountWithPolicyEngine(CAN_SEND_SELECTOR, account);
     }
 
     /**
-     * @notice Account-level receive eligibility (ERC-7943 `canReceive`). See {canSend}.
+     * @notice Account-level receive eligibility (ERC-7943 `canReceive`). See {canSend}; queried under
+     * {CAN_RECEIVE_SELECTOR}.
      */
-    function canReceive(address /*account*/) public view virtual returns (bool) {
-        return true;
+    function canReceive(address account) public view virtual returns (bool) {
+        return _canAccountWithPolicyEngine(CAN_RECEIVE_SELECTOR, account);
+    }
+
+    /**
+     * @dev Read-only account-eligibility query: runs the PolicyEngine `check` for `selector` with the account as
+     * the payload `sender` and an empty context. Maps a rejection (revert) to `false` so the ERC-7943 view never
+     * reverts. The engine is non-zero in the Standard variant (validated at init / on attach).
+     */
+    function _canAccountWithPolicyEngine(bytes4 selector, address account) internal view virtual returns (bool) {
+        IPolicyEngine policyEngine_ = IPolicyEngine(getPolicyEngine());
+        try
+            policyEngine_.check(
+                IPolicyEngine.Payload({selector: selector, sender: account, data: abi.encode(account), context: ""})
+            )
+        {
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /**

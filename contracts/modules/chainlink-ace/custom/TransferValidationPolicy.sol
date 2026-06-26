@@ -95,13 +95,14 @@ contract TransferValidationPolicy is Policy {
      *      With 4 parameters, uses detectTransferRestrictionFrom to also validate
      *      the spender.
      *
-     *      Rules are checked with the view methods `detectTransferRestriction*` /
-     *      `messageForTransferRestriction` rather than the `IRule.transferred` hook:
-     *      `run` is `view` (the engine STATICCALLs it on both the `check()` preview and
-     *      the state-flow pre-check), whereas `transferred` is state-mutating in the
-     *      interface, so it cannot be called here and conceptually belongs in `postRun`.
-     *      `messageForTransferRestriction` only runs on the rejection branch (right before
-     *      reverting), so it adds no gas to passing transfers.
+     *      `run` validates with the VIEW methods `detectTransferRestriction*` (it is `view`: the engine
+     *      STATICCALLs it on both the `check()` preview and the state-flow pre-check). The state-mutating
+     *      `IRule.transferred` enforcement hook — which stateful rules (rolling-window volume caps, per-period
+     *      counters, ...) use to ADVANCE their internal state — is invoked in {postRun}, which the PolicyEngine
+     *      calls only on the state path (after a successful `run`), never on the `check()` preview. Without this,
+     *      stateful rules are never advanced and can be bypassed by repeated transfers (NM-2).
+     *      `messageForTransferRestriction` only runs on the rejection branch (right before reverting), so it adds
+     *      no gas to passing transfers.
      */
     function run(
         address /* caller */,
@@ -146,5 +147,50 @@ contract TransferValidationPolicy is Policy {
         }
 
         return IPolicyEngine.PolicyResult.Continue;
+    }
+
+    /**
+     * @inheritdoc Policy
+     * @notice State path enforcement: advances each rule's internal state via `IRule.transferred`.
+     * @dev The PolicyEngine calls `postRun` only after a successful `run` on the STATE flow (`run(payload)`),
+     *      never on the `check()` preview — so this is where the state-mutating `IRule.transferred` enforcement
+     *      hook belongs. Mirrors {run}'s 3-param (transfer) vs 4-param (transferFrom) decode and calls the
+     *      matching `transferred` overload on each rule, so stateful rules (rolling-window volume caps,
+     *      per-period counters, ...) are advanced exactly once per executed transfer. `transferred` is also
+     *      enforcing (it reverts if the rule now rejects); a revert here surfaces as `PolicyPostRunError` and
+     *      reverts the transfer.
+     */
+    function postRun(
+        address /* caller */,
+        address /* subject */,
+        bytes4 /* selector */,
+        bytes[] calldata parameters,
+        bytes calldata /* context */
+    ) public override onlyPolicyEngine {
+        TransferValidationStorage storage $ = _getStorage();
+        uint256 len = $.rules.length;
+
+        if (parameters.length == 4) {
+            // ERC20TransferFromExtractor layout: [spender, from, to, amount]
+            address spender = abi.decode(parameters[0], (address));
+            address from = abi.decode(parameters[1], (address));
+            address to = abi.decode(parameters[2], (address));
+            uint256 amount = abi.decode(parameters[3], (uint256));
+
+            for (uint256 i = 0; i < len; ++i) {
+                $.rules[i].transferred(spender, from, to, amount);
+            }
+        } else if (parameters.length == 3) {
+            // ERC20TransferExtractor layout: [from, to, amount]
+            address from = abi.decode(parameters[0], (address));
+            address to = abi.decode(parameters[1], (address));
+            uint256 amount = abi.decode(parameters[2], (uint256));
+
+            for (uint256 i = 0; i < len; ++i) {
+                $.rules[i].transferred(from, to, amount);
+            }
+        } else {
+            revert InvalidParametersLength(parameters.length);
+        }
     }
 }

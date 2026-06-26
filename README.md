@@ -33,6 +33,24 @@ Compliance itself is expressed with **policies from the Chainlink ACE policy lib
 
 Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and their integrators) who want CMTAT's token feature set with compliance that can evolve through governance-controlled policy configuration rather than contract upgrades. (For example, a stablecoin can gate issuance with the reserve-backed `SecureMintPolicy` and screen holders with sanctions policies, while an RWA fund can enforce eligibility, transfer limits, and trading-hours windows.)
 
+### Example workflow: a transfer screened by a freeze policy
+
+The sequence below shows a `transfer` being evaluated by the PolicyEngine against a **freeze policy**: the token forwards the call to the engine, an extractor decodes the parameters, and the policy rejects the transfer if the sender (or recipient) is frozen — otherwise the transfer proceeds and balances are updated.
+
+![Transfer screened by a freeze policy](./doc/img/transfer-freeze-workflow.png)
+
+_Diagram source: [`doc/img/transfer-freeze-workflow.puml`](./doc/img/transfer-freeze-workflow.puml)._
+
+> **`defaultPolicyAllow = true`** (shown in the diagram) is the engine's verdict for a call once its policies have run: ACE evaluates the attached policies and, if **none of them explicitly returned `Allowed`**, it falls back to this default. The policies shipped with this integration (pause, RBAC, transfer-validation, freeze, reserve-backed mint) **reject by reverting and otherwise return `Continue`** — they never return `Allowed` — so a call is permitted exactly when **no policy reverted** and the default is `true` (allow-by-default; reject only on an explicit policy revert). With `defaultPolicyAllow = false`, the same non-reverting chain would instead be **rejected** unless a terminal allow policy is attached. See [Security Considerations](#security-considerations).
+
+### Example workflow: reserve-backed minting (SecureMintPolicy + Chainlink Proof of Reserve)
+
+`SecureMintPolicy` gates the `mint` selector against a **Chainlink Proof-of-Reserve (PoR)** feed: before issuing new tokens it reads the latest on-chain reserve value and rejects the mint if it would push `totalSupply` beyond the reserves (optionally adjusted by a configured margin), or if the feed is stale/negative. This enforces that the token can never be minted beyond what is backed by reserves — the reserve-backed issuance pattern used by stablecoins and RWAs.
+
+![Reserve-backed minting with SecureMintPolicy and Chainlink Proof of Reserve](./doc/img/securemint-por-workflow.png)
+
+_Diagram source: [`doc/img/securemint-por-workflow.puml`](./doc/img/securemint-por-workflow.puml)._
+
 ## Table of Contents
 
 - [Deployment versions](#deployment-versions)
@@ -47,9 +65,11 @@ Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and th
 - [Testing](#testing)
 - [Linting & Formatting](#linting--formatting)
 - [Scripts](#scripts)
+- [Deployment Guide](./doc/DEPLOYMENT.md)
 - [Policy preflight check](#policy-preflight-check)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
+- [Security Considerations](#security-considerations)
 - [FAQ for Issuers Using CMTAT with ACE Policies](#faq-for-issuers-using-cmtat-with-ace-policies)
 
 ## Deployment versions
@@ -211,7 +231,7 @@ Guidance for issuers:
 - `TransferValidationPolicy` — Chainlink ACE policy that validates transfers using CMTAT's `IRule` interface (see [TransferValidationPolicy](#transfervalidationpolicy) below)
 - `ERC20TransferFromExtractor` — Extractor that produces 4 parameters (`spender`, `from`, `to`, `amount`) for `transfer()` and `transferFrom()`
 - `CrossChainMintBurnExtractor` — Extractor that maps `crosschainMint` / `crosschainBurn` into the `[from, to, amount]` layout so the same `IRule` rules can screen cross-chain issuance/redemption
-- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.2.0`) instead of the underlying CMTAT framework version. The `version()` view follows the ERC-3643 and ERC-8303 (Contract Version) convention; see [`doc/ERCSpecification/erc-8303.md`](./doc/ERCSpecification/erc-8303.md)
+- `CCTVersionModule` — overrides CMTAT's `VersionModule` so the token's `version()` returns the CMTAT-ACE integration release (currently `0.3.0`) instead of the underlying CMTAT framework version. The `version()` view follows the ERC-3643 and ERC-8303 (Contract Version) convention; see [`doc/ERCSpecification/erc-8303.md`](./doc/ERCSpecification/erc-8303.md)
 
 ## Compliance Policies
 
@@ -267,12 +287,29 @@ It supports two extractor layouts:
 | `ERC20TransferExtractor`     | `[from, to, amount]`          | Calls `detectTransferRestriction(from, to, amount)`              |
 | `ERC20TransferFromExtractor` | `[spender, from, to, amount]` | Calls `detectTransferRestrictionFrom(spender, from, to, amount)` |
 
+### `run` vs `postRun`: view validation and stateful enforcement
+
+CMTAT's native flow calls only `IRule.transferred(...)` on each rule during a transfer (enforcement **and** any state update happen there); `detectTransferRestriction*` is the read-only preview. ACE cannot fuse the two, because the engine reuses the policy's `run()` for **both** the read-only preview (`check()`, which is STATICCALLed by `canTransfer` / ERC-1404 `detectTransferRestriction` / off-chain simulations) and the state-flow pre-check. A STATICCALL forbids state writes, so `run()` must be `view`. `TransferValidationPolicy` therefore splits the work:
+
+| Hook | When the PolicyEngine calls it | What it does |
+| ---- | ------------------------------ | ------------ |
+| **`run`** (`view`) | on every `check()` **and** every `run()` (state) | validates with the view `detectTransferRestriction*`; reverts `PolicyRejected` if any rule returns a non-zero code |
+| **`postRun`** (state) | **only** after a successful `run` on the **state** path (`run(payload)`); **never** on `check()` | calls each rule's state-mutating **`transferred(...)`** hook — this advances **stateful** rules (rolling-window volume caps, per-period counters, conditional rules) and applies their on-chain enforcement |
+
+Consequences:
+
+- **The view check in `run` is required, not redundant.** Without it, `canTransfer` / `detectTransferRestriction` would only run a no-op preview and report a transfer as allowed even when it would revert — breaking the ERC-7943 / ERC-1404 view contract and any wallet/AMM/custodian that simulates via `check()`.
+- **Stateful rules are enforced via `postRun`/`transferred`**, exactly mirroring CMTAT's write path (`RuleEngine.transferred` → `rule.transferred` per rule). `postRun` runs once per **executed** transfer, never on a preview, so a `canTransfer` simulation has no side effects.
+- For correct behavior a rule's `detectTransferRestriction*` and `transferred` should be **consistent** (the CMTA Rules library rules are): `run` then provides an accurate preview/early veto and `postRun` the authoritative state-path enforcement. The integration applies **both**, so it is never weaker than CMTAT and works whether a rule's logic lives in `detect*`, in `transferred`, or in both.
+
 ### Mock rules
 
-Two mock `IRule` implementations are provided in `contracts/modules/chainlink-ace/mocks/TransferRuleMocks.sol` for testing and demonstration:
+Mock `IRule` implementations are provided in `contracts/modules/chainlink-ace/mocks/TransferRuleMocks.sol` for testing and demonstration:
 
-- **`MaxAmountRule`** — Rejects transfers where the amount exceeds a configurable maximum (restriction code `13`)
-- **`RestrictedAddressRule`** — Rejects transfers involving addresses on a configurable restricted list (codes `14`/`15` for sender/recipient)
+- **`MaxAmountRule`** — Rejects transfers where the amount exceeds a configurable maximum (restriction code `13`). Stateless.
+- **`RestrictedAddressRule`** — Rejects transfers involving addresses on a configurable restricted list (codes `14`/`15` for sender/recipient). Stateless.
+- **`CumulativeCapRule`** — **Stateful**: caps the cumulative amount each sender may send; the `sent[from]` counter is advanced by `transferred` (state path) and read by `detect*`. Demonstrates that stateful enforcement requires `postRun`/`transferred` (the NM-2 path).
+- **`TransferredEnforcedCapRule`** — **Stateful**: `detect*` is permissive (always OK) and enforcement lives **solely** in `transferred`, exactly as CMTAT's RuleEngine does — proving `postRun`/`transferred` is an authoritative enforcer, not just a state-updater.
 
 ### Setup
 
@@ -477,6 +514,8 @@ Solidity formatting uses [prettier-plugin-solidity](https://github.com/prettier-
 
 ## Deployment scripts
 
+> 📖 **Read the [Deployment Guide](./doc/DEPLOYMENT.md) first.** It explains how the scripts work, the risks (selector-coverage completeness, `defaultPolicyAllow`, atomic proxy init, extractor/parameter matching, Standard vs Lite responsibilities, roles), and a checklist for using these scripts — or writing your own — without bricking the token or leaving a privileged selector ungated. Always finish with the [preflight check](#policy-preflight-check).
+
 Individual deployment scripts are available for each contract variant:
 
 | Script                                            | Description                    |
@@ -544,26 +583,13 @@ POLICY_ENGINE=0x... TOKEN=0x... \
 
 This section summarizes the static-analysis reports available in this repository.
 
+> ⚠️ **This project has NOT been formally audited by a security company. Use at your own risk.** The reports below are automated static-analysis (Slither, Aderyn) and AI-generated reviews only — they are **not** a substitute for a professional manual security audit. Do not deploy to production with real value without an independent, professional audit.
+
+> 🔒 **See [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)** for the security overview: the latest Slither and Aderyn results (v0.3.0, mocks included), the AI/internal audit findings that were fixed, and the per-tool dispositions. **Latest static analysis: 0 High to fix** — every tool finding is a false positive, an intentional design choice, environment/mock noise, or cosmetic.
+
 ### Slither
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
-
-Setup:
-
-```shell
-python3 -m venv cct
-chmod +x cct/bin/activate
-source cct/bin/activate
-pip install slither-analyzer
-slither --version
-```
-
-Run:
-
-```shell
-source cct/bin/activate
-bun run slither
-```
 
 ```bash
 slither . --checklist > doc/audits/tools/v0.2.0/slither-report.md
@@ -576,61 +602,50 @@ slither . --checklist > doc/audits/tools/v0.2.0/slither-report.md
 
 The direct `slither ... --checklist` command above writes a checklist-style report to `doc/audits/tools/v0.2.0/slither-report.md`.
 
-When done, deactivate the virtual environment:
-
-```shell
-deactivate
-```
-
 | Version | Report                                                                 | Assessment                                                                         |
 | ------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither-report-feedback.md) |
+| v0.3.0  | [slither-report.md](./doc/audits/tools/v0.3.0/slither/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/v0.3.0/slither/slither-report-feedback.md) |
+| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither/slither-report-feedback.md) |
 | v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md) |
 
-Report scope: repo-focused filtered checklist run (v0.2.0).
-
-0 High · 11 Medium · 8 Low · 22 Informational
-
-| ID  | Finding               | Instances | Assessment                                                                                                                |
-| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
-| M-1 | `uninitialized-local` | 11        | False positive — extractors assign locals per selector branch; intentional zero-defaults for mint (`from`) / burn (`to`). |
-| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                                              |
-| I-1 | `assembly`            | 1         | Expected — ERC-7201 namespaced-storage slot pointer; informational.                                                       |
-| I-2 | `dead-code`           | 1         | False positive.                                                                                                           |
-| I-3 | `naming-convention`   | 20        | Style-only informational findings.                                                                                        |
-
-Changes vs v0.1.0: `reentrancy-no-eth` (Medium, 3) and `reentrancy-events` (Low, 2) are no longer reported; `uninitialized-local` rose 6 → 11 (covers the added `CrossChainMintBurnExtractor` and extended `MintBurnExtractor`).
+Latest (v0.3.0, **mocks included**): **0 High · 11 Medium · 10 Low · 21 Informational** — nothing to fix. The per-finding breakdown and dispositions are in [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md) and the [feedback file](./doc/audits/tools/v0.3.0/slither/slither-report-feedback.md).
 
 ### Aderyn
 
 Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/aderyn)
 
 ```bash
+# v0.3.0 — mocks INCLUDED (no -x mocks)
+aderyn --output doc/audits/tools/v0.3.0/aderyn/aderyn-report.md
+# earlier runs excluded mocks:
 aderyn -x mocks --output doc/audits/tools/aderyn-report.md
 ```
 
 | Version | Report                                                  | Assessment                                                                |
 | ------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| v0.3.0  | [aderyn-report.md](./doc/audits/tools/v0.3.0/aderyn/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/v0.3.0/aderyn/aderyn-report-feedback.md) |
 | current | [aderyn-report.md](./doc/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/aderyn-report-feedback.md) |
 
-Report scope: 17 Solidity files, 959 nSLOC.
+Latest (v0.3.0, **mocks included**): **2 High · 11 Low** — nothing to fix (the Highs are the accepted-context / false-positive items). The per-finding breakdown and dispositions are in [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md) and the [feedback file](./doc/audits/tools/v0.3.0/aderyn/aderyn-report-feedback.md).
 
-2 High · 10 Low
+## Nethermind AuditAgent (AI review)
 
-| ID   | Finding                                   | Instances | Assessment                                                                                         |
-| ---- | ----------------------------------------- | --------- | -------------------------------------------------------------------------------------------------- |
-| H-1  | Arbitrary `from` passed to `transferFrom` | 1         | Accepted in context: policy-gated flow; not treated as exploitable in this integration design.     |
-| H-2  | Contract locks Ether without withdraw     | 2         | Accepted false positive: token deployments are not intended as ETH custody contracts.              |
-| L-1  | Centralization Risk                       | 11        | Accepted by design: privileged governance/control is intentional.                                  |
-| L-2  | Unsafe ERC20 Operation                    | 7         | Accepted false positive: primarily selector/module-flow usage, not unsafe token transfer wrappers. |
-| L-3  | Unspecific Solidity Pragma                | 17        | Accepted by design: version ranges are intentionally used in this codebase.                        |
-| L-4  | Literal Instead of Constant               | 2         | Informational: optional quality improvement.                                                       |
-| L-5  | PUSH0 Opcode                              | 17        | Environment-dependent informational finding in this setup.                                         |
-| L-6  | Empty Block                               | 22        | Accepted by design: authorization hook pattern.                                                    |
-| L-7  | Loop Contains `require`/`revert`          | 4         | Accepted by design: atomic validation and explicit failure signaling.                              |
-| L-8  | Unused State Variable                     | 1         | False positive: `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`.                 |
-| L-9  | Costly operations inside loop             | 2         | Accepted: expected tradeoff in policy/rule iteration paths.                                        |
-| L-10 | Unused Import                             | 9         | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons).                   |
+> ⚠️ **This report was generated entirely by AI and has not been manually reviewed by Nethermind's security team.** It does not constitute a security audit; findings may contain errors or omissions and must be independently verified.
+
+AI-generated review of the v0.2.0 codebase (`doc/audits/tools/v0.2.0/nethermind-audit-agent/`). Developer triage: [`audit_agent_report-feedback.md`](./doc/audits/tools/v0.2.0/nethermind-audit-agent/audit_agent_report-feedback.md). Outcome: **6 fixed in code, 2 accepted as documented design, 1 informational, 1 false positive** — all addressed in the v0.3.0 release.
+
+| ID | Finding | Tool sev | Our verdict | Status |
+| -- | ------- | -------- | ----------- | ------ |
+| NM-1 | Uninitialized proxy hijack via public `initialize()` | High | Informational (not exploitable as deployed) | No code change (docs) |
+| NM-2 | `TransferValidationPolicy` never calls stateful `IRule.transferred()` | High | Accepted (High) | **Fixed** |
+| NM-3 | Unmapped inherited privileged selectors bypass policy auth (Standard) | Medium | Accepted as design (High; Lite already safe) | No code change; deployment remediated |
+| NM-4 | `MintBurnExtractor` lacks `burn(address,uint256)` | Low | Accepted (Medium) | **Fixed** |
+| NM-5 | `detectTransferRestriction*` reverts when frozen > balance | Low | Accepted | **Fixed** |
+| NM-6 | Context cleared mid-batch breaks batch ops | Low | Accepted | **Fixed** |
+| NM-7 | `burnAndMint` bypasses screening in Lite | Low | Accepted (Medium) | **Fixed** |
+| NM-8 | Standard `canSend`/`canReceive` always `true` | Info | Fixed (account-level signal added) | **Fixed** |
+| NM-9 | `initialize()` accepts zero PolicyEngine (Standard) | Info | **False positive** | Rejected |
+| NM-10 | Lite flows only screened if exact selectors wired | Info | Accepted by design | No code change; deployment + preflight |
 
 ## Coverage
 
@@ -672,6 +687,25 @@ This project now documents the policy-protected function selectors explicitly. T
 | `crosschainBurn(address,uint256)`         | `0x2b8c49e3` |
 
 Note: exact policy chains per selector (PausePolicy, RBAC, TransferValidationPolicy, etc.) can vary by deployment configuration.
+
+## Security Considerations
+
+### Standard variant is policy-authoritative: selector coverage is part of the deployment's security
+
+In the **Standard** variant, the token delegates **all** authorization to the ACE PolicyEngine: every privileged operation is gated by `runPolicy`, which evaluates the policies wired for the function's **selector** (`msg.sig`). There is intentionally **no on-token role check** — the engine is the single, authoritative gate. (The **Lite** variant is different: it keeps CMTAT's native `onlyRole(...)` access control and uses the engine only for transfer validation, so its authorization does not depend on per-selector wiring.)
+
+A direct consequence for the Standard variant is that **its safety is a property of the deployment configuration, not of the contract alone**. Two settings interact:
+
+- **Selector coverage.** Authorization only applies to selectors that have a policy wired. The same privileged logic is reachable through several entrypoints with **different** selectors — overloads (`mint(address,uint256)` vs `mint(address,uint256,bytes)`), batch variants (`batchMint`, `batchBurn`), and multiplexers such as `burnAndMint(...)` (whose inner `burn`/`mint` run under the **`burnAndMint`** selector). Every such privileged selector must be wired, not only the canonical ones.
+- **`defaultPolicyAllow`** — the engine's behavior for a selector that has **no** policy wired:
+  - `defaultPolicyAllow = true` (allow-by-default): an **unwired** selector is **allowed**. This is convenient, but it means any privileged selector that was not wired (e.g. an overlooked overload or `burnAndMint`) is callable without authorization. Under this setting you **must** wire a policy for *every* privileged selector.
+  - `defaultPolicyAllow = false` (fail-closed): an **unwired** selector **reverts**. Forgetting to wire a selector becomes a safe failure (DoS) instead of an open door. Note the trade-off: the policies shipped here (`PausePolicy`, `RoleBasedAccessControlPolicy`, `TransferValidationPolicy`) return `Continue`, never `Allowed` — so under fail-closed you must also attach a **terminal allow** policy (or a policy that returns `Allowed`) on each selector you intend to permit, otherwise even correctly-wired operations revert.
+
+**Recommendation.** For the Standard variant, choose **one** of:
+1. Wire an access-control policy for **every** privileged selector — derived from the full token ABI, including the overloads/batch/multiplexer selectors above — and keep `defaultPolicyAllow = true`; **or**
+2. Deploy with `defaultPolicyAllow = false` (fail-closed) plus an explicit terminal allow policy on each permitted selector.
+
+Use the [policy preflight check](#policy-preflight-check) before going live to confirm coverage, and treat any unwired privileged selector as a deployment blocker.
 
 ## FAQ for Issuers Using CMTAT with ACE Policies
 
