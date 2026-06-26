@@ -582,6 +582,11 @@ POLICY_ENGINE=0x... TOKEN=0x... \
 
 This section summarizes the static-analysis reports available in this repository.
 
+> ⚠️ **This project has NOT been formally audited by a security company. Use at your own risk.** The reports below
+> are automated static-analysis (Slither, Aderyn) and AI-generated reviews only — they are **not** a substitute
+> for a professional manual security audit. Do not deploy to production with real value without an independent,
+> professional audit.
+
 > 🔒 **See [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)** for the security overview: the latest Slither
 > and Aderyn results (v0.3.0, mocks included), the AI/internal audit findings that were fixed, and the per-tool
 > dispositions. **Latest static analysis: 0 High to fix** — every tool finding is a false positive, an intentional
@@ -590,23 +595,6 @@ This section summarizes the static-analysis reports available in this repository
 ### Slither
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
-
-Setup:
-
-```shell
-python3 -m venv cct
-chmod +x cct/bin/activate
-source cct/bin/activate
-pip install slither-analyzer
-slither --version
-```
-
-Run:
-
-```shell
-source cct/bin/activate
-bun run slither
-```
 
 ```bash
 slither . --checklist > doc/audits/tools/v0.2.0/slither-report.md
@@ -619,34 +607,15 @@ slither . --checklist > doc/audits/tools/v0.2.0/slither-report.md
 
 The direct `slither ... --checklist` command above writes a checklist-style report to `doc/audits/tools/v0.2.0/slither-report.md`.
 
-When done, deactivate the virtual environment:
-
-```shell
-deactivate
-```
-
 | Version | Report                                                                 | Assessment                                                                         |
 | ------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | v0.3.0  | [slither-report.md](./doc/audits/tools/v0.3.0/slither/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/v0.3.0/slither/slither-report-feedback.md) |
 | v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither/slither-report-feedback.md) |
 | v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md) |
 
-Latest (v0.3.0, **mocks included**): **0 High · 11 Medium · 10 Low · 21 Informational** — nothing to fix
-(see [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)). The per-finding table below is the v0.2.0 run.
-
-Report scope: repo-focused filtered checklist run (v0.2.0).
-
-0 High · 11 Medium · 8 Low · 22 Informational
-
-| ID  | Finding               | Instances | Assessment                                                                                                                |
-| --- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
-| M-1 | `uninitialized-local` | 11        | False positive — extractors assign locals per selector branch; intentional zero-defaults for mint (`from`) / burn (`to`). |
-| L-1 | `calls-loop`          | 8         | Accepted by design where policy/rule chains iterate; monitor gas/complexity.                                              |
-| I-1 | `assembly`            | 1         | Expected — ERC-7201 namespaced-storage slot pointer; informational.                                                       |
-| I-2 | `dead-code`           | 1         | False positive.                                                                                                           |
-| I-3 | `naming-convention`   | 20        | Style-only informational findings.                                                                                        |
-
-Changes vs v0.1.0: `reentrancy-no-eth` (Medium, 3) and `reentrancy-events` (Low, 2) are no longer reported; `uninitialized-local` rose 6 → 11 (covers the added `CrossChainMintBurnExtractor` and extended `MintBurnExtractor`).
+Latest (v0.3.0, **mocks included**): **0 High · 11 Medium · 10 Low · 21 Informational** — nothing to fix. The
+per-finding breakdown and dispositions are in [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md) and
+the [feedback file](./doc/audits/tools/v0.3.0/slither/slither-report-feedback.md).
 
 ### Aderyn
 
@@ -665,27 +634,33 @@ aderyn -x mocks --output doc/audits/tools/aderyn-report.md
 | current | [aderyn-report.md](./doc/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/aderyn-report-feedback.md) |
 
 Latest (v0.3.0, **mocks included**): **2 High · 11 Low** — nothing to fix (the Highs are the accepted-context /
-false-positive items; see [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)). The per-finding table below is
-the earlier mocks-excluded run.
+false-positive items). The per-finding breakdown and dispositions are in
+[`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md) and the
+[feedback file](./doc/audits/tools/v0.3.0/aderyn/aderyn-report-feedback.md).
 
-Report scope: 17 Solidity files, 959 nSLOC.
+## Nethermind AuditAgent (AI review)
 
-2 High · 10 Low
+> ⚠️ **This report was generated entirely by AI and has not been manually reviewed by Nethermind's security
+> team.** It does not constitute a security audit; findings may contain errors or omissions and must be
+> independently verified.
 
-| ID   | Finding                                   | Instances | Assessment                                                                                         |
-| ---- | ----------------------------------------- | --------- | -------------------------------------------------------------------------------------------------- |
-| H-1  | Arbitrary `from` passed to `transferFrom` | 1         | Accepted in context: policy-gated flow; not treated as exploitable in this integration design.     |
-| H-2  | Contract locks Ether without withdraw     | 2         | Accepted false positive: token deployments are not intended as ETH custody contracts.              |
-| L-1  | Centralization Risk                       | 11        | Accepted by design: privileged governance/control is intentional.                                  |
-| L-2  | Unsafe ERC20 Operation                    | 7         | Accepted false positive: primarily selector/module-flow usage, not unsafe token transfer wrappers. |
-| L-3  | Unspecific Solidity Pragma                | 17        | Accepted by design: version ranges are intentionally used in this codebase.                        |
-| L-4  | Literal Instead of Constant               | 2         | Informational: optional quality improvement.                                                       |
-| L-5  | PUSH0 Opcode                              | 17        | Environment-dependent informational finding in this setup.                                         |
-| L-6  | Empty Block                               | 22        | Accepted by design: authorization hook pattern.                                                    |
-| L-7  | Loop Contains `require`/`revert`          | 4         | Accepted by design: atomic validation and explicit failure signaling.                              |
-| L-8  | Unused State Variable                     | 1         | False positive: `STORAGE_LOCATION` is used via inline assembly in `_getStorage()`.                 |
-| L-9  | Costly operations inside loop             | 2         | Accepted: expected tradeoff in policy/rule iteration paths.                                        |
-| L-10 | Unused Import                             | 9         | Partially fixed; remaining cases are intentional (artifact/NatSpec/doc reasons).                   |
+AI-generated review of the v0.2.0 codebase (`doc/audits/tools/v0.2.0/nethermind-audit-agent/`). Developer triage:
+[`audit_agent_report-feedback.md`](./doc/audits/tools/v0.2.0/nethermind-audit-agent/audit_agent_report-feedback.md).
+Outcome: **6 fixed in code, 2 accepted as documented design, 1 informational, 1 false positive** — all addressed
+in the v0.3.0 release.
+
+| ID | Finding | Tool sev | Our verdict | Status |
+| -- | ------- | -------- | ----------- | ------ |
+| NM-1 | Uninitialized proxy hijack via public `initialize()` | High | Informational (not exploitable as deployed) | No code change (docs) |
+| NM-2 | `TransferValidationPolicy` never calls stateful `IRule.transferred()` | High | Accepted (High) | **Fixed** |
+| NM-3 | Unmapped inherited privileged selectors bypass policy auth (Standard) | Medium | Accepted as design (High; Lite already safe) | No code change; deployment remediated |
+| NM-4 | `MintBurnExtractor` lacks `burn(address,uint256)` | Low | Accepted (Medium) | **Fixed** |
+| NM-5 | `detectTransferRestriction*` reverts when frozen > balance | Low | Accepted | **Fixed** |
+| NM-6 | Context cleared mid-batch breaks batch ops | Low | Accepted | **Fixed** |
+| NM-7 | `burnAndMint` bypasses screening in Lite | Low | Accepted (Medium) | **Fixed** |
+| NM-8 | Standard `canSend`/`canReceive` always `true` | Info | Fixed (account-level signal added) | **Fixed** |
+| NM-9 | `initialize()` accepts zero PolicyEngine (Standard) | Info | **False positive** | Rejected |
+| NM-10 | Lite flows only screened if exact selectors wired | Info | Accepted by design | No code change; deployment + preflight |
 
 ## Coverage
 
