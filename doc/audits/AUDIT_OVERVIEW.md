@@ -18,7 +18,7 @@ do not apply to the production contracts.
 | **Slither** v0.3.0 | Static analysis | [`tools/v0.3.0/slither/slither-report.md`](./tools/v0.3.0/slither/slither-report.md) | [feedback](./tools/v0.3.0/slither/slither-report-feedback.md) |
 | **Aderyn** v0.3.0 | Static analysis | [`tools/v0.3.0/aderyn/aderyn-report.md`](./tools/v0.3.0/aderyn/aderyn-report.md) | [feedback](./tools/v0.3.0/aderyn/aderyn-report-feedback.md) |
 | **Nethermind AuditAgent** (v0.2.0) | AI review | `tools/v0.2.0/nethermind-audit-agent/audit_agent_report_v0.2.0.pdf` | [feedback](./tools/v0.2.0/nethermind-audit-agent/audit_agent_report-feedback.md) |
-| Internal audit | Manual + tests | `AUDIT/RESULT.md`, `AUDIT/THREAT_MODEL.md` | — |
+| **Claude security audit** (v0.2.0) | Claude + custom skills | [`tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md`](./tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md) | — |
 
 Earlier static-analysis runs: `tools/v0.1.0/`, `tools/v0.2.0/`.
 

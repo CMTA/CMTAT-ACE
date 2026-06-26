@@ -582,6 +582,11 @@ POLICY_ENGINE=0x... TOKEN=0x... \
 
 This section summarizes the static-analysis reports available in this repository.
 
+> 🔒 **See [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)** for the security overview: the latest Slither
+> and Aderyn results (v0.3.0, mocks included), the AI/internal audit findings that were fixed, and the per-tool
+> dispositions. **Latest static analysis: 0 High to fix** — every tool finding is a false positive, an intentional
+> design choice, environment/mock noise, or cosmetic.
+
 ### Slither
 
 Here is the list of report performed with [Slither](https://github.com/crytic/slither)
@@ -622,8 +627,12 @@ deactivate
 
 | Version | Report                                                                 | Assessment                                                                         |
 | ------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither-report-feedback.md) |
+| v0.3.0  | [slither-report.md](./doc/audits/tools/v0.3.0/slither/slither-report.md) | [slither-report-feedback.md](./doc/audits/tools/v0.3.0/slither/slither-report-feedback.md) |
+| v0.2.0  | [slither-report.md](./doc/audits/tools/v0.2.0/slither/slither-report.md)       | [slither-report-feedback.md](./doc/audits/tools/v0.2.0/slither/slither-report-feedback.md) |
 | v0.1.0  | [slither-report.md](./doc/audits/tools/v0.1.0/slither-reportv0.1.0.md) | [slither-report-feedback.md](./doc/audits/tools/v0.1.0/slither-report-feedback.md) |
+
+Latest (v0.3.0, **mocks included**): **0 High · 11 Medium · 10 Low · 21 Informational** — nothing to fix
+(see [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)). The per-finding table below is the v0.2.0 run.
 
 Report scope: repo-focused filtered checklist run (v0.2.0).
 
@@ -644,12 +653,20 @@ Changes vs v0.1.0: `reentrancy-no-eth` (Medium, 3) and `reentrancy-events` (Low,
 Here is the list of report performed with [Aderyn](https://github.com/Cyfrin/aderyn)
 
 ```bash
+# v0.3.0 — mocks INCLUDED (no -x mocks)
+aderyn --output doc/audits/tools/v0.3.0/aderyn/aderyn-report.md
+# earlier runs excluded mocks:
 aderyn -x mocks --output doc/audits/tools/aderyn-report.md
 ```
 
 | Version | Report                                                  | Assessment                                                                |
 | ------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| v0.3.0  | [aderyn-report.md](./doc/audits/tools/v0.3.0/aderyn/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/v0.3.0/aderyn/aderyn-report-feedback.md) |
 | current | [aderyn-report.md](./doc/audits/tools/aderyn-report.md) | [aderyn-report-feedback.md](./doc/audits/tools/aderyn-report-feedback.md) |
+
+Latest (v0.3.0, **mocks included**): **2 High · 11 Low** — nothing to fix (the Highs are the accepted-context /
+false-positive items; see [`doc/audits/AUDIT_OVERVIEW.md`](./doc/audits/AUDIT_OVERVIEW.md)). The per-finding table below is
+the earlier mocks-excluded run.
 
 Report scope: 17 Solidity files, 959 nSLOC.
 

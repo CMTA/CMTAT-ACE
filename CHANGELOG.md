@@ -34,7 +34,8 @@ Custom changelog tag: `Dependencies`, `Documentation`, `Testing`
 Branch: `audit`
 
 Security-hardening release addressing the **Nethermind AuditAgent** review (`doc/audits/tools/v0.2.0/nethermind-audit-agent/`)
-and the internal audit (`AUDIT/`). All changes are backward compatible (no storage/API break). `version()` now reports `0.3.0`.
+and the **Claude security audit** ([`doc/audits/tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md`](doc/audits/tools/v0.2.0/claude-audit/CLAUDE_AUDIT.md)).
+All changes are backward compatible (no storage/API break). `version()` now reports `0.3.0`.
 
 ### Security
 
