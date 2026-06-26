@@ -47,6 +47,7 @@ Issuers of **security tokens, real-world assets (RWA), and stablecoins** (and th
 - [Testing](#testing)
 - [Linting & Formatting](#linting--formatting)
 - [Scripts](#scripts)
+- [Deployment Guide](./doc/DEPLOYMENT.md)
 - [Policy preflight check](#policy-preflight-check)
 - [Audit Reports Summary](#audit-reports-summary)
 - [Policy-Protected Functions (Current Integration)](#policy-protected-functions-current-integration)
@@ -507,6 +508,12 @@ Solidity formatting uses [prettier-plugin-solidity](https://github.com/prettier-
 ## Scripts
 
 ## Deployment scripts
+
+> 📖 **Read the [Deployment Guide](./doc/DEPLOYMENT.md) first.** It explains how the scripts work, the risks
+> (selector-coverage completeness, `defaultPolicyAllow`, atomic proxy init, extractor/parameter matching,
+> Standard vs Lite responsibilities, roles), and a checklist for using these scripts — or writing your own —
+> without bricking the token or leaving a privileged selector ungated. Always finish with the
+> [preflight check](#policy-preflight-check).
 
 Individual deployment scripts are available for each contract variant:
 
